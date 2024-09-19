@@ -62,19 +62,34 @@ yarn build
 #### Класс productModel
 Назначение: Хранение данных о продукте (товаре), таких как название, цена, изображение и наличие.
 ##### Конструктор
-constructor(id: string, name: string, price: number, imageUrl: string, isInStock: boolean)
+- constructor(id: string, name: string, price: number, imageUrl: string, isInStock: boolean)
 ##### Параметры:
-id: string: Уникальный идентификатор товара.
-name: string: Название товара.
-price: number: Цена товара.
-imageUrl: string: URL изображения товара.
+- id: string: Уникальный идентификатор товара. 
+- name: string: Название товара. 
+- price: number: Цена товара. 
+- imageUrl: string: URL изображения товара. 
+- category: категория товара
 ##### Поля класса:
-id: string: Уникальный идентификатор товара.
-name: string: Название товара.
-price: number: Цена товара.
-imageUrl: string: URL изображения товара.
+- id: string: Уникальный идентификатор товара. 
+- name: string: Название товара. 
+- price: number: Цена товара. 
+- imageUrl: string: URL изображения товара. 
+- category: категория товара
 ##### Методы:
-getDetails(): { id: string, name: string, price: number, imageUrl: string, isInStock: boolean }: Возвращает полную информацию о товаре в виде объекта.
+- getDetails(): { id: string, name: string, price: number, imageUrl: string, isInStock: boolean }: Возвращает полную информацию о товаре в виде объекта.
+#### Класс contactInfo
+##### Конструктор:
+- constructor(contactInfo: userEmail: string, userNumber: string, userAddress: string, paymentMethod: boolean);
+##### Поля класса:
+- userEmail: string: почта покупателя
+- userNumber: string: телефон покупателя
+- userAddress: string: адрес доставки
+- paymentMethod: boolean: выбор способа оплаты
+##### Поля класса:
+- userEmail: string: почта покупателя
+- userNumber: string: телефон покупателя
+- userAddress: string: адрес доставки
+- paymentMethod: boolean: выбор способа оплаты
 
 ### Слой Представления
 #### Класс cartView
