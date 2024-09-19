@@ -79,17 +79,17 @@ yarn build
 - getDetails(): { id: string, name: string, price: number, imageUrl: string, isInStock: boolean }: Возвращает полную информацию о товаре в виде объекта.
 #### Класс contactInfo
 ##### Конструктор:
-- constructor(contactInfo: userEmail: string, userNumber: string, userAddress: string, paymentMethod: boolean);
+- constructor(contactInfo: userEmail: string, userNumber: string, userAddress: string, paymentMethod: 'online' | 'post');
 ##### Поля класса:
 - userEmail: string: почта покупателя
 - userNumber: string: телефон покупателя
 - userAddress: string: адрес доставки
-- paymentMethod: boolean: выбор способа оплаты
+- paymentMethod: 'online' | 'post': выбор способа оплаты
 ##### Поля класса:
 - userEmail: string: почта покупателя
 - userNumber: string: телефон покупателя
 - userAddress: string: адрес доставки
-- paymentMethod: boolean: выбор способа оплаты
+- paymentMethod: 'online' | 'post': выбор способа оплаты
 
 ### Слой Представления
 #### Класс cartView
