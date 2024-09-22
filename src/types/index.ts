@@ -1,5 +1,5 @@
-// Тип для сущности Товар (product)
-export interface Product {
+// Тип для сущности Товар (ProductModel)
+export interface ProductModel {
     id: string;               // Уникальный идентификатор товара
     name: string;             // Название товара
     price: number;            // Цена товара
@@ -7,15 +7,20 @@ export interface Product {
     category: string;         // Категория товара
 }
 
-// Тип для сущности Элемент корзины (cartItem)
+// Тип для сущности Элемент корзины (CartItem)
 export interface CartItem {
-    product: Product;         // Объект товара
+    id: string;               // Уникальный идентификатор товара
+    name: string;             // Название товара
+    price: number;            // Цена товара
 }
 
 // Тип для сущности Корзина (CartModel)
 export interface CartModel {
     items: CartItem[];        // Массив товаров в корзине
     totalPrice: number;       // Общая стоимость товаров в корзине
+    getTotalPrice(): number;  // Возвращает общую стоимость всех товаров в корзине
+    updateTotalPrice(): void; // Пересчитывает общую стоимость
+    removeItem(itemId: string): void;
 }
 
 // Тип для контактной информации (ContactInfo)
