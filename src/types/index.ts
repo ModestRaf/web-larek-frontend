@@ -6,6 +6,7 @@ export interface ProductItem {
     category: string;         // Категория товара
     description: string;
     title: string;
+    selected: boolean;
 }
 
 // Тип для сущности Элемент корзины (CartItem)
