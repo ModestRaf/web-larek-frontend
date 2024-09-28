@@ -47,6 +47,30 @@ class ProductList {
         const price = card.querySelector('.card__price') as HTMLElement;
         price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
 
+        const category = card.querySelector('.card__category') as HTMLElement;
+        category.textContent = product.category;
+
+        // Добавляем класс в зависимости от категории
+        switch (product.category) {
+            case 'софт-скил':
+                category.classList.add('card__category_soft');
+                break;
+            case 'хард-скил':
+                category.classList.add('card__category_hard');
+                break;
+            case 'другое':
+                category.classList.add('card__category_other');
+                break;
+            case 'дополнительное':
+                category.classList.add('card__category_additional');
+                break;
+            case 'кнопка':
+                category.classList.add('card__category_button');
+                break;
+            default:
+                break;
+        }
+
         return card;
     }
 }
