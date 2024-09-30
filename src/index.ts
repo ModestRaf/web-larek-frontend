@@ -30,6 +30,8 @@ class ProductList {
         products.forEach(product => {
             const card = this.createProductCard(product);
             this.container.appendChild(card);
+
+            document.querySelector('.card')?.addEventListener('click', () => this.openPopup(product));
         });
     }
 
@@ -73,8 +75,60 @@ class ProductList {
 
         return card;
     }
-}
 
+    openPopup(product: ProductItem): void {
+        const popup = document.querySelector('.modal') as HTMLElement;
+        const popupContent = popup.querySelector('.modal__content') as HTMLElement;
+        const popupTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
+        const popupClone = document.importNode(popupTemplate.content, true);
+
+        const image = popupClone.querySelector('.card__image') as HTMLImageElement;
+        image.src = CDN_URL + product.image;
+        image.alt = product.title;
+
+        const title = popupClone.querySelector('.card__title') as HTMLElement;
+        title.textContent = product.title;
+
+        const price = popupClone.querySelector('.card__price') as HTMLElement;
+        price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
+
+        const category = popupClone.querySelector('.card__category') as HTMLElement;
+        category.textContent = product.category;
+
+        const text = popupClone.querySelector('.card__text') as HTMLElement;
+        text.textContent = product.description || 'Описание отсутствует';
+
+        // Добавляем класс в зависимости от категории
+        switch (product.category) {
+            case 'софт-скил':
+                category.classList.add('card__category_soft');
+                break;
+            case 'хард-скил':
+                category.classList.add('card__category_hard');
+                break;
+            case 'другое':
+                category.classList.add('card__category_other');
+                break;
+            case 'дополнительное':
+                category.classList.add('card__category_additional');
+                break;
+            case 'кнопка':
+                category.classList.add('card__category_button');
+                break;
+            default:
+                break;
+        }
+
+        popupContent.innerHTML = '';
+        popupContent.appendChild(popupClone);
+
+        popup.classList.add('modal_active');
+
+        // Добавляем обработчик событий на закрытие модального окна
+        const closeButton = popup.querySelector('.modal__close') as HTMLElement;
+        closeButton.addEventListener('click', () => popup.classList.remove('modal_active'));
+    }
+}
 
 // Пример использования
 document.addEventListener('DOMContentLoaded', () => {
