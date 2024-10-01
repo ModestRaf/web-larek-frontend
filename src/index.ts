@@ -30,8 +30,7 @@ class ProductList {
         products.forEach(product => {
             const card = this.createProductCard(product);
             this.container.appendChild(card);
-
-            document.querySelector('.card')?.addEventListener('click', () => this.openPopup(product));
+            card.addEventListener('click', () => this.openPopup(product));
         });
     }
 
@@ -39,41 +38,40 @@ class ProductList {
         const cardClone = document.importNode(this.cardTemplate.content, true);
         const card = cardClone.querySelector('.gallery__item') as HTMLElement;
 
-        const image = card.querySelector('.card__image') as HTMLImageElement;
-        image.src = CDN_URL + product.image;
-        image.alt = product.title;
-
-        const title = card.querySelector('.card__title') as HTMLElement;
-        title.textContent = product.title;
-
-        const price = card.querySelector('.card__price') as HTMLElement;
-        price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
-
-        const category = card.querySelector('.card__category') as HTMLElement;
-        category.textContent = product.category;
-
-        // Добавляем класс в зависимости от категории
-        switch (product.category) {
-            case 'софт-скил':
-                category.classList.add('card__category_soft');
-                break;
-            case 'хард-скил':
-                category.classList.add('card__category_hard');
-                break;
-            case 'другое':
-                category.classList.add('card__category_other');
-                break;
-            case 'дополнительное':
-                category.classList.add('card__category_additional');
-                break;
-            case 'кнопка':
-                category.classList.add('card__category_button');
-                break;
-            default:
-                break;
-        }
+        this.updateCardContent(card, product);
 
         return card;
+    }
+
+    updateCardContent(card: HTMLElement, product: ProductItem): void {
+        const image = card.querySelector('.card__image') as HTMLImageElement;
+        const title = card.querySelector('.card__title') as HTMLElement;
+        const price = card.querySelector('.card__price') as HTMLElement;
+        const category = card.querySelector('.card__category') as HTMLElement;
+
+        image.src = CDN_URL + product.image;
+        image.alt = product.title;
+        title.textContent = product.title;
+        price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
+        category.textContent = product.category;
+
+        this.setCategoryClass(category, product.category);
+    }
+
+    setCategoryClass(category: HTMLElement, categoryName: string): void {
+        const categoryClasses = {
+            'софт-скил': 'card__category_soft',
+            'хард-скил': 'card__category_hard',
+            'другое': 'card__category_other',
+            'дополнительное': 'card__category_additional',
+            'кнопка': 'card__category_button'
+        };
+
+        category.classList.remove(...Object.values(categoryClasses));
+        const className = categoryClasses[categoryName as keyof typeof categoryClasses];
+        if (className) {
+            category.classList.add(className);
+        }
     }
 
     openPopup(product: ProductItem): void {
@@ -81,50 +79,15 @@ class ProductList {
         const popupContent = popup.querySelector('.modal__content') as HTMLElement;
         const popupTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
         const popupClone = document.importNode(popupTemplate.content, true);
+        const popupCard = popupClone.querySelector('.card') as HTMLElement;
 
-        const image = popupClone.querySelector('.card__image') as HTMLImageElement;
-        image.src = CDN_URL + product.image;
-        image.alt = product.title;
-
-        const title = popupClone.querySelector('.card__title') as HTMLElement;
-        title.textContent = product.title;
-
-        const price = popupClone.querySelector('.card__price') as HTMLElement;
-        price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
-
-        const category = popupClone.querySelector('.card__category') as HTMLElement;
-        category.textContent = product.category;
-
-        const text = popupClone.querySelector('.card__text') as HTMLElement;
-        text.textContent = product.description || 'Описание отсутствует';
-
-        // Добавляем класс в зависимости от категории
-        switch (product.category) {
-            case 'софт-скил':
-                category.classList.add('card__category_soft');
-                break;
-            case 'хард-скил':
-                category.classList.add('card__category_hard');
-                break;
-            case 'другое':
-                category.classList.add('card__category_other');
-                break;
-            case 'дополнительное':
-                category.classList.add('card__category_additional');
-                break;
-            case 'кнопка':
-                category.classList.add('card__category_button');
-                break;
-            default:
-                break;
-        }
+        this.updateCardContent(popupCard, product);
 
         popupContent.innerHTML = '';
         popupContent.appendChild(popupClone);
 
         popup.classList.add('modal_active');
 
-        // Добавляем обработчик событий на закрытие модального окна
         const closeButton = popup.querySelector('.modal__close') as HTMLElement;
         closeButton.addEventListener('click', () => popup.classList.remove('modal_active'));
     }
