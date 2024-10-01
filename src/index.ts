@@ -1,24 +1,29 @@
 import './scss/styles.scss';
+import { Api, ApiListResponse } from "./components/base/api";
 import {ProductItem} from "./types";
-import {Api, ApiListResponse} from './components/base/api';
-import {API_URL, CDN_URL} from "./utils/constants";
+import { API_URL } from "./utils/constants";
+import { Cards } from './components/cards';
 
 class ProductList {
     private api: Api;
     private container: HTMLElement;
-    private cardTemplate: HTMLTemplateElement;
+    private cards: Cards;
+    private basketCounter: HTMLElement;
+    private products: ProductItem[] = [];  // Массив для хранения всех товаров
 
     constructor(api: Api, containerId: string, cardTemplateId: string) {
         this.api = api;
         this.container = document.getElementById(containerId) as HTMLElement;
-        this.cardTemplate = document.getElementById(cardTemplateId) as HTMLTemplateElement;
+        this.cards = new Cards(cardTemplateId);
+        this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
     }
 
     async loadProducts(): Promise<void> {
         try {
             const response = await this.api.get(`/product`);
             const data = response as ApiListResponse<ProductItem>;
-            this.renderProducts(data.items);
+            this.products = data.items;  // Сохраняем товары в массив
+            this.renderProducts(this.products);
         } catch (error) {
             console.error(error);
         }
@@ -28,68 +33,15 @@ class ProductList {
         this.container.innerHTML = ''; // Очищаем контейнер перед отображением новых данных
 
         products.forEach(product => {
-            const card = this.createProductCard(product);
+            const card = this.cards.createProductCard(product);
             this.container.appendChild(card);
-            card.addEventListener('click', () => this.openPopup(product));
+            card.addEventListener('click', () => this.cards.openPopup(product, this.updateBasketCounter.bind(this)));
         });
     }
 
-    createProductCard(product: ProductItem): HTMLElement {
-        const cardClone = document.importNode(this.cardTemplate.content, true);
-        const card = cardClone.querySelector('.gallery__item') as HTMLElement;
-
-        this.updateCardContent(card, product);
-
-        return card;
-    }
-
-    updateCardContent(card: HTMLElement, product: ProductItem): void {
-        const image = card.querySelector('.card__image') as HTMLImageElement;
-        const title = card.querySelector('.card__title') as HTMLElement;
-        const price = card.querySelector('.card__price') as HTMLElement;
-        const category = card.querySelector('.card__category') as HTMLElement;
-
-        image.src = CDN_URL + product.image;
-        image.alt = product.title;
-        title.textContent = product.title;
-        price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
-        category.textContent = product.category;
-
-        this.setCategoryClass(category, product.category);
-    }
-
-    setCategoryClass(category: HTMLElement, categoryName: string): void {
-        const categoryClasses = {
-            'софт-скил': 'card__category_soft',
-            'хард-скил': 'card__category_hard',
-            'другое': 'card__category_other',
-            'дополнительное': 'card__category_additional',
-            'кнопка': 'card__category_button'
-        };
-
-        category.classList.remove(...Object.values(categoryClasses));
-        const className = categoryClasses[categoryName as keyof typeof categoryClasses];
-        if (className) {
-            category.classList.add(className);
-        }
-    }
-
-    openPopup(product: ProductItem): void {
-        const popup = document.querySelector('.modal') as HTMLElement;
-        const popupContent = popup.querySelector('.modal__content') as HTMLElement;
-        const popupTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
-        const popupClone = document.importNode(popupTemplate.content, true);
-        const popupCard = popupClone.querySelector('.card') as HTMLElement;
-
-        this.updateCardContent(popupCard, product);
-
-        popupContent.innerHTML = '';
-        popupContent.appendChild(popupClone);
-
-        popup.classList.add('modal_active');
-
-        const closeButton = popup.querySelector('.modal__close') as HTMLElement;
-        closeButton.addEventListener('click', () => popup.classList.remove('modal_active'));
+    updateBasketCounter(): void {
+        const selectedProductsCount = this.products.filter(product => product.selected).length;  // Считаем, сколько товаров выбрано
+        this.basketCounter.textContent = selectedProductsCount.toString();  // Обновляем счетчик
     }
 }
 
