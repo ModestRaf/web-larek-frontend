@@ -22,8 +22,9 @@ class ProductList {
         try {
             const response = await this.api.get(`/product`);
             const data = response as ApiListResponse<ProductItem>;
-            this.products = data.items;  // Сохраняем товары в массив
+            this.products = this.loadSelectedFromStorage(data.items);  // Загружаем сохраненное состояние из localStorage
             this.renderProducts(this.products);
+            this.updateBasketCounter();  // Обновляем счетчик сразу после загрузки товаров
         } catch (error) {
             console.error(error);
         }
@@ -42,8 +43,36 @@ class ProductList {
     updateBasketCounter(): void {
         const selectedProductsCount = this.products.filter(product => product.selected).length;  // Считаем, сколько товаров выбрано
         this.basketCounter.textContent = selectedProductsCount.toString();  // Обновляем счетчик
+        this.saveSelectedToStorage();  // Сохраняем состояние в localStorage
+    }
+
+    // Метод для сохранения состояния в localStorage
+    saveSelectedToStorage(): void {
+        const selectedState = this.products.map(product => ({
+            id: product.id,
+            selected: product.selected,
+        }));
+        localStorage.setItem('selectedProducts', JSON.stringify(selectedState));
+    }
+
+    // Метод для загрузки состояния из localStorage
+    loadSelectedFromStorage(products: ProductItem[]): ProductItem[] {
+        const savedSelectedState = localStorage.getItem('selectedProducts');
+        if (savedSelectedState) {
+            const selectedState = JSON.parse(savedSelectedState) as { id: string; selected: boolean }[];
+            // Соотносим сохраненное состояние с загруженными товарами
+            return products.map(product => {
+                const savedProduct = selectedState.find(p => p.id === product.id);
+                if (savedProduct) {
+                    product.selected = savedProduct.selected;
+                }
+                return product;
+            });
+        }
+        return products;
     }
 }
+
 
 // Пример использования
 document.addEventListener('DOMContentLoaded', () => {
