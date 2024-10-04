@@ -9,20 +9,18 @@ export interface ProductItem {
     selected: boolean;
 }
 
+// Тип для сущности Корзина (CartModel)
+export interface CartModal {
+    open(): void;
+    close(): void;
+    items: CartItem[];        // Массив товаров в корзине
+}
+
 // Тип для сущности Элемент корзины (CartItem)
 export interface CartItem {
     id: string;               // Уникальный идентификатор товара
     title: string;            // Название товара
     price: number;            // Цена товара
-}
-
-// Тип для сущности Корзина (CartModel)
-export interface CartModel {
-    items: CartItem[];        // Массив товаров в корзине
-    total: number;       // Общая стоимость товаров в корзине
-    getTotal(): number;  // Возвращает общую стоимость всех товаров в корзине
-    updateTotal(): void; // Пересчитывает общую стоимость
-    removeItem(itemId: string): void;
 }
 
 // Тип для контактной информации (ContactInfo)

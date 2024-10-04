@@ -3,13 +3,14 @@ import { Api, ApiListResponse } from "./components/base/api";
 import {ProductItem} from "./types";
 import { API_URL } from "./utils/constants";
 import { Cards } from './components/cards';
+import {Modal} from "./components/cart";
 
 class ProductList {
     private api: Api;
     private container: HTMLElement;
     private cards: Cards;
     private basketCounter: HTMLElement;
-    private products: ProductItem[] = [];  // Массив для хранения всех товаров
+    private products: ProductItem[] = [];
 
     constructor(api: Api, containerId: string, cardTemplateId: string) {
         this.api = api;
@@ -22,17 +23,16 @@ class ProductList {
         try {
             const response = await this.api.get(`/product`);
             const data = response as ApiListResponse<ProductItem>;
-            this.products = this.loadSelectedFromStorage(data.items);  // Загружаем сохраненное состояние из localStorage
+            this.products = this.loadSelectedFromStorage(data.items);
             this.renderProducts(this.products);
-            this.updateBasketCounter();  // Обновляем счетчик сразу после загрузки товаров
+            this.updateBasketCounter();
         } catch (error) {
             console.error(error);
         }
     }
 
     renderProducts(products: ProductItem[]): void {
-        this.container.innerHTML = ''; // Очищаем контейнер перед отображением новых данных
-
+        this.container.innerHTML = '';
         products.forEach(product => {
             const card = this.cards.createProductCard(product);
             this.container.appendChild(card);
@@ -41,12 +41,11 @@ class ProductList {
     }
 
     updateBasketCounter(): void {
-        const selectedProductsCount = this.products.filter(product => product.selected).length;  // Считаем, сколько товаров выбрано
-        this.basketCounter.textContent = selectedProductsCount.toString();  // Обновляем счетчик
-        this.saveSelectedToStorage();  // Сохраняем состояние в localStorage
+        const selectedProductsCount = this.products.filter(product => product.selected).length;
+        this.basketCounter.textContent = selectedProductsCount.toString();
+        this.saveSelectedToStorage();
     }
 
-    // Метод для сохранения состояния в localStorage
     saveSelectedToStorage(): void {
         const selectedState = this.products.map(product => ({
             id: product.id,
@@ -55,12 +54,10 @@ class ProductList {
         localStorage.setItem('selectedProducts', JSON.stringify(selectedState));
     }
 
-    // Метод для загрузки состояния из localStorage
     loadSelectedFromStorage(products: ProductItem[]): ProductItem[] {
         const savedSelectedState = localStorage.getItem('selectedProducts');
         if (savedSelectedState) {
             const selectedState = JSON.parse(savedSelectedState) as { id: string; selected: boolean }[];
-            // Соотносим сохраненное состояние с загруженными товарами
             return products.map(product => {
                 const savedProduct = selectedState.find(p => p.id === product.id);
                 if (savedProduct) {
@@ -73,10 +70,13 @@ class ProductList {
     }
 }
 
-
-// Пример использования
 document.addEventListener('DOMContentLoaded', () => {
     const api = new Api(API_URL);
     const productList = new ProductList(api, 'gallery', 'card-catalog');
     productList.loadProducts();
+
+    const basketButton = document.querySelector('.header__basket');
+    const basketModal = new Modal('modal-container', 'basket');
+
+    basketButton?.addEventListener('click', () => basketModal.open());
 });
