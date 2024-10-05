@@ -1,4 +1,7 @@
 import {CartItem, CartModal} from "../types";
+import {API_URL} from "../utils/constants";
+import {Api} from "./base/api";
+import {ProductList} from "../index";
 
 export class Modal implements CartModal {
     private modal: HTMLElement;
@@ -26,9 +29,76 @@ export class Modal implements CartModal {
 
         // Отображаем модальное окно корзины
         cartModal.classList.add('modal_active');
+
+        // Рендерим товары в корзине
+        this.renderBasketItems();
     }
 
     close(): void {
         this.modal.classList.remove('modal_active');
+    }
+
+    renderBasketItems(): void {
+        const basketList = this.modal.querySelector('.basket__list') as HTMLElement;
+        const basketPrice = this.modal.querySelector('.basket__price') as HTMLElement;
+
+        // Проверяем, существуют ли элементы перед их использованием
+        if (!basketList || !basketPrice) {
+            console.error('Элементы корзины не найдены');
+            return;
+        }
+
+        // Очищаем список товаров в корзине
+        basketList.innerHTML = '';
+
+        // Считаем общую стоимость товаров в корзине
+        let totalPrice = 0;
+
+        // Рендерим каждый товар в корзине
+        this.items.forEach((item, index) => {
+            const basketItem = this.createBasketItem(item, index + 1);
+            basketList.appendChild(basketItem);
+            totalPrice += item.price;
+        });
+
+        // Обновляем общую стоимость в корзине
+        basketPrice.textContent = `${totalPrice} синапсов`;
+    }
+
+    createBasketItem(item: CartItem, index: number): HTMLElement {
+        const template = document.getElementById('card-basket') as HTMLTemplateElement;
+        const clone = template.content.cloneNode(true) as HTMLElement;
+
+        const itemIndex = clone.querySelector('.basket__item-index') as HTMLElement;
+        const itemTitle = clone.querySelector('.card__title') as HTMLElement;
+        const itemPrice = clone.querySelector('.card__price') as HTMLElement;
+        const deleteButton = clone.querySelector('.basket__item-delete') as HTMLElement;
+
+        itemIndex.textContent = index.toString();
+        itemTitle.textContent = item.title;
+        itemPrice.textContent = `${item.price} синапсов`;
+
+        // Добавляем обработчик событий на кнопку удаления товара
+        deleteButton.addEventListener('click', () => {
+            this.removeBasketItem(item.id);
+        });
+
+        return clone;
+    }
+
+    removeBasketItem(itemId: string): void {
+        // Удаляем товар из массива товаров в корзине
+        this.items = this.items.filter(item => item.id !== itemId);
+
+        // Обновляем список товаров в корзине
+        this.renderBasketItems();
+
+        // Обновляем счетчик корзины в ProductList
+        const productList = new ProductList(new Api(API_URL), 'gallery', 'card-catalog', this);
+        const product = productList.products.find(p => p.id === itemId);
+        if (product) {
+            product.selected = false;
+            productList.updateBasketCounter();
+        }
     }
 }

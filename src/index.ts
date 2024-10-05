@@ -5,18 +5,20 @@ import { API_URL } from "./utils/constants";
 import { Cards } from './components/cards';
 import {Modal} from "./components/cart";
 
-class ProductList {
+export class ProductList {
     private api: Api;
     private container: HTMLElement;
     private cards: Cards;
     private basketCounter: HTMLElement;
-    private products: ProductItem[] = [];
+    products: ProductItem[] = [];
+    private basketModal: Modal;
 
-    constructor(api: Api, containerId: string, cardTemplateId: string) {
+    constructor(api: Api, containerId: string, cardTemplateId: string, basketModal: Modal) {
         this.api = api;
         this.container = document.getElementById(containerId) as HTMLElement;
         this.cards = new Cards(cardTemplateId);
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
+        this.basketModal = basketModal;
     }
 
     async loadProducts(): Promise<void> {
@@ -26,6 +28,7 @@ class ProductList {
             this.products = this.loadSelectedFromStorage(data.items);
             this.renderProducts(this.products);
             this.updateBasketCounter();
+            this.renderBasketItems();
         } catch (error) {
             console.error(error);
         }
@@ -38,6 +41,12 @@ class ProductList {
             this.container.appendChild(card);
             card.addEventListener('click', () => this.cards.openPopup(product, this.updateBasketCounter.bind(this)));
         });
+    }
+
+    toggleProductSelection(product: ProductItem): void {
+        product.selected = !product.selected;
+        this.updateBasketCounter();
+        this.renderBasketItems();
     }
 
     updateBasketCounter(): void {
@@ -68,15 +77,24 @@ class ProductList {
         }
         return products;
     }
+
+    renderBasketItems(): void {
+        const selectedProducts = this.products.filter(product => product.selected);
+        this.basketModal.items = selectedProducts.map(product => ({
+            id: product.id,
+            title: product.title,
+            price: product.price,
+        }));
+        this.basketModal.renderBasketItems();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const api = new Api(API_URL);
-    const productList = new ProductList(api, 'gallery', 'card-catalog');
+    const basketModal = new Modal('modal-container', 'basket');
+    const productList = new ProductList(api, 'gallery', 'card-catalog', basketModal);
     productList.loadProducts();
 
     const basketButton = document.querySelector('.header__basket');
-    const basketModal = new Modal('modal-container', 'basket');
-
     basketButton.addEventListener('click', () => basketModal.open());
 });
