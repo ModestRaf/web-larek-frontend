@@ -78,5 +78,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const basketButton = document.querySelector('.header__basket');
     const basketModal = new Modal('modal-container', 'basket');
 
-    basketButton?.addEventListener('click', () => basketModal.open());
+    basketButton.addEventListener('click', () => basketModal.open());
 });
