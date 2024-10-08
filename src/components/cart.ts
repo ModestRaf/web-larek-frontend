@@ -1,6 +1,4 @@
 import {CartItem, CartModal} from "../types";
-import {API_URL} from "../utils/constants";
-import {Api} from "./base/api";
 import {ProductList} from "../index";
 
 export class Modal implements CartModal {
@@ -60,11 +58,17 @@ export class Modal implements CartModal {
         let totalPrice = 0;
 
         // Рендерим каждый товар в корзине
-        this.items.forEach((item, index) => {
-            const basketItem = this.createBasketItem(item, index + 1);
-            basketList.appendChild(basketItem);
-            totalPrice += item.price;
-        });
+        if (this.items.length === 0) {
+            const emptyMessage = document.createElement('p');
+            emptyMessage.textContent = 'Корзина пуста';
+            basketList.appendChild(emptyMessage);
+        } else {
+            this.items.forEach((item, index) => {
+                const basketItem = this.createBasketItem(item, index + 1);
+                basketList.appendChild(basketItem);
+                totalPrice += item.price;
+            });
+        }
 
         // Обновляем общую стоимость в корзине
         basketPrice.textContent = `${totalPrice} синапсов`;
@@ -81,7 +85,7 @@ export class Modal implements CartModal {
 
         itemIndex.textContent = index.toString();
         itemTitle.textContent = item.title;
-        itemPrice.textContent = `${item.price} синапсов`;
+        itemPrice.textContent = item.price === null ? 'Бесценно' : `${item.price} синапсов`;
 
         // Добавляем обработчик событий на кнопку удаления товара
         deleteButton.addEventListener('click', () => {
