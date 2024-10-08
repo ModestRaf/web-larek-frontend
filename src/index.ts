@@ -19,11 +19,12 @@ export class ProductList {
         this.cards = new Cards(cardTemplateId);
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.basketModal = basketModal;
+        this.basketModal.setProductList(this); // Передаем экземпляр ProductList в Modal
     }
 
     async loadProducts(): Promise<void> {
         try {
-            const response = await this.api.get(`/product`);
+            const response = await this.api.get('/product');
             const data = response as ApiListResponse<ProductItem>;
             this.products = this.loadSelectedFromStorage(data.items);
             this.renderProducts(this.products);
@@ -90,6 +91,16 @@ export class ProductList {
         this.updateBasketCounter(); // Обновляем счетчик
         this.saveSelectedToStorage(); // Сохраняем текущее состояние корзины
         this.renderBasketItems(); // Рендерим содержимое корзины
+    }
+
+    removeProductFromCart(productId: string): void {
+        const product = this.products.find(p => p.id === productId);
+        if (product) {
+            product.selected = false;
+            this.updateBasketCounter();
+            this.saveSelectedToStorage();
+            this.renderBasketItems();
+        }
     }
 }
 

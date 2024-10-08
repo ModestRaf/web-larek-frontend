@@ -7,6 +7,7 @@ export class Modal implements CartModal {
     private modal: HTMLElement;
     private contentTemplate: HTMLTemplateElement;
     items: CartItem[] = [];  // Массив товаров в корзине
+    private productList: ProductList | null = null; // Добавляем ссылку на ProductList
 
     constructor(modalId: string, contentTemplateId: string) {
         this.modal = document.getElementById(modalId) as HTMLElement;
@@ -14,6 +15,10 @@ export class Modal implements CartModal {
 
         // Добавляем обработчик событий на кнопку закрытия
         this.modal.querySelector('.modal__close')?.addEventListener('click', () => this.close());
+    }
+
+    setProductList(productList: ProductList): void {
+        this.productList = productList;
     }
 
     open(): void {
@@ -94,11 +99,8 @@ export class Modal implements CartModal {
         this.renderBasketItems();
 
         // Обновляем счетчик корзины в ProductList
-        const productList = new ProductList(new Api(API_URL), 'gallery', 'card-catalog', this);
-        const product = productList.products.find(p => p.id === itemId);
-        if (product) {
-            product.selected = false;
-            productList.updateBasketCounter();
+        if (this.productList) {
+            this.productList.removeProductFromCart(itemId);
         }
     }
 }
