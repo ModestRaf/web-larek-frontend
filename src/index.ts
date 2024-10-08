@@ -40,7 +40,7 @@ export class ProductList {
         products.forEach(product => {
             const card = this.cards.createProductCard(product);
             this.container.appendChild(card);
-            card.addEventListener('click', () => this.cards.openPopup(product, this.addProductToCart.bind(this)));
+            card.addEventListener('click', () => this.cards.openPopup(product, this.toggleProductInCart.bind(this)));
         });
     }
 
@@ -83,10 +83,10 @@ export class ProductList {
         this.basketModal.renderBasketItems();
     }
 
-    addProductToCart(product: ProductItem): void {
+    toggleProductInCart(product: ProductItem): void {
         const existingProduct = this.products.find(p => p.id === product.id);
-        if (existingProduct && !existingProduct.selected) {
-            existingProduct.selected = true; // Помечаем товар как выбранный
+        if (existingProduct) {
+            existingProduct.selected = !existingProduct.selected; // Переключаем состояние товара
         }
         this.updateBasketCounter(); // Обновляем счетчик
         this.saveSelectedToStorage(); // Сохраняем текущее состояние корзины
