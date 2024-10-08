@@ -48,7 +48,7 @@ export class Cards {
         }
     }
 
-    openPopup(product: ProductItem, updateBasketCounter: () => void): void {
+    openPopup(product: ProductItem, addProductToCart: (product: ProductItem) => void): void {
         const popup = document.querySelector('.modal') as HTMLElement;
         const popupContent = popup.querySelector('.modal__content') as HTMLElement;
         const popupTemplate = document.getElementById('card-preview') as HTMLTemplateElement;
@@ -58,20 +58,17 @@ export class Cards {
         this.updateCardContent(popupCard, product);
 
         const button = popupCard.querySelector('.card__button') as HTMLButtonElement;
-        button.textContent = product.selected ? 'Убрать из корзины' : 'В корзину';
+        button.textContent = 'Добавить в корзину';
         button.addEventListener('click', () => {
-            product.selected = !product.selected;  // Меняем состояние выбранного товара
-            updateBasketCounter();  // Обновляем счетчик корзины
-            button.textContent = product.selected ? 'Убрать из корзины' : 'В корзину';
+            addProductToCart(product);
         });
 
         popupContent.innerHTML = '';
         popupContent.appendChild(popupClone);
-
         popup.classList.add('modal_active');
 
-        // Добавляем обработчик событий на закрытие модального окна
         const closeButton = popup.querySelector('.modal__close') as HTMLElement;
         closeButton.addEventListener('click', () => popup.classList.remove('modal_active'));
     }
+
 }

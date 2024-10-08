@@ -39,14 +39,8 @@ export class ProductList {
         products.forEach(product => {
             const card = this.cards.createProductCard(product);
             this.container.appendChild(card);
-            card.addEventListener('click', () => this.cards.openPopup(product, this.updateBasketCounter.bind(this)));
+            card.addEventListener('click', () => this.cards.openPopup(product, this.addProductToCart.bind(this)));
         });
-    }
-
-    toggleProductSelection(product: ProductItem): void {
-        product.selected = !product.selected;
-        this.updateBasketCounter();
-        this.renderBasketItems();
     }
 
     updateBasketCounter(): void {
@@ -87,6 +81,16 @@ export class ProductList {
         }));
         this.basketModal.renderBasketItems();
     }
+
+    addProductToCart(product: ProductItem): void {
+        const existingProduct = this.products.find(p => p.id === product.id);
+        if (existingProduct && !existingProduct.selected) {
+            existingProduct.selected = true; // Помечаем товар как выбранный
+        }
+        this.updateBasketCounter(); // Обновляем счетчик
+        this.saveSelectedToStorage(); // Сохраняем текущее состояние корзины
+        this.renderBasketItems(); // Рендерим содержимое корзины
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -94,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const basketModal = new Modal('modal-container', 'basket');
     const productList = new ProductList(api, 'gallery', 'card-catalog', basketModal);
     productList.loadProducts();
-
     const basketButton = document.querySelector('.header__basket');
     basketButton.addEventListener('click', () => basketModal.open());
 });
