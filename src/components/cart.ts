@@ -1,15 +1,18 @@
 import {CartItem, CartModal} from "../types";
 import {ProductList} from "../index";
+import {OrderModal} from "./order";
 
 export class Modal implements CartModal {
     private modal: HTMLElement;
     private contentTemplate: HTMLTemplateElement;
     items: CartItem[] = [];  // Массив товаров в корзине
     private productList: ProductList | null = null; // Добавляем ссылку на ProductList
+    private orderModal: OrderModal; // Добавляем экземпляр OrderModal
 
     constructor(modalId: string, contentTemplateId: string) {
         this.modal = document.getElementById(modalId) as HTMLElement;
         this.contentTemplate = document.getElementById(contentTemplateId) as HTMLTemplateElement;
+        this.orderModal = new OrderModal('modal-container', 'order'); // Инициализируем OrderModal
 
         // Добавляем обработчик событий на кнопку закрытия
         this.modal.querySelector('.modal__close')?.addEventListener('click', () => this.close());
@@ -35,6 +38,10 @@ export class Modal implements CartModal {
 
         // Рендерим товары в корзине
         this.renderBasketItems();
+
+        // Добавляем обработчик событий на кнопку "Оформить"
+        const checkoutButton = cartModal.querySelector('.basket__button') as HTMLElement;
+        checkoutButton.addEventListener('click', () => this.orderModal.open(this.getTotalPrice()));
     }
 
     close(): void {
@@ -106,5 +113,9 @@ export class Modal implements CartModal {
         if (this.productList) {
             this.productList.removeProductFromCart(itemId);
         }
+    }
+
+    getTotalPrice(): number {
+        return this.items.reduce((total, item) => total + item.price, 0);
     }
 }
