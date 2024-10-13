@@ -35,7 +35,6 @@ export class OrderModal {
         // Добавляем обработчик событий для поля address
         this.setupAddressField();
 
-        // Устанавливаем класс button_alt-active по умолчанию для кнопки "Онлайн"
         const onlineButton = this.modal.querySelector('button[name="card"]') as HTMLButtonElement;
         onlineButton.classList.add('button_alt-active');
 
@@ -52,10 +51,7 @@ export class OrderModal {
 
         paymentButtons.forEach(button => {
             button.addEventListener('click', () => {
-                // Убираем класс button_alt-active у всех кнопок
                 paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
-
-                // Добавляем класс button_alt-active к нажатой кнопке
                 button.classList.add('button_alt-active');
             });
         });
