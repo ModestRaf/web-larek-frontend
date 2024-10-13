@@ -51,9 +51,10 @@ export class Modal implements CartModal {
     renderBasketItems(): void {
         const basketList = this.modal.querySelector('.basket__list') as HTMLElement;
         const basketPrice = this.modal.querySelector('.basket__price') as HTMLElement;
+        const checkoutButton = this.modal.querySelector('.basket__button') as HTMLButtonElement;
 
         // Проверяем, существуют ли элементы перед их использованием
-        if (!basketList || !basketPrice) {
+        if (!basketList || !basketPrice || !checkoutButton) {
             console.error('Элементы корзины не найдены');
             return;
         }
@@ -69,12 +70,14 @@ export class Modal implements CartModal {
             const emptyMessage = document.createElement('p');
             emptyMessage.textContent = 'Корзина пуста';
             basketList.appendChild(emptyMessage);
+            checkoutButton.disabled = true; // Делаем кнопку "Оформить" неактивной
         } else {
             this.items.forEach((item, index) => {
                 const basketItem = this.createBasketItem(item, index + 1);
                 basketList.appendChild(basketItem);
                 totalPrice += item.price;
             });
+            checkoutButton.disabled = false; // Делаем кнопку "Оформить" активной
         }
 
         // Обновляем общую стоимость в корзине
