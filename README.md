@@ -56,22 +56,22 @@ yarn build
 - сущности ProductItem и CartItem, определенные в файле src/types/index.ts.
 
 для сущности Товар (ProductItem)
-export interface ProductItem {
-id: string;               // Уникальный идентификатор товара
-price: number | null;     // Цена товара
-image: string;            // URL изображения товара
-category: string;         // Категория товара
-description: string;      // Описание товара
-title: string;            // Название товара
-selected: boolean;        // Флаг, выбран ли товар
-}
+```
+id: string;               Уникальный идентификатор товара
+price: number | null;     Цена товара
+image: string;            URL изображения товара
+category: string;         Категория товара
+description: string;      Описание товара
+title: string;            Название товара
+selected: boolean;        Флаг, выбран ли товар
+```
 
 для сущности Элемент корзины (CartItem)
-export interface CartItem {
+```
 id: string;               Уникальный идентификатор товара
 title: string;            Название товара
 price: number;            Цена товара
-} 
+```
 
 - классы
 
@@ -85,11 +85,11 @@ OrderModal, ContactsModal, SuccessModal: Классы, отвечающие за
 - CartModal — представляет модальное окно корзины и определяет методы open() и close().
 
 для сущности Корзина (CartModal)
-export interface CartModal {
+```
 open(): void;              Открыть корзину
 close(): void;             Закрыть корзину
 items: CartItem[];         Список товаров в корзине
-}
+```
 
 - Cards: Отвечает за отображение данных карточки товара в каталоге.
 - Order: Отвечает за отображение первого шага заказа в модальном окне.
