@@ -64,27 +64,43 @@ export class OrderModal {
     setupAddressField(): void {
         const addressField = this.modal.querySelector('input[name="address"]') as HTMLInputElement;
         const nextButton = this.modal.querySelector('.order__button') as HTMLButtonElement;
+        const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
 
         addressField.addEventListener('input', () => {
             // Проверяем, пустое ли поле address
-            if (addressField.value.trim() !== '') {
-                nextButton.disabled = false; // Включаем кнопку "Далее"
+            if (addressField.value.trim() === '') {
+                formErrors.textContent = 'Необходимо указать адрес доставки';
+                formErrors.style.display = 'block';
+                nextButton.disabled = true; // Делаем кнопку "Далее" неактивной
             } else {
-                nextButton.disabled = true; // Отключаем кнопку "Далее"
+                formErrors.style.display = 'none';
+                nextButton.disabled = false; // Делаем кнопку "Далее" активной
             }
         });
     }
 
     setupNextButton(totalPrice: number): void {
         const nextButton = this.modal.querySelector('.order__button') as HTMLButtonElement;
+        const addressField = this.modal.querySelector('input[name="address"]') as HTMLInputElement;
+        const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
+
         nextButton.addEventListener('click', () => {
-            this.close(); // Закрываем текущее модальное окно
-            new ContactsModal('modal-container', 'contacts').open(totalPrice); // Открываем модальное окно contacts
+            // Проверяем, заполнено ли поле address
+            if (addressField.value.trim() === '') {
+                formErrors.textContent = 'Необходимо указать адрес доставки';
+                formErrors.style.display = 'block';
+                nextButton.disabled = true; // Делаем кнопку "Далее" неактивной
+            } else {
+                formErrors.style.display = 'none';
+                nextButton.disabled = false; // Делаем кнопку "Далее" активной
+                this.close(); // Закрываем текущее модальное окно
+                new ContactsModal('modal-container', 'contacts').open(totalPrice); // Открываем модальное окно contacts
+            }
         });
     }
 }
 
-class ContactsModal {
+export class ContactsModal {
     private modal: HTMLElement;
     private contentTemplate: HTMLTemplateElement;
 
@@ -125,12 +141,24 @@ class ContactsModal {
         const emailField = this.modal.querySelector('input[name="email"]') as HTMLInputElement;
         const phoneField = this.modal.querySelector('input[name="phone"]') as HTMLInputElement;
         const payButton = this.modal.querySelector('.button') as HTMLButtonElement;
+        const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
 
         const checkFields = () => {
-            if (emailField.value.trim() !== '' && phoneField.value.trim() !== '') {
-                payButton.disabled = false; // Включаем кнопку "Оплатить"
-            } else {
+            if (emailField.value.trim() === '' && phoneField.value.trim() === '') {
+                formErrors.textContent = 'Необходимо ввести email и номер телефона';
+                formErrors.style.display = 'block';
                 payButton.disabled = true; // Отключаем кнопку "Оплатить"
+            } else if (emailField.value.trim() === '') {
+                formErrors.textContent = 'Необходимо ввести email';
+                formErrors.style.display = 'block';
+                payButton.disabled = true; // Отключаем кнопку "Оплатить"
+            } else if (phoneField.value.trim() === '') {
+                formErrors.textContent = 'Необходимо ввести номер телефона';
+                formErrors.style.display = 'block';
+                payButton.disabled = true; // Отключаем кнопку "Оплатить"
+            } else {
+                formErrors.style.display = 'none';
+                payButton.disabled = false; // Включаем кнопку "Оплатить"
             }
         };
 
@@ -147,7 +175,7 @@ class ContactsModal {
     }
 }
 
-class SuccessModal {
+export class SuccessModal {
     private modal: HTMLElement;
     private contentTemplate: HTMLTemplateElement;
     private totalPrice: number;
