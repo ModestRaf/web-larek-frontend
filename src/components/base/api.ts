@@ -29,7 +29,7 @@ export class Api {
     }
 
     get(uri: string) {
-        return fetch(this.baseUrl + uri, {
+        return fetch('https://larek-api.nomoreparties.co/api/weblarek' + uri, {
             ...this.options,
             method: 'GET'
         }).then(this.handleResponse);
