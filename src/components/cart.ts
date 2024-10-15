@@ -53,6 +53,12 @@ export class Modal implements CartModal {
         const basketPrice = this.modal.querySelector('.basket__price') as HTMLElement;
         const checkoutButton = this.modal.querySelector('.basket__button') as HTMLButtonElement;
 
+        // Проверяем, существуют ли элементы перед их использованием
+        if (!basketList || !basketPrice || !checkoutButton) {
+            console.error('Элементы корзины не найдены');
+            return;
+        }
+
         // Очищаем список товаров в корзине
         basketList.innerHTML = '';
 
