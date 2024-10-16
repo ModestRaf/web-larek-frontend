@@ -8,11 +8,19 @@ export class Modal implements CartModal {
     items: CartItem[] = [];  // Массив товаров в корзине
     private productList: ProductList | null = null; // Добавляем ссылку на ProductList
     private orderModal: OrderModal; // Добавляем экземпляр OrderModal
+    private cartModal: HTMLElement;
+    private cartContent: HTMLElement;
+    private cartTemplate: HTMLTemplateElement;
+    private template: HTMLTemplateElement;
 
     constructor(modalId: string, contentTemplateId: string) {
         this.modal = document.getElementById(modalId) as HTMLElement;
         this.contentTemplate = document.getElementById(contentTemplateId) as HTMLTemplateElement;
-        this.orderModal = new OrderModal('modal-container', 'order'); // Инициализируем OrderModal
+        this.orderModal = new OrderModal('modal-container', 'order');
+        this.cartModal = document.querySelector('.modal') as HTMLElement;
+        this.cartContent = this.cartModal.querySelector('.modal__content') as HTMLElement;
+        this.cartTemplate = document.getElementById('basket') as HTMLTemplateElement;
+        this.template = document.getElementById('card-basket') as HTMLTemplateElement;
 
         // Добавляем обработчик событий на кнопку закрытия
         this.modal.querySelector('.modal__close')?.addEventListener('click', () => this.close());
@@ -24,23 +32,16 @@ export class Modal implements CartModal {
 
     open(): void {
         // Получаем элементы для модального окна корзины
-        const cartModal = document.querySelector('.modal') as HTMLElement;
-        const cartContent = cartModal.querySelector('.modal__content') as HTMLElement;
-        const cartTemplate = document.getElementById('basket') as HTMLTemplateElement;
-        const cartClone = document.importNode(cartTemplate.content, true);
-
+        const cartClone = document.importNode(this.cartTemplate.content, true);
         // Очищаем и обновляем содержимое модального окна корзины
-        cartContent.innerHTML = '';
-        cartContent.appendChild(cartClone);
-
+        this.cartContent.innerHTML = '';
+        this.cartContent.appendChild(cartClone);
         // Отображаем модальное окно корзины
-        cartModal.classList.add('modal_active');
-
+        this.cartModal.classList.add('modal_active');
         // Рендерим товары в корзине
         this.renderBasketItems();
-
         // Добавляем обработчик событий на кнопку "Оформить"
-        const checkoutButton = cartModal.querySelector('.basket__button') as HTMLElement;
+        const checkoutButton = this.cartModal.querySelector('.basket__button') as HTMLElement;
         checkoutButton.addEventListener('click', () => this.orderModal.open(this.getTotalPrice()));
     }
 
@@ -85,9 +86,7 @@ export class Modal implements CartModal {
     }
 
     createBasketItem(item: CartItem, index: number): HTMLElement {
-        const template = document.getElementById('card-basket') as HTMLTemplateElement;
-        const clone = template.content.cloneNode(true) as HTMLElement;
-
+        const clone = this.template.content.cloneNode(true) as HTMLElement;
         const itemIndex = clone.querySelector('.basket__item-index') as HTMLElement;
         const itemTitle = clone.querySelector('.card__title') as HTMLElement;
         const itemPrice = clone.querySelector('.card__price') as HTMLElement;

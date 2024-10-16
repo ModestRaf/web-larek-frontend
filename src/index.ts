@@ -116,14 +116,11 @@ export class ProductList {
 document.addEventListener('DOMContentLoaded', () => {
     const api = new Api(API_URL);
     const basketModal = new Modal('modal-container', 'basket');
-
-    // These values are now directly passed to ProductList, which then passes them to Cards
     const containerId = 'gallery';
     const cardTemplateId = 'card-catalog';
     const popupSelector = '.modal';
     const popupTemplateId = 'card-preview';
     const closeSelector = '.modal__close';
-
     const productList = new ProductList(
         api,
         containerId,
