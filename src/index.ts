@@ -13,14 +13,23 @@ export class ProductList {
     products: ProductItem[] = [];
     private basketModal: Modal;
 
-    constructor(api: Api, containerId: string, cardTemplateId: string, basketModal: Modal) {
+    constructor(
+        api: Api,
+        containerId: string,
+        cardTemplateId: string,
+        popupSelector: string,
+        popupTemplateId: string,
+        closeSelector: string,
+        basketModal: Modal
+    ) {
         this.api = api;
         this.container = document.getElementById(containerId) as HTMLElement;
-        this.cards = new Cards(cardTemplateId);
+        this.cards = new Cards(cardTemplateId, popupSelector, popupTemplateId, closeSelector);
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.basketModal = basketModal;
-        this.basketModal.setProductList(this); // Передаем экземпляр ProductList в Modal
+        this.basketModal.setProductList(this);
     }
+
 
     async loadProducts(): Promise<void> {
         try {
@@ -107,8 +116,25 @@ export class ProductList {
 document.addEventListener('DOMContentLoaded', () => {
     const api = new Api(API_URL);
     const basketModal = new Modal('modal-container', 'basket');
-    const productList = new ProductList(api, 'gallery', 'card-catalog', basketModal);
+
+    // These values are now directly passed to ProductList, which then passes them to Cards
+    const containerId = 'gallery';
+    const cardTemplateId = 'card-catalog';
+    const popupSelector = '.modal';
+    const popupTemplateId = 'card-preview';
+    const closeSelector = '.modal__close';
+
+    const productList = new ProductList(
+        api,
+        containerId,
+        cardTemplateId,
+        popupSelector,
+        popupTemplateId,
+        closeSelector,
+        basketModal
+    );
     productList.loadProducts();
+
     const basketButton = document.querySelector('.header__basket');
     basketButton.addEventListener('click', () => basketModal.open());
 });

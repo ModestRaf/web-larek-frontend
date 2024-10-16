@@ -216,7 +216,15 @@ export class SuccessModal {
     }
 
     clearBasket(): void {
-        const productList = new ProductList(new Api(API_URL), 'gallery', 'card-catalog', new Modal('modal-container', 'basket'));
+        const productList = new ProductList(
+            new Api(API_URL),
+            'gallery',
+            'card-catalog',
+            '.modal',             // popupSelector
+            'card-preview',       // popupTemplateId
+            '.modal__close',      // closeSelector
+            new Modal('modal-container', 'basket')
+        );
         productList.products.forEach(product => {
             product.selected = false;
         });
