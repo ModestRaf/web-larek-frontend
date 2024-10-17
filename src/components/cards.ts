@@ -6,13 +6,13 @@ export class Cards {
     private popup: HTMLElement;
     private popupContent: HTMLElement;
     private popupTemplate: HTMLTemplateElement;
-    private closeButton: HTMLElement;
+    private readonly closeButton: HTMLElement;
 
     constructor(cardTemplateId: string, popupSelector: string, popupTemplateId: string, closeSelector: string) {
-        this.cardTemplate = document.getElementById(cardTemplateId) as HTMLTemplateElement;
+        this.cardTemplate = document.querySelector(`#${cardTemplateId}`) as HTMLTemplateElement;
         this.popup = document.querySelector(popupSelector) as HTMLElement;
         this.popupContent = this.popup.querySelector('.modal__content') as HTMLElement;
-        this.popupTemplate = document.getElementById(popupTemplateId) as HTMLTemplateElement;
+        this.popupTemplate = document.querySelector(`#${popupTemplateId}`) as HTMLTemplateElement;
         this.closeButton = this.popup.querySelector(closeSelector);
         if (this.closeButton) {
             this.closeButton.addEventListener('click', () => this.popup.classList.remove('modal_active'));
@@ -21,18 +21,17 @@ export class Cards {
 
     createProductCard(product: ProductItem): HTMLElement {
         const cardClone = document.importNode(this.cardTemplate.content, true);
-        const card = cardClone.querySelector('.gallery__item') as HTMLElement;
-        this.updateCardContent(card, product);
-        return card;
+        const productCard = cardClone.querySelector('.gallery__item') as HTMLElement;
+        this.updateCardContent(productCard, product);
+        return productCard;
     }
 
-    updateCardContent(card: HTMLElement, product: ProductItem): void {
-        const image = card.querySelector('.card__image') as HTMLImageElement;
-        const title = card.querySelector('.card__title') as HTMLElement;
-        const price = card.querySelector('.card__price') as HTMLElement | null;
-        const category = card.querySelector('.card__category') as HTMLElement;
-        const button = card.querySelector('.card__button') as HTMLButtonElement;
-
+    updateCardContent(productCard: HTMLElement, product: ProductItem): void {
+        const image = productCard.querySelector('.card__image') as HTMLImageElement;
+        const title = productCard.querySelector('.card__title') as HTMLElement;
+        const price = productCard.querySelector('.card__price') as HTMLElement | null;
+        const category = productCard.querySelector('.card__category') as HTMLElement;
+        const button = productCard.querySelector('.card__button') as HTMLButtonElement;
         if (image) {
             image.src = CDN_URL + product.image;
             image.alt = product.title;

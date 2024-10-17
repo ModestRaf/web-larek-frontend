@@ -21,7 +21,7 @@ export class ProductList {
         basketModal: Modal
     ) {
         this.api = api;
-        this.container = document.getElementById(containerId) as HTMLElement;
+        this.container = document.querySelector(`#${containerId}`) as HTMLElement;
         this.cards = new Cards(cardTemplateId, popupSelector, popupTemplateId, closeSelector);
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.basketModal = basketModal;
@@ -92,11 +92,11 @@ export class ProductList {
     toggleProductInCart(product: ProductItem): void {
         const existingProduct = this.products.find(p => p.id === product.id);
         if (existingProduct) {
-            existingProduct.selected = !existingProduct.selected; // Переключаем состояние товара
+            existingProduct.selected = !existingProduct.selected;
         }
-        this.updateBasketCounter(); // Обновляем счетчик
-        this.saveSelectedToStorage(); // Сохраняем текущее состояние корзины
-        this.renderBasketItems(); // Рендерим содержимое корзины
+        this.updateBasketCounter();
+        this.saveSelectedToStorage();
+        this.renderBasketItems();
     }
 
     removeProductFromCart(productId: string): void {

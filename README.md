@@ -125,7 +125,7 @@ items: CartItem[];         Список товаров в корзине
 
 ##### Методы:
 - createProductCard(product: ProductItem): HTMLElement — создает карточку товара.
-- updateCardContent(card: HTMLElement, product: ProductItem): void — обновляет содержимое карточки товара.
+- updateCardContent(productCard: HTMLElement, product: ProductItem): void — обновляет содержимое карточки товара.
 - setCategoryClass(category: HTMLElement, categoryName: string): void — устанавливает класс категории.
 - openPopup(product: ProductItem, toggleProductInCart: (product: ProductItem) => void): void — открывает модальное окно с подробной информацией о товаре.
 
