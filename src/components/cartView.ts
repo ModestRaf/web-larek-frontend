@@ -1,21 +1,22 @@
 import {CartItem, CartModal} from "../types";
-import {OrderModal} from "./order";
 import {CartModel} from "./cart";
+import {OrderView} from "./orderAddress";
+import {OrderModel} from "./order";
 
 export class CartView implements CartModal {
     protected modal: HTMLElement;
     private contentTemplate: HTMLTemplateElement;
-    private orderModal: OrderModal;
+    private orderView: OrderView;
     private cartModal: HTMLElement;
     private cartContent: HTMLElement;
     private cartTemplate: HTMLTemplateElement;
     private template: HTMLTemplateElement;
     private model: CartModel;
 
-    constructor(modalId: string, contentTemplateId: string, model: CartModel) {
+    constructor(modalId: string, contentTemplateId: string, model: CartModel, orderModel: OrderModel) {
         this.modal = document.querySelector(`#${modalId}`) as HTMLElement;
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
-        this.orderModal = new OrderModal('modal-container', 'order');
+        this.orderView = new OrderView('modal-container', 'order', orderModel);
         this.cartModal = document.querySelector('.modal') as HTMLElement;
         this.cartContent = this.cartModal.querySelector('.modal__content') as HTMLElement;
         this.cartTemplate = document.querySelector('#basket') as HTMLTemplateElement;
@@ -31,7 +32,7 @@ export class CartView implements CartModal {
         this.cartModal.classList.add('modal_active');
         this.renderBasketItems();
         const checkoutButton = this.cartModal.querySelector('.basket__button') as HTMLElement;
-        checkoutButton.addEventListener('click', () => this.orderModal.open(this.model.getTotalPrice()));
+        checkoutButton.addEventListener('click', () => this.orderView.open(this.model.getTotalPrice()));
     }
 
     close(): void {

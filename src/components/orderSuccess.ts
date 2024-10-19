@@ -6,6 +6,7 @@ import {CartModel} from "./cart";
 import {CardsModel} from "./cards";
 import {CardsView} from "./cardsView";
 import {ProductListView} from "./larekView";
+import {OrderModel} from "./order";
 
 export class SuccessModal {
     private modal: HTMLElement;
@@ -51,7 +52,8 @@ export class SuccessModal {
 
     clearBasket(): void {
         const cartModel = new CartModel();
-        const basketModal = new CartView('modal-container', 'basket', cartModel);
+        const orderModel = new OrderModel('modal-container', 'order');
+        const basketModal = new CartView('modal-container', 'basket', cartModel, orderModel);
         const cardsModel = new CardsModel('card-catalog', 'card-preview');
         const cardsView = new CardsView('.modal', '.modal__close', cardsModel);
         const productListModel = new ProductListModel(new Api(API_URL));
@@ -70,5 +72,8 @@ export class SuccessModal {
         productListModel.saveSelectedToStorage();
         productListView.updateBasketCounter();
         productListView.renderBasketItems();
+
+        // Очищаем содержимое корзины
+        basketModal.renderBasketItems();
     }
 }

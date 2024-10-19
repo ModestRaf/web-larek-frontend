@@ -7,11 +7,13 @@ import {CardsView} from "./components/cardsView";
 import {CardsModel} from "./components/cards";
 import {ProductListView} from "./components/larekView";
 import {ProductListModel} from "./components/larekApi";
+import {OrderModel} from "./components/order";
 
 document.addEventListener('DOMContentLoaded', () => {
     const api = new Api(API_URL);
     const cartModel = new CartModel();
-    const basketModal = new CartView('modal-container', 'basket', cartModel);
+    const orderModel = new OrderModel('modal-container', 'order');
+    const basketModal = new CartView('modal-container', 'basket', cartModel, orderModel);
     const containerId = 'gallery';
     const cardTemplateId = 'card-catalog';
     const popupSelector = '.modal';
