@@ -1,36 +1,33 @@
 import {ContactsModal} from "./contacts";
 import {OrderModel} from "./order";
+import {ModalBase} from "./modalBase";
 
-export class OrderView {
-    private orderModal: HTMLElement;
-    private orderContent: HTMLElement;
+export class OrderView extends ModalBase {
+    private contentTemplate: HTMLTemplateElement;
+    private orderTemplate: HTMLTemplateElement;
     private model: OrderModel;
 
     constructor(modalId: string, contentTemplateId: string, model: OrderModel) {
-        this.orderModal = document.querySelector('.modal') as HTMLElement;
-        this.orderContent = this.orderModal.querySelector('.modal__content') as HTMLElement;
+        super(`#${modalId}`, '.modal__close');
+        this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
+        this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
         this.model = model;
-        this.model.modal.querySelector('.modal__close')?.addEventListener('click', () => this.close());
     }
 
     open(totalPrice: number): void {
-        const orderClone = document.importNode(this.model.orderTemplate.content, true);
-        this.orderContent.innerHTML = '';
-        this.orderContent.appendChild(orderClone);
-        this.orderModal.classList.add('modal_active');
+        super.open(totalPrice);
+        const orderClone = document.importNode(this.orderTemplate.content, true);
+        this.content.innerHTML = '';
+        this.content.appendChild(orderClone);
         this.setupPaymentButtons();
         this.setupAddressField();
-        const onlineButton = this.model.modal.querySelector('button[name="card"]') as HTMLButtonElement;
+        const onlineButton = this.modal.querySelector('button[name="card"]') as HTMLButtonElement;
         onlineButton.classList.add('button_alt-active');
         this.setupNextButton(totalPrice);
     }
 
-    close(): void {
-        this.model.close();
-    }
-
     setupPaymentButtons(): void {
-        const paymentButtons = this.model.modal.querySelectorAll('.order__buttons .button_alt');
+        const paymentButtons = this.modal.querySelectorAll('.order__buttons .button_alt');
         paymentButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
@@ -40,9 +37,9 @@ export class OrderView {
     }
 
     setupAddressField(): void {
-        const addressField = this.model.modal.querySelector('input[name="address"]') as HTMLInputElement;
-        const nextButton = this.model.modal.querySelector('.order__button') as HTMLButtonElement;
-        const formErrors = this.model.modal.querySelector('.form__errors') as HTMLElement;
+        const addressField = this.modal.querySelector('input[name="address"]') as HTMLInputElement;
+        const nextButton = this.modal.querySelector('.order__button') as HTMLButtonElement;
+        const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
 
         addressField.addEventListener('input', () => {
             this.model.validateAddressField(addressField, nextButton, formErrors);
@@ -50,9 +47,9 @@ export class OrderView {
     }
 
     setupNextButton(totalPrice: number): void {
-        const nextButton = this.model.modal.querySelector('.order__button') as HTMLButtonElement;
-        const addressField = this.model.modal.querySelector('input[name="address"]') as HTMLInputElement;
-        const formErrors = this.model.modal.querySelector('.form__errors') as HTMLElement;
+        const nextButton = this.modal.querySelector('.order__button') as HTMLButtonElement;
+        const addressField = this.modal.querySelector('input[name="address"]') as HTMLInputElement;
+        const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
 
         nextButton.addEventListener('click', () => {
             if (this.model.validateAddressField(addressField, nextButton, formErrors)) {

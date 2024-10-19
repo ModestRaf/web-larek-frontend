@@ -2,41 +2,32 @@ import {CartItem, CartModal} from "../types";
 import {CartModel} from "./cart";
 import {OrderView} from "./orderAddress";
 import {OrderModel} from "./order";
+import {ModalBase} from "./modalBase";
 
-export class CartView implements CartModal {
-    protected modal: HTMLElement;
+export class CartView extends ModalBase implements CartModal {
     private contentTemplate: HTMLTemplateElement;
     private orderView: OrderView;
-    private cartModal: HTMLElement;
-    private cartContent: HTMLElement;
     private cartTemplate: HTMLTemplateElement;
     private template: HTMLTemplateElement;
     private model: CartModel;
 
     constructor(modalId: string, contentTemplateId: string, model: CartModel, orderModel: OrderModel) {
-        this.modal = document.querySelector(`#${modalId}`) as HTMLElement;
+        super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderView = new OrderView('modal-container', 'order', orderModel);
-        this.cartModal = document.querySelector('.modal') as HTMLElement;
-        this.cartContent = this.cartModal.querySelector('.modal__content') as HTMLElement;
         this.cartTemplate = document.querySelector('#basket') as HTMLTemplateElement;
         this.template = document.querySelector('#card-basket') as HTMLTemplateElement;
         this.model = model;
-        this.modal.querySelector('.modal__close')?.addEventListener('click', () => this.close());
     }
 
     open(): void {
+        super.open();
         const cartClone = document.importNode(this.cartTemplate.content, true);
-        this.cartContent.innerHTML = '';
-        this.cartContent.appendChild(cartClone);
-        this.cartModal.classList.add('modal_active');
+        this.content.innerHTML = '';
+        this.content.appendChild(cartClone);
         this.renderBasketItems();
-        const checkoutButton = this.cartModal.querySelector('.basket__button') as HTMLElement;
+        const checkoutButton = this.modal.querySelector('.basket__button') as HTMLElement;
         checkoutButton.addEventListener('click', () => this.orderView.open(this.model.getTotalPrice()));
-    }
-
-    close(): void {
-        this.modal.classList.remove('modal_active');
     }
 
     renderBasketItems(): void {
