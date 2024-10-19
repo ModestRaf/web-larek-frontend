@@ -1,59 +1,23 @@
 import {ProductItem} from "../types";
 import {Api, ApiListResponse} from "./base/api";
-import {Cards} from "./cards";
-import {Modal} from "./cart";
 
-export class ProductList {
+export class ProductListModel {
     private api: Api;
-    private container: HTMLElement;
-    private cards: Cards;
-    private basketCounter: HTMLElement;
     products: ProductItem[] = [];
-    private basketModal: Modal;
 
-    constructor(
-        api: Api,
-        containerId: string,
-        cardTemplateId: string,
-        popupSelector: string,
-        popupTemplateId: string,
-        closeSelector: string,
-        basketModal: Modal
-    ) {
+    constructor(api: Api) {
         this.api = api;
-        this.container = document.querySelector(`#${containerId}`) as HTMLElement;
-        this.cards = new Cards(cardTemplateId, popupSelector, popupTemplateId, closeSelector);
-        this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
-        this.basketModal = basketModal;
-        this.basketModal.setProductList(this);
     }
 
-    async loadProducts(): Promise<void> {
+    async loadProducts(): Promise<ProductItem[]> {
         try {
             const response = await this.api.get('/product');
             const data = response as ApiListResponse<ProductItem>;
-            this.products = this.loadSelectedFromStorage(data.items);
-            this.renderProducts(this.products);
-            this.updateBasketCounter();
-            this.renderBasketItems();
+            return this.loadSelectedFromStorage(data.items);
         } catch (error) {
             console.error(error);
+            return [];
         }
-    }
-
-    renderProducts(products: ProductItem[]): void {
-        this.container.innerHTML = '';
-        products.forEach(product => {
-            const card = this.cards.createProductCard(product);
-            this.container.appendChild(card);
-            card.addEventListener('click', () => this.cards.openPopup(product, this.toggleProductInCart.bind(this)));
-        });
-    }
-
-    updateBasketCounter(): void {
-        const selectedProductsCount = this.products.filter(product => product.selected).length;
-        this.basketCounter.textContent = selectedProductsCount.toString();
-        this.saveSelectedToStorage();
     }
 
     saveSelectedToStorage(): void {
@@ -79,33 +43,19 @@ export class ProductList {
         return products;
     }
 
-    renderBasketItems(): void {
-        const selectedProducts = this.products.filter(product => product.selected);
-        this.basketModal.items = selectedProducts.map(product => ({
-            id: product.id,
-            title: product.title,
-            price: product.price,
-        }));
-        this.basketModal.renderBasketItems();
-    }
-
     toggleProductInCart(product: ProductItem): void {
         const existingProduct = this.products.find(p => p.id === product.id);
         if (existingProduct) {
             existingProduct.selected = !existingProduct.selected;
         }
-        this.updateBasketCounter();
         this.saveSelectedToStorage();
-        this.renderBasketItems();
     }
 
     removeProductFromCart(productId: string): void {
         const product = this.products.find(p => p.id === productId);
         if (product) {
             product.selected = false;
-            this.updateBasketCounter();
             this.saveSelectedToStorage();
-            this.renderBasketItems();
         }
     }
 }

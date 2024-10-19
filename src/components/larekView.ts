@@ -1,0 +1,73 @@
+import {ProductItem} from "../types";
+import {CartView} from "./cartView";
+import {CartModel} from "./cart";
+import {CardsView} from "./cardsView";
+import {ProductListModel} from "./larekApi";
+
+export class ProductListView {
+    private container: HTMLElement;
+    private basketCounter: HTMLElement;
+    private basketModal: CartView;
+    private cartModel: CartModel;
+    private cardsView: CardsView;
+    private model: ProductListModel;
+
+    constructor(
+        containerId: string,
+        basketModal: CartView,
+        cartModel: CartModel,
+        cardsView: CardsView,
+        model: ProductListModel
+    ) {
+        this.container = document.querySelector(`#${containerId}`) as HTMLElement;
+        this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
+        this.basketModal = basketModal;
+        this.cartModel = cartModel;
+        this.cardsView = cardsView;
+        this.model = model;
+        this.cartModel.setProductList(this);
+    }
+
+    async loadProducts(): Promise<void> {
+        this.model.products = await this.model.loadProducts();
+        this.renderProducts(this.model.products);
+        this.updateBasketCounter();
+        this.renderBasketItems();
+    }
+
+    renderProducts(products: ProductItem[]): void {
+        this.container.innerHTML = '';
+        products.forEach(product => {
+            const card = this.cardsView.model.createProductCard(product);
+            this.container.appendChild(card);
+            card.addEventListener('click', () => this.cardsView.openPopup(product, this.toggleProductInCart.bind(this)));
+        });
+    }
+
+    updateBasketCounter(): void {
+        const selectedProductsCount = this.model.products.filter(product => product.selected).length;
+        this.basketCounter.textContent = selectedProductsCount.toString();
+    }
+
+    renderBasketItems(): void {
+        const selectedProducts = this.model.products.filter(product => product.selected);
+        this.cartModel.items = selectedProducts.map(product => ({
+            id: product.id,
+            title: product.title,
+            price: product.price,
+        }));
+        this.basketModal.renderBasketItems();
+    }
+
+    toggleProductInCart(product: ProductItem): void {
+        this.model.toggleProductInCart(product);
+        this.updateBasketCounter();
+        this.renderBasketItems();
+    }
+
+    removeProductFromCart(productId: string): void {
+        this.model.removeProductFromCart(productId);
+        this.updateBasketCounter();
+        this.renderBasketItems();
+    }
+}

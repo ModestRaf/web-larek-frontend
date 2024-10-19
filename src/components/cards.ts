@@ -1,22 +1,13 @@
 import { ProductItem } from "../types";
 import { CDN_URL } from "../utils/constants";
 
-export class Cards {
+export class CardsModel {
     private cardTemplate: HTMLTemplateElement;
-    private popup: HTMLElement;
-    private popupContent: HTMLElement;
-    private popupTemplate: HTMLTemplateElement;
-    private readonly closeButton: HTMLElement;
+    popupTemplate: HTMLTemplateElement;
 
-    constructor(cardTemplateId: string, popupSelector: string, popupTemplateId: string, closeSelector: string) {
+    constructor(cardTemplateId: string, popupTemplateId: string) {
         this.cardTemplate = document.querySelector(`#${cardTemplateId}`) as HTMLTemplateElement;
-        this.popup = document.querySelector(popupSelector) as HTMLElement;
-        this.popupContent = this.popup.querySelector('.modal__content') as HTMLElement;
         this.popupTemplate = document.querySelector(`#${popupTemplateId}`) as HTMLTemplateElement;
-        this.closeButton = this.popup.querySelector(closeSelector);
-        if (this.closeButton) {
-            this.closeButton.addEventListener('click', () => this.popup.classList.remove('modal_active'));
-        }
     }
 
     createProductCard(product: ProductItem): HTMLElement {
@@ -65,23 +56,5 @@ export class Cards {
         if (className) {
             category.classList.add(className);
         }
-    }
-
-    openPopup(product: ProductItem, toggleProductInCart: (product: ProductItem) => void): void {
-        const popupClone = document.importNode(this.popupTemplate.content, true);
-        const popupCard = popupClone.querySelector('.card') as HTMLElement;
-        this.updateCardContent(popupCard, product);
-        const button = popupCard.querySelector('.card__button') as HTMLButtonElement | null;
-        if (button) {
-            button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
-            button.addEventListener('click', () => {
-                toggleProductInCart(product);
-                this.updateCardContent(popupCard, product);
-            });
-        }
-
-        this.popupContent.innerHTML = '';
-        this.popupContent.appendChild(popupClone);
-        this.popup.classList.add('modal_active');
     }
 }

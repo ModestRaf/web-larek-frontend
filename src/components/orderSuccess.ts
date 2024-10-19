@@ -1,7 +1,11 @@
-import {ProductList} from "./larekApi";
+import {ProductListModel} from "./larekApi";
 import {Api} from "./base/api";
 import {API_URL} from "../utils/constants";
-import {Modal} from "./cart";
+import {CartView} from "./cartView";
+import {CartModel} from "./cart";
+import {CardsModel} from "./cards";
+import {CardsView} from "./cardsView";
+import {ProductListView} from "./larekView";
 
 export class SuccessModal {
     private modal: HTMLElement;
@@ -46,20 +50,25 @@ export class SuccessModal {
     }
 
     clearBasket(): void {
-        const productList = new ProductList(
-            new Api(API_URL),
+        const cartModel = new CartModel();
+        const basketModal = new CartView('modal-container', 'basket', cartModel);
+        const cardsModel = new CardsModel('card-catalog', 'card-preview');
+        const cardsView = new CardsView('.modal', '.modal__close', cardsModel);
+        const productListModel = new ProductListModel(new Api(API_URL));
+        const productListView = new ProductListView(
             'gallery',
-            'card-catalog',
-            '.modal',             // popupSelector
-            'card-preview',       // popupTemplateId
-            '.modal__close',      // closeSelector
-            new Modal('modal-container', 'basket')
+            basketModal,
+            cartModel,
+            cardsView,
+            productListModel
         );
-        productList.products.forEach(product => {
+
+        // Очищаем корзину и обновляем счетчик
+        productListModel.products.forEach(product => {
             product.selected = false;
         });
-        productList.updateBasketCounter();
-        productList.saveSelectedToStorage();
-        productList.renderBasketItems();
+        productListModel.saveSelectedToStorage();
+        productListView.updateBasketCounter();
+        productListView.renderBasketItems();
     }
 }
