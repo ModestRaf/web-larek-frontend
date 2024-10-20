@@ -1,32 +1,23 @@
 import {SuccessModal} from "./orderSuccess";
+import {ModalBase} from "./modalBase";
 
-export class ContactsModal {
-    private modal: HTMLElement;
+export class ContactsModal extends ModalBase { // Наследуем от ModalBase
     private contentTemplate: HTMLTemplateElement;
-    private contactsModal: HTMLElement;
-    private contactsContent: HTMLElement;
     private contactsTemplate: HTMLTemplateElement;
 
     constructor(modalId: string, contentTemplateId: string) {
-        this.modal = document.querySelector(`#${modalId}`) as HTMLElement;
+        super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
-        this.contactsModal = document.querySelector('.modal') as HTMLElement;
-        this.contactsContent = this.contactsModal.querySelector('.modal__content') as HTMLElement;
         this.contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
-        this.modal.querySelector('.modal__close')?.addEventListener('click', () => this.close());
     }
 
     open(totalPrice: number): void {
+        super.open(); // Используем метод open из ModalBase
         const contactsClone = document.importNode(this.contactsTemplate.content, true);
-        this.contactsContent.innerHTML = '';
-        this.contactsContent.appendChild(contactsClone);
-        this.contactsModal.classList.add('modal_active');
+        this.content.innerHTML = ''; // Используем this.content из ModalBase
+        this.content.appendChild(contactsClone);
         this.setupContactFields();
         this.setupPayButton(totalPrice);
-    }
-
-    close(): void {
-        this.modal.classList.remove('modal_active');
     }
 
     setupContactFields(): void {
@@ -52,6 +43,7 @@ export class ContactsModal {
                 formErrors.classList.add('form__errors_visible');
                 payButton.disabled = true;
             } else {
+                formErrors.textContent = '';
                 formErrors.classList.remove('form__errors_visible');
                 payButton.disabled = false;
             }
@@ -60,11 +52,10 @@ export class ContactsModal {
         emailField.addEventListener('input', checkFields);
         phoneField.addEventListener('input', checkFields);
     }
-
     setupPayButton(totalPrice: number): void {
         const payButton = this.modal.querySelector('.button') as HTMLButtonElement;
         payButton.addEventListener('click', () => {
-            this.close();
+            this.close(); // Используем метод close из ModalBase
             new SuccessModal('modal-container', 'success', totalPrice).open();
         });
     }

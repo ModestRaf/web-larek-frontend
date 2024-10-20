@@ -1,24 +1,7 @@
 import {ProductItem} from "../types";
-import {Api, ApiListResponse} from "./base/api";
 
 export class ProductListModel {
-    private api: Api;
     products: ProductItem[] = [];
-
-    constructor(api: Api) {
-        this.api = api;
-    }
-
-    async loadProducts(): Promise<ProductItem[]> {
-        try {
-            const response = await this.api.get('/product');
-            const data = response as ApiListResponse<ProductItem>;
-            return this.loadSelectedFromStorage(data.items);
-        } catch (error) {
-            console.error(error);
-            return [];
-        }
-    }
 
     saveSelectedToStorage(): void {
         const selectedState = this.products.map(product => ({

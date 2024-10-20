@@ -1,20 +1,13 @@
 import {ProductItem} from "../types";
 import {CardsModel} from "./cards";
+import {ModalBase} from "./modalBase";
 
-export class CardsView {
-    private popup: HTMLElement;
-    private popupContent: HTMLElement;
-    private readonly closeButton: HTMLElement;
+export class CardsView extends ModalBase { // Наследуем от ModalBase
     model: CardsModel;
 
     constructor(popupSelector: string, closeSelector: string, model: CardsModel) {
-        this.popup = document.querySelector(popupSelector) as HTMLElement;
-        this.popupContent = this.popup.querySelector('.modal__content') as HTMLElement;
-        this.closeButton = this.popup.querySelector(closeSelector);
+        super(popupSelector, closeSelector); // Вызываем конструктор ModalBase
         this.model = model;
-        if (this.closeButton) {
-            this.closeButton.addEventListener('click', () => this.popup.classList.remove('modal_active'));
-        }
     }
 
     openPopup(product: ProductItem, toggleProductInCart: (product: ProductItem) => void): void {
@@ -30,8 +23,8 @@ export class CardsView {
             });
         }
 
-        this.popupContent.innerHTML = '';
-        this.popupContent.appendChild(popupClone);
-        this.popup.classList.add('modal_active');
+        this.content.innerHTML = ''; // Используем this.content из ModalBase
+        this.content.appendChild(popupClone);
+        this.open(); // Используем метод open из ModalBase
     }
 }

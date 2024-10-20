@@ -10,6 +10,9 @@ export class ModalBase {
         if (this.closeButton) {
             this.closeButton.addEventListener('click', () => this.close());
         }
+
+        // Добавляем обработчик события keydown на документ
+        document.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
 
     open(totalPrice?: number): void {
@@ -18,5 +21,12 @@ export class ModalBase {
 
     close(): void {
         this.modal.classList.remove('modal_active');
+    }
+
+    // Обработчик события keydown
+    private handleKeyDown(event: KeyboardEvent): void {
+        if (event.key === 'Escape') {
+            this.close();
+        }
     }
 }

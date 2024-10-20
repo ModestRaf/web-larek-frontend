@@ -2,22 +2,22 @@ import {ContactsModal} from "./contacts";
 import {OrderModel} from "./order";
 import {ModalBase} from "./modalBase";
 
-export class OrderView extends ModalBase {
+export class OrderView extends ModalBase { // Наследуем от ModalBase
     private contentTemplate: HTMLTemplateElement;
     private orderTemplate: HTMLTemplateElement;
     private model: OrderModel;
 
     constructor(modalId: string, contentTemplateId: string, model: OrderModel) {
-        super(`#${modalId}`, '.modal__close');
+        super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
         this.model = model;
     }
 
     open(totalPrice: number): void {
-        super.open(totalPrice);
+        super.open(totalPrice); // Используем метод open из ModalBase
         const orderClone = document.importNode(this.orderTemplate.content, true);
-        this.content.innerHTML = '';
+        this.content.innerHTML = ''; // Используем this.content из ModalBase
         this.content.appendChild(orderClone);
         this.setupPaymentButtons();
         this.setupAddressField();
@@ -53,7 +53,7 @@ export class OrderView extends ModalBase {
 
         nextButton.addEventListener('click', () => {
             if (this.model.validateAddressField(addressField, nextButton, formErrors)) {
-                this.close();
+                this.close(); // Используем метод close из ModalBase
                 new ContactsModal('modal-container', 'contacts').open(totalPrice);
             }
         });

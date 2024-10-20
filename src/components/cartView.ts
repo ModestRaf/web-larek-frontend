@@ -1,10 +1,10 @@
-import {CartItem, CartModal} from "../types";
+import {CartItem} from "../types";
 import {CartModel} from "./cart";
 import {OrderView} from "./orderAddress";
 import {OrderModel} from "./order";
 import {ModalBase} from "./modalBase";
 
-export class CartView extends ModalBase implements CartModal {
+export class CartView extends ModalBase { // Наследуем от ModalBase
     private contentTemplate: HTMLTemplateElement;
     private orderView: OrderView;
     private cartTemplate: HTMLTemplateElement;
@@ -12,7 +12,7 @@ export class CartView extends ModalBase implements CartModal {
     private model: CartModel;
 
     constructor(modalId: string, contentTemplateId: string, model: CartModel, orderModel: OrderModel) {
-        super(`#${modalId}`, '.modal__close');
+        super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderView = new OrderView('modal-container', 'order', orderModel);
         this.cartTemplate = document.querySelector('#basket') as HTMLTemplateElement;
@@ -21,9 +21,9 @@ export class CartView extends ModalBase implements CartModal {
     }
 
     open(): void {
-        super.open();
+        super.open(); // Используем метод open из ModalBase
         const cartClone = document.importNode(this.cartTemplate.content, true);
-        this.content.innerHTML = '';
+        this.content.innerHTML = ''; // Используем this.content из ModalBase
         this.content.appendChild(cartClone);
         this.renderBasketItems();
         const checkoutButton = this.modal.querySelector('.basket__button') as HTMLElement;
@@ -74,6 +74,4 @@ export class CartView extends ModalBase implements CartModal {
 
         return clone;
     }
-
-    items: CartItem[];
 }

@@ -28,8 +28,7 @@ export class ProductListView {
         this.cartModel.setProductList(this);
     }
 
-    async loadProducts(): Promise<void> {
-        this.model.products = await this.model.loadProducts();
+    loadProducts(): void {
         this.renderProducts(this.model.products);
         this.updateBasketCounter();
         this.renderBasketItems();
