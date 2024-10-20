@@ -1,4 +1,4 @@
-import {ProductListModel} from "./larekApi";
+import {ProductListModel} from "./ProductList";
 import {CartView} from "./cartView";
 import {CartModel} from "./cart";
 import {CardsModel} from "./cards";
@@ -11,7 +11,6 @@ export class SuccessModal extends ModalBase { // Наследуем от ModalBa
     private contentTemplate: HTMLTemplateElement;
     private readonly totalPrice: number;
     private successTemplate: HTMLTemplateElement;
-
     constructor(modalId: string, contentTemplateId: string, totalPrice: number) {
         super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
         this.contentTemplate = document.getElementById(contentTemplateId) as HTMLTemplateElement;
@@ -25,10 +24,8 @@ export class SuccessModal extends ModalBase { // Наследуем от ModalBa
         this.content.innerHTML = ''; // Используем this.content из ModalBase
         this.content.appendChild(successClone);
         this.modal.classList.add('modal_active'); // Используем this.modal из ModalBase
-
         const successDescription = this.modal.querySelector('.order-success__description') as HTMLElement;
         successDescription.textContent = `Списано ${this.totalPrice} синапсов`;
-
         const closeButton = this.modal.querySelector('.order-success__close') as HTMLButtonElement;
         closeButton.addEventListener('click', () => {
             this.close(); // Закрываем текущее модальное окно
@@ -50,15 +47,12 @@ export class SuccessModal extends ModalBase { // Наследуем от ModalBa
             cardsView,
             productListModel
         );
-
         // Очищаем корзину и обновляем счетчик
         productListModel.products.forEach(product => {
             product.selected = false;
         });
         productListModel.saveSelectedToStorage();
         productListView.updateBasketCounter();
-        productListView.renderBasketItems();
-
         // Очищаем содержимое корзины
         basketModal.renderBasketItems();
     }

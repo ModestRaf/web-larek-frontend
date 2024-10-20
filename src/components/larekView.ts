@@ -2,7 +2,7 @@ import {ProductItem} from "../types";
 import {CartView} from "./cartView";
 import {CartModel} from "./cart";
 import {CardsView} from "./cardsView";
-import {ProductListModel} from "./larekApi";
+import {ProductListModel} from "./ProductList";
 
 export class ProductListView {
     private container: HTMLElement;
@@ -31,7 +31,6 @@ export class ProductListView {
     loadProducts(): void {
         this.renderProducts(this.model.products);
         this.updateBasketCounter();
-        this.renderBasketItems();
     }
 
     renderProducts(products: ProductItem[]): void {
@@ -48,25 +47,17 @@ export class ProductListView {
         this.basketCounter.textContent = selectedProductsCount.toString();
     }
 
-    renderBasketItems(): void {
-        const selectedProducts = this.model.products.filter(product => product.selected);
-        this.cartModel.items = selectedProducts.map(product => ({
-            id: product.id,
-            title: product.title,
-            price: product.price,
-        }));
-        this.basketModal.renderBasketItems();
-    }
-
     toggleProductInCart(product: ProductItem): void {
         this.model.toggleProductInCart(product);
         this.updateBasketCounter();
-        this.renderBasketItems();
+        this.cartModel.updateCartItems(this.model.products);
+        this.basketModal.renderBasketItems();
     }
 
     removeProductFromCart(productId: string): void {
         this.model.removeProductFromCart(productId);
         this.updateBasketCounter();
-        this.renderBasketItems();
+        this.cartModel.updateCartItems(this.model.products);
+        this.basketModal.renderBasketItems();
     }
 }

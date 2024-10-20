@@ -25,7 +25,6 @@ export class ContactsModal extends ModalBase { // Наследуем от ModalB
         const phoneField = this.modal.querySelector('input[name="phone"]') as HTMLInputElement;
         const payButton = this.modal.querySelector('.button') as HTMLButtonElement;
         const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
-
         const checkFields = () => {
             const emailValue = emailField.value.trim();
             const phoneValue = phoneField.value.trim();

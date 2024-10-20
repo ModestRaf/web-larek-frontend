@@ -66,12 +66,10 @@ export class CartView extends ModalBase { // Наследуем от ModalBase
         const itemTitle = clone.querySelector('.card__title') as HTMLElement;
         const itemPrice = clone.querySelector('.card__price') as HTMLElement;
         const deleteButton = clone.querySelector('.basket__item-delete') as HTMLElement;
-
         itemIndex.textContent = index.toString();
         itemTitle.textContent = item.title;
         itemPrice.textContent = item.price === null ? 'Бесценно' : `${item.price} синапсов`;
         deleteButton.addEventListener('click', () => this.model.removeBasketItem(item.id));
-
         return clone;
     }
 }

@@ -1,4 +1,4 @@
-import {CartItem} from "../types";
+import {CartItem, ProductItem} from "../types";
 import {ProductListView} from "./larekView";
 
 export class CartModel {
@@ -14,6 +14,14 @@ export class CartModel {
         if (this.productList) {
             this.productList.removeProductFromCart(itemId);
         }
+    }
+
+    updateCartItems(products: ProductItem[]): void {
+        this.items = products.filter(product => product.selected).map(product => ({
+            id: product.id,
+            title: product.title,
+            price: product.price,
+        }));
     }
 
     getTotalPrice(): number {

@@ -6,7 +6,7 @@ import {CartView} from "./components/cartView";
 import {CardsView} from "./components/cardsView";
 import {CardsModel} from "./components/cards";
 import {ProductListView} from "./components/larekView";
-import {ProductListModel} from "./components/larekApi";
+import {ProductListModel} from "./components/ProductList";
 import {OrderModel} from "./components/order";
 import {SuccessModal} from "./components/orderSuccess";
 import {ProductItem} from "./types";
@@ -26,7 +26,6 @@ async function loadProducts(api: Api): Promise<ProductItem[]> {
 document.addEventListener('DOMContentLoaded', async () => {
     const api = new Api(API_URL);
     const products = await loadProducts(api);
-
     const cartModel = new CartModel();
     const orderModel = new OrderModel('modal-container', 'order');
     const basketModal = new CartView('modal-container', 'basket', cartModel, orderModel);
@@ -37,10 +36,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeSelector = '.modal__close';
     const cardsModel = new CardsModel(cardTemplateId, popupTemplateId);
     const cardsView = new CardsView(popupSelector, closeSelector, cardsModel);
-
     const productListModel = new ProductListModel();
     productListModel.products = productListModel.loadSelectedFromStorage(products); // Передаем загруженные продукты в ProductListModel
-
     const productListView = new ProductListView(
         containerId,
         basketModal,
@@ -50,10 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
     cartModel.setProductList(productListView);
     productListView.loadProducts();
-
     const basketButton = document.querySelector('.header__basket');
     basketButton.addEventListener('click', () => basketModal.open());
-
     const successModal = new SuccessModal('modal-container', 'success', 100); // Замените 100 на реальную сумму
     const successButton = document.querySelector('.order-success__close');
     successButton.addEventListener('click', () => {
