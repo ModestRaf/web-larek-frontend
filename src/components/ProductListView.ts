@@ -1,23 +1,22 @@
 import {ProductItem} from "../types";
 import {CartView} from "./cartView";
-import {CartModel} from "./cart";
+import {Cart} from "./cart";
 import {CardsView} from "./cardsView";
-import {ProductListModel} from "./ProductList";
+import {ProductList} from "./ProductList";
 
 export class ProductListView {
     private container: HTMLElement;
     private basketCounter: HTMLElement;
     private basketModal: CartView;
-    private cartModel: CartModel;
+    private cartModel: Cart;
     private cardsView: CardsView;
-    private model: ProductListModel;
-
+    private model: ProductList;
     constructor(
         containerId: string,
         basketModal: CartView,
-        cartModel: CartModel,
+        cartModel: Cart,
         cardsView: CardsView,
-        model: ProductListModel
+        model: ProductList
     ) {
         this.container = document.querySelector(`#${containerId}`) as HTMLElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
@@ -33,7 +32,7 @@ export class ProductListView {
         products.forEach(product => {
             const card = this.cardsView.model.createProductCard(product);
             this.container.appendChild(card);
-            card.addEventListener('click', () => this.cardsView.openPopup(product, this.toggleProductInCart.bind(this)));
+            card.addEventListener('click', () => this.cardsView.openPopup(product, () => this.toggleProductInCart(product)));
         });
     }
 
@@ -41,17 +40,6 @@ export class ProductListView {
         this.basketCounter.textContent = selectedProductsCount.toString();
     }
 
-    toggleProductInCart(product: ProductItem): void {
-        this.model.toggleProductInCart(product);
-        this.updateBasketCounter(this.model.products.filter(p => p.selected).length);
-        this.cartModel.updateCartItems(this.model.products);
-        this.basketModal.renderBasketItems();
-    }
-
-    removeProductFromCart(productId: string): void {
-        this.model.removeProductFromCart(productId);
-        this.updateBasketCounter(this.model.products.filter(p => p.selected).length);
-        this.cartModel.updateCartItems(this.model.products);
-        this.basketModal.renderBasketItems();
-    }
+    toggleProductInCart: (product: ProductItem) => void;
+    removeProductFromCart: (productId: string) => void;
 }

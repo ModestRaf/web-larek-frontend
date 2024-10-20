@@ -1,9 +1,9 @@
 import {CartItem, ProductItem} from "../types";
-import {ProductListView} from "./larekView";
+import {ProductListView} from "./ProductListView";
 
-export class CartModel {
+export class Cart {
     items: CartItem[] = [];  // Массив товаров в корзине
-    private productList: ProductListView | null = null; // Добавляем ссылку на ProductListView
+    private productList: ProductListView | null = null;
 
     setProductList(productList: ProductListView): void {
         this.productList = productList;

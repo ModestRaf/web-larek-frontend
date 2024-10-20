@@ -1,14 +1,14 @@
 import {ContactsModal} from "./contacts";
-import {OrderModel} from "./order";
+import {Order} from "./order";
 import {ModalBase} from "./modalBase";
 
-export class OrderView extends ModalBase { // Наследуем от ModalBase
+export class OrderView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private orderTemplate: HTMLTemplateElement;
-    private model: OrderModel;
+    private model: Order;
 
-    constructor(modalId: string, contentTemplateId: string, model: OrderModel) {
-        super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
+    constructor(modalId: string, contentTemplateId: string, model: Order) {
+        super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
         this.model = model;
@@ -40,7 +40,6 @@ export class OrderView extends ModalBase { // Наследуем от ModalBase
         const addressField = this.modal.querySelector('input[name="address"]') as HTMLInputElement;
         const nextButton = this.modal.querySelector('.order__button') as HTMLButtonElement;
         const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
-
         addressField.addEventListener('input', () => {
             this.model.validateAddressField(addressField, nextButton, formErrors);
         });
@@ -50,7 +49,6 @@ export class OrderView extends ModalBase { // Наследуем от ModalBase
         const nextButton = this.modal.querySelector('.order__button') as HTMLButtonElement;
         const addressField = this.modal.querySelector('input[name="address"]') as HTMLInputElement;
         const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
-
         nextButton.addEventListener('click', () => {
             if (this.model.validateAddressField(addressField, nextButton, formErrors)) {
                 this.close(); // Используем метод close из ModalBase

@@ -1,12 +1,12 @@
 import {ProductItem} from "../types";
-import {CardsModel} from "./cards";
+import {Cards} from "./cards";
 import {ModalBase} from "./modalBase";
 
-export class CardsView extends ModalBase { // Наследуем от ModalBase
-    model: CardsModel;
+export class CardsView extends ModalBase {
+    model: Cards;
 
-    constructor(popupSelector: string, closeSelector: string, model: CardsModel) {
-        super(popupSelector, closeSelector); // Вызываем конструктор ModalBase
+    constructor(popupSelector: string, closeSelector: string, model: Cards) {
+        super(popupSelector, closeSelector);
         this.model = model;
     }
 
@@ -22,9 +22,8 @@ export class CardsView extends ModalBase { // Наследуем от ModalBase
                 this.model.updateCardContent(popupCard, product);
             });
         }
-
-        this.content.innerHTML = ''; // Используем this.content из ModalBase
+        this.content.innerHTML = '';
         this.content.appendChild(popupClone);
-        this.open(); // Используем метод open из ModalBase
+        this.open();
     }
 }

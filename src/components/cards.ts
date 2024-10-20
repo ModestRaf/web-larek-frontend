@@ -1,7 +1,7 @@
 import { ProductItem } from "../types";
 import { CDN_URL } from "../utils/constants";
 
-export class CardsModel {
+export class Cards {
     private cardTemplate: HTMLTemplateElement;
     popupTemplate: HTMLTemplateElement;
 

@@ -1,13 +1,13 @@
 import './scss/styles.scss';
 import {Api, ApiListResponse} from "./components/base/api";
 import {API_URL} from "./utils/constants";
-import {CartModel} from "./components/cart";
+import {Cart} from "./components/cart";
 import {CartView} from "./components/cartView";
 import {CardsView} from "./components/cardsView";
-import {CardsModel} from "./components/cards";
-import {ProductListView} from "./components/larekView";
-import {ProductListModel} from "./components/ProductList";
-import {OrderModel} from "./components/order";
+import {Cards} from "./components/cards";
+import {ProductListView} from "./components/ProductListView";
+import {ProductList} from "./components/ProductList";
+import {Order} from "./components/order";
 import {SuccessModal} from "./components/orderSuccess";
 import {ProductItem} from "./types";
 
@@ -26,52 +26,52 @@ async function loadProducts(api: Api): Promise<ProductItem[]> {
 document.addEventListener('DOMContentLoaded', async () => {
     const api = new Api(API_URL);
     const products = await loadProducts(api);
-    const cartModel = new CartModel();
-    const orderModel = new OrderModel('modal-container', 'order');
-    const basketModal = new CartView('modal-container', 'basket', cartModel, orderModel);
+    const cart = new Cart();
+    const orderModel = new Order('modal-container', 'order');
+    const basketModal = new CartView('modal-container', 'basket', cart, orderModel);
     const containerId = 'gallery';
     const cardTemplateId = 'card-catalog';
     const popupSelector = '.modal';
     const popupTemplateId = 'card-preview';
     const closeSelector = '.modal__close';
-    const cardsModel = new CardsModel(cardTemplateId, popupTemplateId);
-    const cardsView = new CardsView(popupSelector, closeSelector, cardsModel);
-    const productListModel = new ProductListModel();
-    productListModel.products = productListModel.loadSelectedFromStorage(products); // Передаем загруженные продукты в ProductListModel
+    const cards = new Cards(cardTemplateId, popupTemplateId);
+    const cardsView = new CardsView(popupSelector, closeSelector, cards);
+    const productList = new ProductList();
+    productList.products = productList.loadSelectedFromStorage(products); // Передаем загруженные продукты в ProductList
     const productListView = new ProductListView(
         containerId,
         basketModal,
-        cartModel,
+        cart,
         cardsView,
-        productListModel
+        productList
     );
-    cartModel.setProductList(productListView);
+    cart.setProductList(productListView);
 
     // Логика загрузки продуктов
     function loadProductsLogic(): void {
-        productListView.renderProducts(productListModel.products);
+        productListView.renderProducts(productList.products);
         updateBasketCounter();
     }
 
     // Логика обновления счетчика корзины
     function updateBasketCounter(): void {
-        const selectedProductsCount = productListModel.products.filter(product => product.selected).length;
+        const selectedProductsCount = productList.products.filter(product => product.selected).length;
         productListView.updateBasketCounter(selectedProductsCount);
     }
 
     // Логика переключения продукта в корзине
     function toggleProductInCart(product: ProductItem): void {
-        productListModel.toggleProductInCart(product);
+        productList.toggleProductInCart(product);
         updateBasketCounter();
-        cartModel.updateCartItems(productListModel.products);
+        cart.updateCartItems(productList.products);
         basketModal.renderBasketItems();
     }
 
     // Логика удаления продукта из корзины
     function removeProductFromCart(productId: string): void {
-        productListModel.removeProductFromCart(productId);
+        productList.removeProductFromCart(productId);
         updateBasketCounter();
-        cartModel.updateCartItems(productListModel.products);
+        cart.updateCartItems(productList.products);
         basketModal.renderBasketItems();
     }
 

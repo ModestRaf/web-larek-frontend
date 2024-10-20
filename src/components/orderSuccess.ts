@@ -1,10 +1,10 @@
-import {ProductListModel} from "./ProductList";
+import {ProductList} from "./ProductList";
 import {CartView} from "./cartView";
-import {CartModel} from "./cart";
-import {CardsModel} from "./cards";
+import {Cart} from "./cart";
+import {Cards} from "./cards";
 import {CardsView} from "./cardsView";
-import {ProductListView} from "./larekView";
-import {OrderModel} from "./order";
+import {ProductListView} from "./ProductListView";
+import {Order} from "./order";
 import {ModalBase} from "./modalBase";
 
 export class SuccessModal extends ModalBase { // Наследуем от ModalBase
@@ -35,12 +35,12 @@ export class SuccessModal extends ModalBase { // Наследуем от ModalBa
     }
 
     clearBasket(): void {
-        const cartModel = new CartModel();
-        const orderModel = new OrderModel('modal-container', 'order');
+        const cartModel = new Cart();
+        const orderModel = new Order('modal-container', 'order');
         const basketModal = new CartView('modal-container', 'basket', cartModel, orderModel);
-        const cardsModel = new CardsModel('card-catalog', 'card-preview');
+        const cardsModel = new Cards('card-catalog', 'card-preview');
         const cardsView = new CardsView('.modal', '.modal__close', cardsModel);
-        const productListModel = new ProductListModel();
+        const productListModel = new ProductList();
         const productListView = new ProductListView(
             'gallery',
             basketModal,

@@ -1,12 +1,12 @@
 import {SuccessModal} from "./orderSuccess";
 import {ModalBase} from "./modalBase";
 
-export class ContactsModal extends ModalBase { // Наследуем от ModalBase
+export class ContactsModal extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
 
     constructor(modalId: string, contentTemplateId: string) {
-        super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
+        super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
     }
@@ -28,7 +28,6 @@ export class ContactsModal extends ModalBase { // Наследуем от ModalB
         const checkFields = () => {
             const emailValue = emailField.value.trim();
             const phoneValue = phoneField.value.trim();
-
             if (emailValue === '' && phoneValue === '') {
                 formErrors.textContent = 'Необходимо ввести email и номер телефона';
                 formErrors.classList.add('form__errors_visible');
@@ -47,10 +46,10 @@ export class ContactsModal extends ModalBase { // Наследуем от ModalB
                 payButton.disabled = false;
             }
         };
-
         emailField.addEventListener('input', checkFields);
         phoneField.addEventListener('input', checkFields);
     }
+
     setupPayButton(totalPrice: number): void {
         const payButton = this.modal.querySelector('.button') as HTMLButtonElement;
         payButton.addEventListener('click', () => {

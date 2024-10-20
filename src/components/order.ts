@@ -1,4 +1,4 @@
-export class OrderModel {
+export class Order {
     modal: HTMLElement;
     private contentTemplate: HTMLTemplateElement;
     orderTemplate: HTMLTemplateElement;
