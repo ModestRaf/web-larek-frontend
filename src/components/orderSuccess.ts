@@ -11,6 +11,7 @@ export class SuccessModal extends ModalBase { // Наследуем от ModalBa
     private contentTemplate: HTMLTemplateElement;
     private readonly totalPrice: number;
     private successTemplate: HTMLTemplateElement;
+
     constructor(modalId: string, contentTemplateId: string, totalPrice: number) {
         super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
         this.contentTemplate = document.getElementById(contentTemplateId) as HTMLTemplateElement;
@@ -52,7 +53,8 @@ export class SuccessModal extends ModalBase { // Наследуем от ModalBa
             product.selected = false;
         });
         productListModel.saveSelectedToStorage();
-        productListView.updateBasketCounter();
+        const selectedProductsCount = productListModel.products.filter(product => product.selected).length;
+        productListView.updateBasketCounter(selectedProductsCount); // Передаем правильное количество аргументов
         // Очищаем содержимое корзины
         basketModal.renderBasketItems();
     }

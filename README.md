@@ -52,7 +52,6 @@ yarn build
 
 ## Архитектура приложения
 Приложение построено на основе архитектуры MVP (Model-View-Presenter), которая состоит из трех слоев:
-
 - Модель (Model): Отвечает за логику данных, включая хранение и манипуляцию данными продуктов и корзины.
 - Представление (View): Компоненты интерфейса, отвечающие за отображение данных и реагирование на действия пользователя.
 - Презентер (Presenter): Связывает модель и представление, обрабатывая пользовательский ввод и обновляя представление на
@@ -93,27 +92,21 @@ price: number;            Цена товара
 - removeProductFromCart(productId: string): void — удаляет продукт из корзины.
 
 #### CartModel
-
 ##### Данные:
-
 - items: CartItem[] — список товаров в корзине.
 - productList: ProductList | null — ссылка на ProductList.
-
 ##### Методы:
-
 - setProductList(productList: ProductListView): void — устанавливает ссылку на ProductListView.
 - removeBasketItem(itemId: string): void — удаляет товар из корзины.
 - updateCartItems(products: ProductItem[]): void — обновляет содержимое корзины.
 - getTotalPrice(): number — возвращает общую стоимость товаров в корзине.
 
 ### Слой Представление (View)
-
 Компоненты интерфейса взаимодействуют с пользователем и предоставляют ему визуальную обратную связь.
 
 Основные классы:
 
 #### CartModal
-
 представляет модальное окно корзины и определяет методы open() и close().
 для сущности Корзина (CartModal)
 
@@ -125,10 +118,8 @@ items: CartItem[];         Список товаров в корзине
 
 #### CardsModel
 ##### Данные:
-
 - cardTemplate: HTMLTemplateElement — шаблон карточки товара.
 - popupTemplate: HTMLTemplateElement — шаблон модального окна.
-
 ##### Методы:
 - createProductCard(product: ProductItem): HTMLElement — создает карточку товара.
 - updateCardContent(productCard: HTMLElement, product: ProductItem): void — обновляет содержимое карточки товара.
@@ -136,62 +127,48 @@ items: CartItem[];         Список товаров в корзине
 
 #### CardsView
 ##### Данные:
-
 - model: CardsModel — модель карточек товара.
 ##### Методы:
-
 - openPopup(product: ProductItem, toggleProductInCart: (product: ProductItem) => void): void — открывает модальное окно
   с подробной информацией о товаре.
 
 #### OrderView
 ##### Данные:
-
 - model: OrderModel — модель заказа.
 ##### Методы:
-
 - open(totalPrice: number): void — открывает модальное окно оформления заказа.
 - setupPaymentButtons(): void — настраивает кнопки выбора способа оплаты.
 - setupAddressField(): void — настраивает поле ввода адреса доставки.
 - setupNextButton(totalPrice: number): void — настраивает кнопку "Далее".
 
 #### ContactsModal
-
 ##### Данные:
-
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна.
 - contactsTemplate: HTMLTemplateElement — шаблон контактной информации.
-
 ##### Методы:
-
 - open(totalPrice: number): void — открывает модальное окно контактной информации.
 - setupContactFields(): void — настраивает поля ввода email и телефона.
 - setupPayButton(totalPrice: number): void — настраивает кнопку оплаты.
 
 #### SuccessModal
-
 ##### Данные:
-
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна.
 - successTemplate: HTMLTemplateElement — шаблон успешного завершения заказа.
 - totalPrice: number — общая стоимость заказа.
 
 ##### Методы:
-
 - open(): void — открывает модальное окно успешного завершения заказа.
 - close(): void — закрывает модальное окно успешного завершения заказа.
 - clearBasket(): void — очищает корзину.
 
 ### Слой Презентер (Presenter)
-
 Презентер управляет логикой взаимодействия между моделью и представлением, обрабатывая события и вызывая соответствующие
 методы модели. Основная задача презентера — обработка событий, исходящих от представления,
 обновление модели на основе действий пользователя и обновление представления на основе изменений в модели.
 
 ##### Пользовательские события
-
 addEventListener используется для установки обработчиков событий на элементы интерфейса, такие как клики по кнопкам для
 открытия корзины и загрузки товаров.
-
 - click на кнопку "Закрыть" для закрытия модального окна
 - click на кнопку "Добавить в корзину" в карточке товара.
 - click на кнопку "Убрать" в карточке товара.
@@ -202,18 +179,14 @@ addEventListener используется для установки обрабо
 - input в полях email и телефона в модальном окне контактной информации.
 
 #### ProductListView
-
 ##### Данные:
-
 - container: HTMLElement — контейнер для отображения продуктов.
 - basketCounter: HTMLElement — элемент для отображения счетчика корзины.
 - basketModal: CartView — модальное окно корзины.
 - cartModel: CartModel — модель корзины.
 - cardsView: CardsView — представление карточек товара.
 - model: ProductListModel — модель списка продуктов.
-
 ##### Методы:
-
 - loadProducts(): void — загружает и отображает продукты на странице.
 - renderProducts(products: ProductItem[]): void — отображает продукты на странице.
 - updateBasketCounter(): void — обновляет счетчик корзины.

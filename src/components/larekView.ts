@@ -28,11 +28,6 @@ export class ProductListView {
         this.cartModel.setProductList(this);
     }
 
-    loadProducts(): void {
-        this.renderProducts(this.model.products);
-        this.updateBasketCounter();
-    }
-
     renderProducts(products: ProductItem[]): void {
         this.container.innerHTML = '';
         products.forEach(product => {
@@ -42,21 +37,20 @@ export class ProductListView {
         });
     }
 
-    updateBasketCounter(): void {
-        const selectedProductsCount = this.model.products.filter(product => product.selected).length;
+    updateBasketCounter(selectedProductsCount: number): void {
         this.basketCounter.textContent = selectedProductsCount.toString();
     }
 
     toggleProductInCart(product: ProductItem): void {
         this.model.toggleProductInCart(product);
-        this.updateBasketCounter();
+        this.updateBasketCounter(this.model.products.filter(p => p.selected).length);
         this.cartModel.updateCartItems(this.model.products);
         this.basketModal.renderBasketItems();
     }
 
     removeProductFromCart(productId: string): void {
         this.model.removeProductFromCart(productId);
-        this.updateBasketCounter();
+        this.updateBasketCounter(this.model.products.filter(p => p.selected).length);
         this.cartModel.updateCartItems(this.model.products);
         this.basketModal.renderBasketItems();
     }
