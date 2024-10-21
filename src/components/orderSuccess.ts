@@ -1,61 +1,36 @@
-import {ProductList} from "./ProductList";
-import {CartView} from "./cartView";
-import {Cart} from "./cart";
-import {Cards} from "./cards";
-import {CardsView} from "./cardsView";
-import {ProductListView} from "./ProductListView";
-import {Order} from "./order";
 import {ModalBase} from "./modalBase";
 
-export class SuccessModal extends ModalBase { // Наследуем от ModalBase
+export class SuccessModal extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private readonly totalPrice: number;
     private successTemplate: HTMLTemplateElement;
 
     constructor(modalId: string, contentTemplateId: string, totalPrice: number) {
-        super(`#${modalId}`, '.modal__close'); // Вызываем конструктор ModalBase
+        super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.getElementById(contentTemplateId) as HTMLTemplateElement;
         this.totalPrice = totalPrice;
         this.successTemplate = document.getElementById('success') as HTMLTemplateElement;
     }
 
     open(): void {
-        super.open(); // Используем метод open из ModalBase
+        super.open();
         const successClone = document.importNode(this.successTemplate.content, true);
-        this.content.innerHTML = ''; // Используем this.content из ModalBase
+        this.content.innerHTML = '';
         this.content.appendChild(successClone);
-        this.modal.classList.add('modal_active'); // Используем this.modal из ModalBase
+        this.modal.classList.add('modal_active');
+
         const successDescription = this.modal.querySelector('.order-success__description') as HTMLElement;
         successDescription.textContent = `Списано ${this.totalPrice} синапсов`;
+
         const closeButton = this.modal.querySelector('.order-success__close') as HTMLButtonElement;
         closeButton.addEventListener('click', () => {
-            this.close(); // Закрываем текущее модальное окно
-            this.clearBasket(); // Очищаем корзину
+            this.close();
+            this.onSuccessClose();
         });
     }
 
-    clearBasket(): void {
-        const cartModel = new Cart();
-        const orderModel = new Order('modal-container', 'order');
-        const basketModal = new CartView('modal-container', 'basket', cartModel, orderModel);
-        const cardsModel = new Cards('card-catalog', 'card-preview');
-        const cardsView = new CardsView('.modal', '.modal__close', cardsModel);
-        const productListModel = new ProductList();
-        const productListView = new ProductListView(
-            'gallery',
-            basketModal,
-            cartModel,
-            cardsView,
-            productListModel
-        );
-        // Очищаем корзину и обновляем счетчик
-        productListModel.products.forEach(product => {
-            product.selected = false;
-        });
-        productListModel.saveSelectedToStorage();
-        const selectedProductsCount = productListModel.products.filter(product => product.selected).length;
-        productListView.updateBasketCounter(selectedProductsCount); // Передаем правильное количество аргументов
-        // Очищаем содержимое корзины
-        basketModal.renderBasketItems();
+    private onSuccessClose(): void {
+        const event = new CustomEvent('orderSuccessClosed', {bubbles: true});
+        this.modal.dispatchEvent(event);
     }
 }

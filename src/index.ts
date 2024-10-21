@@ -8,8 +8,8 @@ import {Cards} from "./components/cards";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
-import {SuccessModal} from "./components/orderSuccess";
 import {ProductItem} from "./types";
+import {SuccessModal} from "./components/orderSuccess";
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         productList
     );
     cart.setProductList(productListView);
+    cart.setCartView(basketModal);  // Linking CartView for basket rendering
 
     // Логика загрузки продуктов
     function loadProductsLogic(): void {
@@ -64,7 +65,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         productList.toggleProductInCart(product);
         updateBasketCounter();
         cart.updateCartItems(productList.products);
-        basketModal.renderBasketItems();
     }
 
     // Логика удаления продукта из корзины
@@ -72,7 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         productList.removeProductFromCart(productId);
         updateBasketCounter();
         cart.updateCartItems(productList.products);
-        basketModal.renderBasketItems();
     }
 
     // Привязка логики к представлению
@@ -84,10 +83,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const basketButton = document.querySelector('.header__basket');
     basketButton.addEventListener('click', () => basketModal.open());
-    const successModal = new SuccessModal('modal-container', 'success', 100); // Замените 100 на реальную сумму
-    const successButton = document.querySelector('.order-success__close');
-    successButton.addEventListener('click', () => {
-        successModal.close();
-        successModal.clearBasket();
+
+    // Обработка закрытия модального окна после успешного оформления заказа
+    document.addEventListener('orderSuccessClosed', () => {
+        cart.clearCart(); // Clear the cart after the order is successful
+        productList.clearSelectedProducts(); // Clear selected products in ProductList
+        updateBasketCounter(); // Обновляем счетчик корзины после очистки
+        productListView.renderProducts(productList.products); // Обновляем отображение продуктов
     });
+
+    // Обработка события успешного оформления заказа
+    document.addEventListener('orderSuccess', (event: CustomEvent) => {
+        const totalPrice = event.detail.totalPrice;
+        const successModal = new SuccessModal('modal-container', 'success', totalPrice);
+        successModal.open();
+    });
+
+    // Восстановление состояния корзины после перезагрузки страницы
+    cart.updateCartItems(productList.products);
 });

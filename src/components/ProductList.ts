@@ -41,4 +41,9 @@ export class ProductList {
             this.saveSelectedToStorage();
         }
     }
+
+    clearSelectedProducts(): void {
+        this.products.forEach(product => product.selected = false);
+        this.saveSelectedToStorage();
+    }
 }
