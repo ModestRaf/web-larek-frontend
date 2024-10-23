@@ -26,8 +26,9 @@ async function loadProducts(api: Api): Promise<ProductItem[]> {
 // Отправка заказа на сервер
 async function submitOrder(api: Api, order: IOrder): Promise<IOrderResult> {
     try {
+        console.log('Отправка заказа на сервер:', JSON.stringify(order, null, 2)); // Лог перед отправкой заказа
         const response = await api.post('/order', order, 'POST') as IOrderResult;
-        console.log('Ответ сервера:', JSON.stringify(response));
+        console.log('Ответ сервера:', JSON.stringify(response, null, 2)); // Лог ответа сервера
         return response;
     } catch (error) {
         console.error('Ошибка при отправке заказа:', error.message || error.response?.data || error);

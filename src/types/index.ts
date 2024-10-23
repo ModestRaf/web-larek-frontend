@@ -9,15 +9,6 @@ export interface ProductItem {
     selected: boolean;
 }
 
-// Тип для сущности Корзина (CartModel)
-export interface CartModal {
-    open(): void;
-
-    close(): void;
-
-    items: CartItem[];        // Массив товаров в корзине
-}
-
 // Тип для сущности Элемент корзины (CartItem)
 export interface CartItem {
     id: string;               // Уникальный идентификатор товара
