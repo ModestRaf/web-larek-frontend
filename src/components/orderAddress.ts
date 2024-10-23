@@ -1,23 +1,30 @@
 import {ContactsModal} from "./contacts";
 import {Order} from "./order";
 import {ModalBase} from "./modalBase";
+import {SuccessModal} from "./orderSuccess";
 
 export class OrderView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private orderTemplate: HTMLTemplateElement;
     private model: Order;
+    private successModal: SuccessModal;
+    private selectedPaymentMethod: string;
+    public formSubmitHandler: (event: Event) => void; // Add formSubmitHandler
 
-    constructor(modalId: string, contentTemplateId: string, model: Order) {
+    constructor(modalId: string, contentTemplateId: string, model: Order, successModal: SuccessModal, formSubmitHandler: (event: Event) => void) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
         this.model = model;
+        this.successModal = successModal;
+        this.selectedPaymentMethod = 'card';
+        this.formSubmitHandler = formSubmitHandler; // Assign formSubmitHandler
     }
 
     open(totalPrice: number): void {
-        super.open(totalPrice); // Используем метод open из ModalBase
+        super.open(totalPrice);
         const orderClone = document.importNode(this.orderTemplate.content, true);
-        this.content.innerHTML = ''; // Используем this.content из ModalBase
+        this.content.innerHTML = '';
         this.content.appendChild(orderClone);
         this.setupPaymentButtons();
         this.setupAddressField();
@@ -31,7 +38,10 @@ export class OrderView extends ModalBase {
         paymentButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
-                (event.target as HTMLElement).classList.add('button_alt-active');
+                const selectedButton = event.target as HTMLElement;
+                selectedButton.classList.add('button_alt-active');
+                this.selectedPaymentMethod = selectedButton.getAttribute('name');
+                this.model.setPaymentMethod(this.selectedPaymentMethod); // Save payment method to model
             });
         });
     }
@@ -42,6 +52,7 @@ export class OrderView extends ModalBase {
         const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
         addressField.addEventListener('input', () => {
             this.model.validateAddressField(addressField, nextButton, formErrors);
+            this.model.setAddress(addressField.value); // Save address to model
         });
     }
 
@@ -51,9 +62,13 @@ export class OrderView extends ModalBase {
         const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
         nextButton.addEventListener('click', () => {
             if (this.model.validateAddressField(addressField, nextButton, formErrors)) {
-                this.close(); // Используем метод close из ModalBase
-                new ContactsModal('modal-container', 'contacts').open(totalPrice);
+                this.close();
+                new ContactsModal('modal-container', 'contacts', this.model, this.successModal, this.formSubmitHandler).open(totalPrice);
             }
         });
+    }
+
+    getSelectedPaymentMethod(): string {
+        return this.selectedPaymentMethod;
     }
 }

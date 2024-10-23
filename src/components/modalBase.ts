@@ -1,5 +1,5 @@
 export class ModalBase {
-    protected modal: HTMLElement;
+    modal: HTMLElement;
     protected content: HTMLElement;
     protected closeButton: HTMLElement;
     constructor(modalSelector: string, closeSelector: string) {

@@ -1,13 +1,16 @@
 import {ProductItem} from "../types";
 import {Cards} from "./cards";
 import {ModalBase} from "./modalBase";
+import {Api} from "./base/api";
 
 export class CardsView extends ModalBase {
     model: Cards;
-
-    constructor(popupSelector: string, closeSelector: string, model: Cards) {
+    private api: Api; // Добавлено
+    constructor(popupSelector: string, closeSelector: string, model: Cards, api: Api) { // Обновлено
         super(popupSelector, closeSelector);
+
         this.model = model;
+        this.api = api; // Сохранение API
     }
 
     openPopup(product: ProductItem, toggleProductInCart: (product: ProductItem) => void): void {

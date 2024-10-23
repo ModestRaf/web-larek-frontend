@@ -1,14 +1,21 @@
 import {SuccessModal} from "./orderSuccess";
 import {ModalBase} from "./modalBase";
+import {Order} from "./order";
 
 export class ContactsModal extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
+    private order: Order;
+    private successModal: SuccessModal;
+    public formSubmitHandler: (event: Event) => void;
 
-    constructor(modalId: string, contentTemplateId: string) {
+    constructor(modalId: string, contentTemplateId: string, order: Order, successModal: SuccessModal, formSubmitHandler: (event: Event) => void) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
+        this.order = order;
+        this.successModal = successModal;
+        this.formSubmitHandler = formSubmitHandler;
     }
 
     open(totalPrice: number): void {
@@ -17,7 +24,7 @@ export class ContactsModal extends ModalBase {
         this.content.innerHTML = ''; // Используем this.content из ModalBase
         this.content.appendChild(contactsClone);
         this.setupContactFields();
-        this.setupPayButton(totalPrice);
+        this.setupFormSubmitHandler();
     }
 
     setupContactFields(): void {
@@ -25,36 +32,21 @@ export class ContactsModal extends ModalBase {
         const phoneField = this.modal.querySelector('input[name="phone"]') as HTMLInputElement;
         const payButton = this.modal.querySelector('.button') as HTMLButtonElement;
         const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
+
         const checkFields = () => {
-            const emailValue = emailField.value.trim();
-            const phoneValue = phoneField.value.trim();
-            if (emailValue === '' && phoneValue === '') {
-                formErrors.textContent = 'Необходимо ввести email и номер телефона';
-                formErrors.classList.add('form__errors_visible');
-                payButton.disabled = true;
-            } else if (emailValue === '') {
-                formErrors.textContent = 'Необходимо ввести email';
-                formErrors.classList.add('form__errors_visible');
-                payButton.disabled = true;
-            } else if (phoneValue === '') {
-                formErrors.textContent = 'Необходимо ввести номер телефона';
-                formErrors.classList.add('form__errors_visible');
-                payButton.disabled = true;
-            } else {
-                formErrors.textContent = '';
-                formErrors.classList.remove('form__errors_visible');
-                payButton.disabled = false;
-            }
+            this.order.validateContactFields(emailField, phoneField, payButton, formErrors);
         };
+
         emailField.addEventListener('input', checkFields);
         phoneField.addEventListener('input', checkFields);
     }
 
-    setupPayButton(totalPrice: number): void {
-        const payButton = this.modal.querySelector('.button') as HTMLButtonElement;
-        payButton.addEventListener('click', () => {
-            this.close(); // Используем метод close из ModalBase
-            new SuccessModal('modal-container', 'success', totalPrice).open();
-        });
+    setupFormSubmitHandler(): void {
+        const form = document.querySelector('form[name="contacts"]');
+        if (form) {
+            form.addEventListener('submit', this.formSubmitHandler);
+        } else {
+            console.error('Форма не найдена');
+        }
     }
 }

@@ -3,6 +3,7 @@ import {Cart} from "./cart";
 import {OrderView} from "./orderAddress";
 import {Order} from "./order";
 import {ModalBase} from "./modalBase";
+import {SuccessModal} from "./orderSuccess";
 
 export class CartView extends ModalBase { // Наследуем от ModalBase
     private contentTemplate: HTMLTemplateElement;
@@ -11,10 +12,10 @@ export class CartView extends ModalBase { // Наследуем от ModalBase
     private template: HTMLTemplateElement;
     private model: Cart;
 
-    constructor(modalId: string, contentTemplateId: string, model: Cart, orderModel: Order) {
+    constructor(modalId: string, contentTemplateId: string, model: Cart, orderModel: Order, successModal: SuccessModal, formSubmitHandler: (event: Event) => void) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
-        this.orderView = new OrderView('modal-container', 'order', orderModel);
+        this.orderView = new OrderView('modal-container', 'order', orderModel, successModal, formSubmitHandler);
         this.cartTemplate = document.querySelector('#basket') as HTMLTemplateElement;
         this.template = document.querySelector('#card-basket') as HTMLTemplateElement;
         this.model = model;
