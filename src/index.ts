@@ -11,6 +11,7 @@ import {Order} from "./components/order";
 import {OrderForm, ProductItem, IOrder, IOrderResult} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsModal} from "./components/contacts";
+import {OrderView} from "./components/orderAddress";
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -86,8 +87,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Создаем экземпляр ContactsModal и передаем в него orderModel, successModal и обработчик сабмита
     const contactsModal = new ContactsModal('modal-container', 'content-template', orderModel, successModal, formSubmitHandler);
 
-    // Создаем экземпляр CartView и передаем в него contactsModal
-    const basketModal = new CartView('modal-container', 'basket', cart, orderModel, successModal, contactsModal, formSubmitHandler);
+    // Создаем экземпляр OrderView и передаем в него orderModel, successModal, contactsModal и обработчик сабмита
+    const orderView = new OrderView('modal-container', 'order', orderModel, successModal, contactsModal, formSubmitHandler);
+
+    // Создаем экземпляр CartView и передаем в него orderView
+    const basketModal = new CartView('modal-container', 'basket', cart, orderView);
 
     const containerId = 'gallery';
     const cardTemplateId = 'card-catalog';
