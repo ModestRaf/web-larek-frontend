@@ -10,13 +10,22 @@ export class OrderView extends ModalBase {
     private successModal: SuccessModal;
     private selectedPaymentMethod: string;
     public formSubmitHandler: (event: Event) => void; // Add formSubmitHandler
+    private contactsModal: ContactsModal; // Add contactsModal
 
-    constructor(modalId: string, contentTemplateId: string, model: Order, successModal: SuccessModal, formSubmitHandler: (event: Event) => void) {
+    constructor(
+        modalId: string,
+        contentTemplateId: string,
+        model: Order,
+        successModal: SuccessModal,
+        contactsModal: ContactsModal, // Add contactsModal
+        formSubmitHandler: (event: Event) => void
+    ) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
         this.model = model;
         this.successModal = successModal;
+        this.contactsModal = contactsModal; // Assign contactsModal
         this.selectedPaymentMethod = 'card';
         this.formSubmitHandler = formSubmitHandler; // Assign formSubmitHandler
     }
@@ -30,7 +39,7 @@ export class OrderView extends ModalBase {
         this.setupAddressField();
         const onlineButton = this.modal.querySelector('button[name="card"]') as HTMLButtonElement;
         onlineButton.classList.add('button_alt-active');
-        this.setupNextButton(totalPrice);
+        this.setupNextButton();
     }
 
     setupPaymentButtons(): void {
@@ -56,19 +65,15 @@ export class OrderView extends ModalBase {
         });
     }
 
-    setupNextButton(totalPrice: number): void {
+    setupNextButton(): void {
         const nextButton = this.modal.querySelector('.order__button') as HTMLButtonElement;
         const addressField = this.modal.querySelector('input[name="address"]') as HTMLInputElement;
         const formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
         nextButton.addEventListener('click', () => {
             if (this.model.validateAddressField(addressField, nextButton, formErrors)) {
                 this.close();
-                new ContactsModal('modal-container', 'contacts', this.model, this.successModal, this.formSubmitHandler).open(totalPrice);
+                this.contactsModal.open(); // Use contactsModal
             }
         });
-    }
-
-    getSelectedPaymentMethod(): string {
-        return this.selectedPaymentMethod;
     }
 }

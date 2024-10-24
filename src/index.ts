@@ -82,7 +82,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Создаем статичный экземпляр SuccessModal при загрузке страницы
     const successModal = new SuccessModal('modal-container', 'success');
-    const basketModal = new CartView('modal-container', 'basket', cart, orderModel, successModal, formSubmitHandler);
+
+    // Создаем экземпляр ContactsModal и передаем в него orderModel, successModal и обработчик сабмита
+    const contactsModal = new ContactsModal('modal-container', 'content-template', orderModel, successModal, formSubmitHandler);
+
+    // Создаем экземпляр CartView и передаем в него contactsModal
+    const basketModal = new CartView('modal-container', 'basket', cart, orderModel, successModal, contactsModal, formSubmitHandler);
+
     const containerId = 'gallery';
     const cardTemplateId = 'card-catalog';
     const popupSelector = '.modal';
@@ -155,9 +161,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Восстановление состояния корзины после перезагрузки страницы
     cart.updateCartItems(productList.products);
-
-    // Создаем экземпляр ContactsModal и передаем в него orderModel, successModal и обработчик сабмита
-    const contactsModal = new ContactsModal('modal-container', 'content-template', orderModel, successModal, formSubmitHandler);
 
     // Обработчик сабмита формы
     const form = contactsModal.modal.querySelector('form[name="contacts"]');
