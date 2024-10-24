@@ -1,17 +1,15 @@
-import {CartItem, ProductItem} from "../types";
-import {ProductListView} from "./ProductListView";
-import {CartView} from "./cartView";
+import {CartItem, ICartView, IProductListView, ProductItem} from "../types";
 
 export class Cart {
     items: CartItem[] = [];
-    private productList: ProductListView | null = null;
-    private cartView: CartView | null = null;
+    private productList: IProductListView | null = null;
+    private cartView: ICartView | null = null;
 
-    setProductList(productList: ProductListView): void {
+    setProductList(productList: IProductListView): void {
         this.productList = productList;
     }
 
-    setCartView(cartView: CartView): void {
+    setCartView(cartView: ICartView): void {
         this.cartView = cartView;
     }
 

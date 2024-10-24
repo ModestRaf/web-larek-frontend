@@ -12,6 +12,10 @@ import {OrderForm, ProductItem, IOrder, IOrderResult} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsModal} from "./components/contacts";
 import {OrderView} from "./components/orderAddress";
+import {ensureElement} from "./utils/utils";
+import {EventEmitter, IEvents} from "./components/base/events";
+
+let eventEmitter: IEvents;
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -27,9 +31,9 @@ async function loadProducts(api: Api): Promise<ProductItem[]> {
 // Отправка заказа на сервер
 async function submitOrder(api: Api, order: IOrder): Promise<IOrderResult> {
     try {
-        console.log('Отправка заказа на сервер:', JSON.stringify(order, null, 2)); // Лог перед отправкой заказа
+        console.log('Отправка заказа на сервер:', JSON.stringify(order, null, 2));
         const response = await api.post('/order', order, 'POST') as IOrderResult;
-        console.log('Ответ сервера:', JSON.stringify(response, null, 2)); // Лог ответа сервера
+        console.log('Ответ сервера:', JSON.stringify(response, null, 2));
         return response;
     } catch (error) {
         console.error('Ошибка при отправке заказа:', error.message || error.response?.data || error);
@@ -38,6 +42,8 @@ async function submitOrder(api: Api, order: IOrder): Promise<IOrderResult> {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    eventEmitter = new EventEmitter();
+
     const api = new Api(API_URL);
     const products = await loadProducts(api);
     const cart = new Cart();
@@ -47,15 +53,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const totalPrice = cart.getTotalPrice();
-        const emailField = form.querySelector('input[name="email"]') as HTMLInputElement;
-        const phoneField = form.querySelector('input[name="phone"]') as HTMLInputElement;
+        const emailField = ensureElement<HTMLInputElement>('input[name="email"]', form);
+        const phoneField = ensureElement<HTMLInputElement>('input[name="phone"]', form);
 
         try {
             const orderForm: OrderForm = {
                 email: emailField.value,
                 phone: phoneField.value,
                 payment: orderModel.getPaymentMethod(),
-                address: orderModel.getAddress()
+                address: orderModel.getAddress(),
             };
             const order: IOrder = {
                 ...orderForm,
@@ -66,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Ответ от сервера:', response);
             if (response.id) {
                 console.log('Заказ успешно отправлен');
-                successModal.open(totalPrice);
+                eventEmitter.emit('orderSuccess', new CustomEvent('orderSuccess', {detail: {totalPrice}}));
                 cart.clearCart();
                 productList.clearSelectedProducts();
                 updateBasketCounter();
@@ -80,94 +86,115 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Ошибка при отправке заказа:', error);
         }
     };
+    const onSuccess = () => {
+        console.log('Форма успешно отправлена');
+    };
 
-    // Создаем статичный экземпляр SuccessModal при загрузке страницы
+    const openContactsModal = () => {
+        contactsModal.open();
+    };
+
+    const createProductCard = (product: ProductItem) => {
+        return cardsView.model.createProductCard(product);
+    };
+
+    const openPopup = (product: ProductItem, callback: () => void) => {
+        cardsView.openPopup(product, callback);
+    };
+
     const successModal = new SuccessModal('modal-container', 'success');
-
-    // Создаем экземпляр ContactsModal и передаем в него orderModel, successModal и обработчик сабмита
-    const contactsModal = new ContactsModal('modal-container', 'content-template', orderModel, successModal, formSubmitHandler);
-
-    // Создаем экземпляр OrderView и передаем в него orderModel, successModal, contactsModal и обработчик сабмита
-    const orderView = new OrderView('modal-container', 'order', orderModel, successModal, contactsModal, formSubmitHandler);
-
-    // Создаем экземпляр CartView и передаем в него orderView
-    const basketModal = new CartView('modal-container', 'basket', cart, orderView);
-
-    const containerId = 'gallery';
+    const contactsModal = new ContactsModal(
+        'modal-container',
+        'content-template',
+        orderModel,
+        onSuccess, // Передаем функцию onSuccess
+        formSubmitHandler
+    );
+    const orderView = new OrderView(
+        'modal-container',
+        'content-template',
+        orderModel, // Передаем объект, реализующий интерфейс
+        openContactsModal, // Передаем функцию openContactsModal
+        onSuccess, // Передаем функцию onSuccess
+        formSubmitHandler
+    );
+    const basketModal = new CartView(
+        'modal-container',
+        'basket',
+        cart,
+        (totalPrice) => orderView.open(totalPrice)
+    );
+    const openBasketModal = () => {
+        basketModal.open();
+    };
     const cardTemplateId = 'card-catalog';
     const popupSelector = '.modal';
     const popupTemplateId = 'card-preview';
     const closeSelector = '.modal__close';
     const cards = new Cards(cardTemplateId, popupTemplateId);
-    const cardsView = new CardsView(popupSelector, closeSelector, cards, api);
+    const cardsView = new CardsView(popupSelector, closeSelector, cards);
     const productList = new ProductList();
     productList.products = productList.loadSelectedFromStorage(products);
+    const cartModel = new Cart();
     const productListView = new ProductListView(
-        containerId,
-        basketModal,
-        cart,
-        cardsView,
-        productList
+        'gallery',
+        cartModel, // Передаем объект, реализующий интерфейс
+        createProductCard, // Передаем функцию createProductCard
+        openPopup, // Передаем функцию openPopup
+        openBasketModal // Передаем функцию openBasketModal
     );
     cart.setProductList(productListView);
     cart.setCartView(basketModal);
 
-    // Логика загрузки продуктов
     function loadProductsLogic(): void {
         productListView.renderProducts(productList.products);
         updateBasketCounter();
     }
 
-    // Логика обновления счетчика корзины
     function updateBasketCounter(): void {
         const selectedProductsCount = productList.products.filter(product => product.selected).length;
         productListView.updateBasketCounter(selectedProductsCount);
     }
 
-    // Логика переключения продукта в корзине
     function toggleProductInCart(product: ProductItem): void {
         productList.toggleProductInCart(product);
         updateBasketCounter();
         cart.updateCartItems(productList.products);
     }
 
-    // Логика удаления продукта из корзины
     function removeProductFromCart(productId: string): void {
         productList.removeProductFromCart(productId);
         updateBasketCounter();
         cart.updateCartItems(productList.products);
     }
 
-    // Привязка логики к представлению
     productListView.toggleProductInCart = toggleProductInCart;
     productListView.removeProductFromCart = removeProductFromCart;
 
-    // Загрузка продуктов при старте
     loadProductsLogic();
 
-    const basketButton = document.querySelector('.header__basket');
+    const basketButton = ensureElement<HTMLButtonElement>('.header__basket');
     basketButton.addEventListener('click', () => basketModal.open());
 
-    // Обработка закрытия модального окна после успешного оформления заказа
-    document.addEventListener('orderSuccessClosed', () => {
-        cart.clearCart(); // Очистка корзины после успешного заказа
-        productList.clearSelectedProducts(); // Очистка выбранных товаров в ProductList
-        updateBasketCounter(); // Обновляем счетчик корзины после очистки
-        productListView.renderProducts(productList.products); // Обновляем отображение продуктов
+    eventEmitter.on('orderSuccessClosed', () => {
+        cart.clearCart();
+        productList.clearSelectedProducts();
+        updateBasketCounter();
+        productListView.renderProducts(productList.products);
     });
 
-    // Обработка события успешного оформления заказа
-    document.addEventListener('orderSuccess', (event: CustomEvent) => {
+    eventEmitter.on('orderSuccess', (event: CustomEvent) => {
         const totalPrice = event.detail.totalPrice;
-        console.log('Открытие окна успеха');
-        successModal.open(totalPrice);
+        if (totalPrice !== undefined) {
+            successModal.open(totalPrice);
+        } else {
+            console.error('totalPrice is undefined');
+        }
     });
 
-    // Восстановление состояния корзины после перезагрузки страницы
     cart.updateCartItems(productList.products);
 
-    // Обработчик сабмита формы
-    const form = contactsModal.modal.querySelector('form[name="contacts"]');
+    const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
     if (form) {
         form.addEventListener('submit', formSubmitHandler);
     } else {

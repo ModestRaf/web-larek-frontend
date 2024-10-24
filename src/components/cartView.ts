@@ -1,36 +1,39 @@
-import {CartItem} from "../types";
-import {Cart} from "./cart";
-import {OrderView} from "./orderAddress";
+import {CartItem, ICart} from "../types";
 import {ModalBase} from "./modalBase";
-export class CartView extends ModalBase { // Наследуем от ModalBase
+
+export class CartView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
-    private orderView: OrderView;
+    private readonly onCheckout: (totalPrice: number) => void; // Коллбек для обработки заказа
     private cartTemplate: HTMLTemplateElement;
     private template: HTMLTemplateElement;
-    private model: Cart;
+    private model: ICart;
 
     constructor(
         modalId: string,
         contentTemplateId: string,
-        model: Cart,
-        orderView: OrderView, // Добавляем orderView
+        model: ICart, // Принимаем абстракцию через интерфейс
+        onCheckout: (totalPrice: number) => void, // Передаем функцию для обработки
     ) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
-        this.orderView = orderView; // Присваиваем orderView
+        this.onCheckout = onCheckout;
         this.cartTemplate = document.querySelector('#basket') as HTMLTemplateElement;
         this.template = document.querySelector('#card-basket') as HTMLTemplateElement;
-        this.model = model;
+        this.model = model; // Используем интерфейс ICart
     }
 
     open(): void {
-        super.open(); // Используем метод open из ModalBase
+        super.open();
         const cartClone = document.importNode(this.cartTemplate.content, true);
-        this.content.innerHTML = '';
-        this.content.appendChild(cartClone);
-        this.renderBasketItems();
-        const checkoutButton = this.modal.querySelector('.basket__button') as HTMLElement;
-        checkoutButton.addEventListener('click', () => this.orderView.open(this.model.getTotalPrice()));
+        this.content.innerHTML = '';  // Очищаем содержимое перед добавлением
+        this.content.appendChild(cartClone);  // Добавляем клонированный шаблон
+        this.renderBasketItems();  // Рендерим список товаров в корзине
+        const checkoutButton = this.modal.querySelector('.basket__button') as HTMLElement | null;
+        if (checkoutButton) {
+            checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
+        } else {
+            console.error('Checkout button not found');
+        }
     }
 
     renderBasketItems(): void {
@@ -42,21 +45,27 @@ export class CartView extends ModalBase { // Наследуем от ModalBase
             return;
         }
         basketList.innerHTML = '';
-        let totalPrice = 0;
         if (this.model.items.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.textContent = 'Корзина пуста';
-            basketList.appendChild(emptyMessage);
-            checkoutButton.disabled = true;
+            this.renderEmptyCart(basketList, checkoutButton);
         } else {
-            this.model.items.forEach((item, index) => {
-                const basketItem = this.createBasketItem(item, index + 1);
-                basketList.appendChild(basketItem);
-                totalPrice += item.price;
-            });
-            checkoutButton.disabled = false;
+            this.renderItems(basketList, checkoutButton);
         }
-        basketPrice.textContent = `${totalPrice} синапсов`;
+        basketPrice.textContent = `${this.model.getTotalPrice()} синапсов`;
+    }
+
+    private renderEmptyCart(basketList: HTMLElement, checkoutButton: HTMLButtonElement): void {
+        const emptyMessage = document.createElement('p');
+        emptyMessage.textContent = 'Корзина пуста';
+        basketList.appendChild(emptyMessage);
+        checkoutButton.disabled = true;
+    }
+
+    private renderItems(basketList: HTMLElement, checkoutButton: HTMLButtonElement): void {
+        this.model.items.forEach((item, index) => {
+            const basketItem = this.createBasketItem(item, index + 1);
+            basketList.appendChild(basketItem);
+        });
+        checkoutButton.disabled = false;
     }
 
     createBasketItem(item: CartItem, index: number): HTMLElement {
@@ -68,7 +77,9 @@ export class CartView extends ModalBase { // Наследуем от ModalBase
         itemIndex.textContent = index.toString();
         itemTitle.textContent = item.title;
         itemPrice.textContent = item.price === null ? 'Бесценно' : `${item.price} синапсов`;
+        // Используем метод интерфейса для удаления товара
         deleteButton.addEventListener('click', () => this.model.removeBasketItem(item.id));
+
         return clone;
     }
 }
