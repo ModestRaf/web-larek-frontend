@@ -1,4 +1,4 @@
-[# Проектная работа "Веб-ларек"
+# Проектная работа "Веб-ларек"
 
 Стек: HTML, SCSS, TS, Webpack
 
@@ -90,7 +90,6 @@ price: number;            Цена товара
 
 #### ProductList
 ##### Данные:
-
 - products: ProductItem[] — список продуктов
 ##### Методы:
 - saveSelectedToStorage(): void — сохраняет состояние корзины в localStorage
@@ -101,11 +100,9 @@ price: number;            Цена товара
 
 #### Cart
 ##### Данные:
-
 - items: CartItem[] — список товаров в корзине
 - productList: IProductListView | null — ссылка на ProductListView
 ##### Методы:
-
 - setProductList(productList: IProductListView): void — устанавливает ссылку на ProductListView
 - removeBasketItem(itemId: string): void — удаляет товар из корзины
 - updateCartItems(products: ProductItem[]): void — обновляет содержимое корзины
@@ -121,17 +118,13 @@ price: number;            Цена товара
 Основные классы:
 
 #### CartView
-
 ##### Данные:
-
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна
 - cartTemplate: HTMLTemplateElement — шаблон корзины
 - template: HTMLTemplateElement — шаблон элемента корзины
 - model: ICart — модель корзины
 - onCheckout: (totalPrice: number) => void — функция, вызываемая при оформлении заказа
-
 ##### Методы:
-
 - open(): void — открывает модальное окно корзины
 - renderBasketItems(): void — отображает элементы корзины
 - renderEmptyCart(basketList: HTMLElement, checkoutButton: HTMLButtonElement): void — отображает сообщение о пустой
@@ -140,14 +133,10 @@ price: number;            Цена товара
 - createBasketItem(item: CartItem, index: number): HTMLElement — создает элемент корзины
 
 #### CardsView
-
 ##### Данные:
-
 - cardTemplate: HTMLTemplateElement — шаблон карточки товара
 - popupTemplate: HTMLTemplateElement — шаблон модального окна
-
 ##### Методы:
-
 - openPopup(product: ProductItem, toggleProductInCart: (product: ProductItem) => void): void — открывает модальное окно
   с подробной информацией о товаре
 - createProductCard(product: ProductItem): HTMLElement — создает карточку товара
@@ -156,7 +145,6 @@ price: number;            Цена товара
 
 #### OrderView
 ##### Данные:
-
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна
 - orderTemplate: HTMLTemplateElement — шаблон заказа
 - model: IOrderModel — модель заказа
@@ -172,7 +160,6 @@ price: number;            Цена товара
 
 #### ContactsModal
 ##### Данные:
-
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна
 - contactsTemplate: HTMLTemplateElement — шаблон контактной информации
 - contactValidator: IContactValidator — валидатор контактных данных
@@ -183,7 +170,6 @@ price: number;            Цена товара
 - payButton: HTMLButtonElement | null — кнопка оплаты
 - formErrors: HTMLElement | null — элемент для отображения ошибок
 ##### Методы:
-
 - open(): void — открывает модальное окно контактной информации
 - setupContactFields(): void — настраивает поля ввода email и телефона
 - setupFormSubmitHandler(): void — настраивает обработчик отправки формы
@@ -193,13 +179,11 @@ price: number;            Цена товара
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна
 - successTemplate: HTMLTemplateElement — шаблон успешного завершения заказа
 ##### Методы:
-
 - open(totalPrice: number): void — открывает модальное окно успешного завершения заказа
 - onSuccessClose(): void — вызывается при закрытии модального окна успешного завершения заказа
 
 #### ProductListView
 ##### Данные:
-
 - container: HTMLElement — контейнер для отображения продуктов
 - basketCounter: HTMLElement — элемент для отображения счетчика корзины
 - cartModel: ICartModel — модель корзины
@@ -208,7 +192,6 @@ price: number;            Цена товара
   информацией о товаре
 - openBasketModal: () => void — функция для открытия модального окна корзины
 ##### Методы:
-
 - renderProducts(products: ProductItem[]): void — отображает продукты на странице
 - updateBasketCounter(selectedProductsCount: number): void — обновляет счетчик товаров в корзине
 - toggleProductInCart: (product: ProductItem) => void — переключает состояние продукта в корзине
@@ -232,7 +215,23 @@ price: number;            Цена товара
 
 ##### Пользовательские события
 
-addEventListener используется для установки обработчиков событий на элементы интерфейса, такие как клики по кнопкам для
+Пользовательские события (Custom Events) в приложении используются для уведомления других компонентов о важных
+изменениях состояния или действий пользователя.
+
+###### Где используются Custom Events
+
+Успешное завершение заказа:
+
+- событие orderSuccessClosed используется для уведомления о том, что пользователь закрыл модальное окно успешного
+  завершения заказа.
+- событие orderSuccess используется для уведомления о том, что заказ был успешно отправлен на сервер.
+
+Обработка событий. События добавляются и обрабатываются в index.ts, чтобы обеспечить взаимодействие между различными
+компонентами приложения.
+
+###### addEventListener
+
+Используется для установки обработчиков событий на элементы интерфейса, такие как клики по кнопкам для
 открытия корзины и загрузки товаров
 
 - click на кнопку "Закрыть" для закрытия модального окна
@@ -244,6 +243,7 @@ addEventListener используется для установки обрабо
 - input в поле адреса доставки в модальном окне оформления заказа
 - input в полях email и телефона в модальном окне контактной информации
 
+###### Функции в index.ts
 В index.ts определены функции, которые связывают пользовательские действия с методами моделей и представлений. Эти
 функции отвечают за инициализацию и настройку обработчиков событий для ключевых элементов интерфейса:
 
