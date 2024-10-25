@@ -8,14 +8,14 @@ import {Cards} from "./components/cards";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
-import {OrderForm, ProductItem, IOrder, IOrderResult} from "./types";
+import {ProductItem, IOrder, IOrderResult, OrderForm} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsModal} from "./components/contacts";
 import {OrderView} from "./components/orderAddress";
 import {ensureElement} from "./utils/utils";
 import {EventEmitter, IEvents} from "./components/base/events";
 
-let eventEmitter: IEvents;
+const eventEmitter: IEvents = new EventEmitter();
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -32,24 +32,113 @@ async function loadProducts(api: Api): Promise<ProductItem[]> {
 async function submitOrder(api: Api, order: IOrder): Promise<IOrderResult> {
     try {
         console.log('Отправка заказа на сервер:', JSON.stringify(order, null, 2));
-        const response = await api.post('/order', order, 'POST') as IOrderResult;
+        const response = await api.post('/order', order) as IOrderResult;
         console.log('Ответ сервера:', JSON.stringify(response, null, 2));
         return response;
     } catch (error) {
-        console.error('Ошибка при отправке заказа:', error.message || error.response?.data || error);
+        console.error('Ошибка при отправке заказа:', error);
         throw error;
     }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    eventEmitter = new EventEmitter();
-
     const api = new Api(API_URL);
     const products = await loadProducts(api);
     const cart = new Cart();
-    const orderModel = new Order('modal-container', 'order');
+    const productList = new ProductList();
+    productList.products = productList.loadSelectedFromStorage(products);
 
-    const formSubmitHandler = async (event: Event) => {
+    const orderModel = new Order('modal-container', 'order');
+    const successModal = new SuccessModal('modal-container', 'success');
+    const contactsModal = new ContactsModal(
+        'modal-container',
+        'content-template',
+        orderModel,
+        () => console.log('Форма успешно отправлена'),
+        formSubmitHandler
+    );
+
+    const orderView = new OrderView(
+        'modal-container',
+        'content-template',
+        orderModel,
+        () => contactsModal.open(),
+        () => console.log('Форма успешно отправлена'),
+        formSubmitHandler
+    );
+
+    const basketModal = new CartView(
+        'modal-container',
+        'basket',
+        cart,
+        (totalPrice) => orderView.open(totalPrice)
+    );
+
+    const cardsView = new CardsView('.modal', '.modal__close', new Cards('card-catalog', 'card-preview'));
+
+    const productListView = new ProductListView(
+        'gallery',
+        cart,
+        (product) => cardsView.model.createProductCard(product),
+        (product, callback) => cardsView.openPopup(product, callback),
+        () => basketModal.open()
+    );
+
+    productListView.toggleProductInCart = (product) => {
+        productList.toggleProductInCart(product);
+        updateBasketCounter();
+        cart.updateCartItems(productList.products);
+    };
+
+    productListView.removeProductFromCart = (productId) => {
+        productList.removeProductFromCart(productId);
+        updateBasketCounter();
+        cart.updateCartItems(productList.products);
+    };
+
+    cart.setProductList(productListView);
+    cart.setCartView(basketModal);
+
+    loadProductsLogic();
+
+    // Элементы управления
+    const basketButton = ensureElement<HTMLButtonElement>('.header__basket');
+    basketButton.addEventListener('click', () => basketModal.open());
+
+    // Обработчики событий
+    eventEmitter.on('orderSuccessClosed', resetCart);
+    eventEmitter.on('orderSuccess', (event: CustomEvent) => {
+        const totalPrice = event.detail.totalPrice;
+        if (totalPrice !== undefined) {
+            successModal.open(totalPrice);
+        } else {
+            console.error('totalPrice is undefined');
+        }
+    });
+
+    const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
+    form?.addEventListener('submit', formSubmitHandler);
+
+    // Вспомогательные функции
+    function updateBasketCounter(): void {
+        const selectedProductsCount = productList.products.filter(product => product.selected).length;
+        productListView.updateBasketCounter(selectedProductsCount);
+    }
+
+    function resetCart() {
+        cart.clearCart();
+        productList.clearSelectedProducts();
+        updateBasketCounter();
+        productListView.renderProducts(productList.products);
+    }
+
+    function loadProductsLogic(): void {
+        productListView.renderProducts(productList.products);
+        updateBasketCounter();
+        basketModal.renderBasketItems();  // Обновляем интерфейс корзины при загрузке
+    }
+
+    async function formSubmitHandler(event: Event) {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const totalPrice = cart.getTotalPrice();
@@ -72,11 +161,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Ответ от сервера:', response);
             if (response.id) {
                 console.log('Заказ успешно отправлен');
-                eventEmitter.emit('orderSuccess', new CustomEvent('orderSuccess', {detail: {totalPrice}}));
                 cart.clearCart();
                 productList.clearSelectedProducts();
                 updateBasketCounter();
                 productListView.renderProducts(productList.products);
+                eventEmitter.emit('orderSuccess', new CustomEvent('orderSuccess', {detail: {totalPrice}}));
             } else if (response.error) {
                 console.error('Ошибка при отправке заказа:', response.error);
             } else {
@@ -85,119 +174,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Ошибка при отправке заказа:', error);
         }
-    };
-    const onSuccess = () => {
-        console.log('Форма успешно отправлена');
-    };
-
-    const openContactsModal = () => {
-        contactsModal.open();
-    };
-
-    const createProductCard = (product: ProductItem) => {
-        return cardsView.model.createProductCard(product);
-    };
-
-    const openPopup = (product: ProductItem, callback: () => void) => {
-        cardsView.openPopup(product, callback);
-    };
-
-    const successModal = new SuccessModal('modal-container', 'success');
-    const contactsModal = new ContactsModal(
-        'modal-container',
-        'content-template',
-        orderModel,
-        onSuccess, // Передаем функцию onSuccess
-        formSubmitHandler
-    );
-    const orderView = new OrderView(
-        'modal-container',
-        'content-template',
-        orderModel, // Передаем объект, реализующий интерфейс
-        openContactsModal, // Передаем функцию openContactsModal
-        onSuccess, // Передаем функцию onSuccess
-        formSubmitHandler
-    );
-    const basketModal = new CartView(
-        'modal-container',
-        'basket',
-        cart,
-        (totalPrice) => orderView.open(totalPrice)
-    );
-    const openBasketModal = () => {
-        basketModal.open();
-    };
-    const cardTemplateId = 'card-catalog';
-    const popupSelector = '.modal';
-    const popupTemplateId = 'card-preview';
-    const closeSelector = '.modal__close';
-    const cards = new Cards(cardTemplateId, popupTemplateId);
-    const cardsView = new CardsView(popupSelector, closeSelector, cards);
-    const productList = new ProductList();
-    productList.products = productList.loadSelectedFromStorage(products);
-    const cartModel = new Cart();
-    const productListView = new ProductListView(
-        'gallery',
-        cartModel, // Передаем объект, реализующий интерфейс
-        createProductCard, // Передаем функцию createProductCard
-        openPopup, // Передаем функцию openPopup
-        openBasketModal // Передаем функцию openBasketModal
-    );
-    cart.setProductList(productListView);
-    cart.setCartView(basketModal);
-
-    function loadProductsLogic(): void {
-        productListView.renderProducts(productList.products);
-        updateBasketCounter();
-    }
-
-    function updateBasketCounter(): void {
-        const selectedProductsCount = productList.products.filter(product => product.selected).length;
-        productListView.updateBasketCounter(selectedProductsCount);
-    }
-
-    function toggleProductInCart(product: ProductItem): void {
-        productList.toggleProductInCart(product);
-        updateBasketCounter();
-        cart.updateCartItems(productList.products);
-    }
-
-    function removeProductFromCart(productId: string): void {
-        productList.removeProductFromCart(productId);
-        updateBasketCounter();
-        cart.updateCartItems(productList.products);
-    }
-
-    productListView.toggleProductInCart = toggleProductInCart;
-    productListView.removeProductFromCart = removeProductFromCart;
-
-    loadProductsLogic();
-
-    const basketButton = ensureElement<HTMLButtonElement>('.header__basket');
-    basketButton.addEventListener('click', () => basketModal.open());
-
-    eventEmitter.on('orderSuccessClosed', () => {
-        cart.clearCart();
-        productList.clearSelectedProducts();
-        updateBasketCounter();
-        productListView.renderProducts(productList.products);
-    });
-
-    eventEmitter.on('orderSuccess', (event: CustomEvent) => {
-        const totalPrice = event.detail.totalPrice;
-        if (totalPrice !== undefined) {
-            successModal.open(totalPrice);
-        } else {
-            console.error('totalPrice is undefined');
-        }
-    });
-
-    cart.updateCartItems(productList.products);
-
-    const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
-    if (form) {
-        form.addEventListener('submit', formSubmitHandler);
-    } else {
-        console.error('Форма не найдена');
     }
 });

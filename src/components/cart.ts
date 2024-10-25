@@ -5,6 +5,10 @@ export class Cart {
     private productList: IProductListView | null = null;
     private cartView: ICartView | null = null;
 
+    constructor() {
+        this.loadCartFromStorage();  // Загружаем данные из localStorage при инициализации
+    }
+
     setProductList(productList: IProductListView): void {
         this.productList = productList;
     }
@@ -15,6 +19,7 @@ export class Cart {
 
     removeBasketItem(itemId: string): void {
         this.items = this.items.filter(item => item.id !== itemId);
+        this.saveCartToStorage();  // Сохраняем изменения
         if (this.productList) {
             this.productList.removeProductFromCart(itemId);
         }
@@ -29,6 +34,7 @@ export class Cart {
             title: product.title,
             price: product.price,
         }));
+        this.saveCartToStorage();  // Сохраняем изменения
         if (this.cartView) {
             this.cartView.renderBasketItems();
         }
@@ -40,8 +46,22 @@ export class Cart {
 
     clearCart(): void {
         this.items = [];
+        this.saveCartToStorage();  // Очищаем localStorage
         if (this.cartView) {
             this.cartView.renderBasketItems();
+        }
+    }
+
+    // Сохраняем текущее состояние корзины в localStorage
+    private saveCartToStorage(): void {
+        localStorage.setItem('cartItems', JSON.stringify(this.items));
+    }
+
+    // Загружаем состояние корзины из localStorage
+    private loadCartFromStorage(): void {
+        const savedItems = localStorage.getItem('cartItems');
+        if (savedItems) {
+            this.items = JSON.parse(savedItems);
         }
     }
 }
