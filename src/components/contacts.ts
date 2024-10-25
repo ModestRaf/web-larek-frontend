@@ -1,16 +1,17 @@
 import {ModalBase} from "./modalBase";
 import {IContactValidator} from "../types";
+import {setupContactFields, setupFormSubmitHandler} from "../index";
 
 export class ContactsModal extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
-    private contactValidator: IContactValidator; // Используем интерфейс
-    private readonly onSuccess: () => void; // Функция, вызываемая при успешной отправке формы
-    private readonly formSubmitHandler: (event: Event) => void;
-    private emailField: HTMLInputElement | null = null;
-    private phoneField: HTMLInputElement | null = null;
-    private payButton: HTMLButtonElement | null = null;
-    private formErrors: HTMLElement | null = null;
+    contactValidator: IContactValidator; // Используем интерфейс
+    readonly onSuccess: () => void; // Функция, вызываемая при успешной отправке формы
+    readonly formSubmitHandler: (event: Event) => void;
+    emailField: HTMLInputElement | null = null;
+    phoneField: HTMLInputElement | null = null;
+    payButton: HTMLButtonElement | null = null;
+    formErrors: HTMLElement | null = null;
 
     constructor(
         modalId: string,
@@ -38,36 +39,8 @@ export class ContactsModal extends ModalBase {
         this.payButton = this.modal.querySelector('.button') as HTMLButtonElement;
         this.formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
 
-        this.setupContactFields();
-        this.setupFormSubmitHandler();
-    }
-
-    setupContactFields(): void {
-        const checkFields = () => {
-            this.contactValidator.validateContactFields(this.emailField, this.phoneField, this.payButton, this.formErrors);
-        };
-        this.emailField.addEventListener('input', checkFields);
-        this.phoneField.addEventListener('input', checkFields);
-    }
-
-    setupFormSubmitHandler(): void {
-        const form = this.modal.querySelector('form[name="contacts"]');
-        if (form) {
-            form.addEventListener('submit', (event) => {
-                event.preventDefault(); // Предотвращаем стандартное поведение формы
-
-                if (this.emailField && this.phoneField) {
-                    const isValid = this.contactValidator.validateContactFields(this.emailField, this.phoneField, this.payButton, this.formErrors);
-                    if (isValid) {
-                        this.formSubmitHandler(event); // Вызываем обработчик отправки формы
-                        this.onSuccess(); // Вызываем функцию успеха
-                    } else {
-                        console.error('Форма не прошла валидацию');
-                    }
-                }
-            });
-        } else {
-            console.error('Форма не найдена');
-        }
+        // Устанавливаем обработчики событий
+        setupContactFields(this);
+        setupFormSubmitHandler(this);
     }
 }

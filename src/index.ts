@@ -4,7 +4,6 @@ import {API_URL} from "./utils/constants";
 import {Cart} from "./components/cart";
 import {CartView} from "./components/cartView";
 import {CardsView} from "./components/cardsView";
-import {Cards} from "./components/cards";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
@@ -42,12 +41,18 @@ const basketModal = new CartView(
     cart,
     (totalPrice) => orderView.open(totalPrice)
 );
-const cardsView = new CardsView('.modal', '.modal__close', new Cards('card-catalog', 'card-preview'));
+const cardsView = new CardsView(
+    '.modal',
+    '.modal__close',
+    'card-catalog',
+    'card-preview'
+);
+
 const productListView = new ProductListView(
     'gallery',
     cart,
-    (product) => cardsView.model.createProductCard(product),
-    (product, callback) => cardsView.openPopup(product, callback),
+    (product) => cardsView.createProductCard(product), // Убираем `model` и обращаемся к `createProductCard`
+    (product, callback) => cardsView.openPopup(product, callback), // Убираем `model` и обращаемся к `openPopup`
     () => basketModal.open()
 );
 
@@ -93,33 +98,6 @@ function loadProductsLogic(): void {
     updateBasketCounter();
     basketModal.renderBasketItems();  // Обновляем интерфейс корзины при загрузке
 }
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const products = await loadProducts(api);
-    productList.products = productList.loadSelectedFromStorage(products);
-    productListView.toggleProductInCart = (product) => {
-        productList.toggleProductInCart(product);
-        updateBasketCounter();
-        cart.updateCartItems(productList.products);
-    };
-
-    productListView.removeProductFromCart = (productId) => {
-        productList.removeProductFromCart(productId);
-        updateBasketCounter();
-        cart.updateCartItems(productList.products);
-    };
-
-    cart.setProductList(productListView);
-    cart.setCartView(basketModal);
-
-    loadProductsLogic();
-
-    // Элементы управления
-    const basketButton = ensureElement<HTMLButtonElement>('.header__basket');
-    basketButton.addEventListener('click', () => basketModal.open());
-    const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
-    form?.addEventListener('submit', formSubmitHandler);
-});
 
 // Обработчики событий
 eventEmitter.on('orderSuccessClosed', resetCart);
@@ -168,3 +146,76 @@ async function formSubmitHandler(event: Event) {
         console.error('Ошибка при отправке заказа:', error);
     }
 }
+
+productListView.removeProductFromCart = (productId) => {
+    productList.removeProductFromCart(productId);
+    updateBasketCounter();
+    cart.updateCartItems(productList.products);
+};
+productListView.toggleProductInCart = (product) => {
+    productList.toggleProductInCart(product);
+    updateBasketCounter();
+    cart.updateCartItems(productList.products);
+};
+
+cart.setProductList(productListView);
+
+export function setupContactFields(contactsModal: ContactsModal): void {
+    const checkFields = () => {
+        const isValid = contactsModal.contactValidator.validateContactFields(
+            contactsModal.emailField,
+            contactsModal.phoneField,
+            contactsModal.payButton,
+            contactsModal.formErrors
+        );
+        if (isValid) {
+            contactsModal.payButton.removeAttribute('disabled');
+        } else {
+            contactsModal.payButton.setAttribute('disabled', 'true');
+        }
+    };
+    contactsModal.emailField.addEventListener('input', checkFields);
+    contactsModal.phoneField.addEventListener('input', checkFields);
+}
+
+export function setupFormSubmitHandler(contactsModal: ContactsModal): void {
+    const form = contactsModal.modal.querySelector('form[name="contacts"]');
+    if (form) {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (contactsModal.emailField && contactsModal.phoneField) {
+                const isValid = contactsModal.contactValidator.validateContactFields(
+                    contactsModal.emailField,
+                    contactsModal.phoneField,
+                    contactsModal.payButton,
+                    contactsModal.formErrors
+                );
+                if (isValid) {
+                    contactsModal.formSubmitHandler(event); // Вызываем обработчик отправки формы
+                    contactsModal.onSuccess();
+                } else {
+                    console.error('Форма не прошла валидацию');
+                }
+            }
+        });
+    } else {
+        console.error('Форма не найдена');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const products = await loadProducts(api);
+    productList.products = productList.loadSelectedFromStorage(products);
+
+    loadProductsLogic();
+
+    // Элементы управления
+    const basketButton = ensureElement<HTMLButtonElement>('.header__basket');
+    basketButton.addEventListener('click', () => basketModal.open());
+    const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
+    form?.addEventListener('submit', formSubmitHandler);
+
+    // Перемещаем setupContactFields и setupFormSubmitHandler в index.ts
+    setupContactFields(contactsModal);
+    setupFormSubmitHandler(contactsModal);
+});

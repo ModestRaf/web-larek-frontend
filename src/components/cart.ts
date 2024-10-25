@@ -1,30 +1,22 @@
-import {CartItem, ICartView, IProductListView, ProductItem} from "../types";
+import {CartItem, IProductListView, ProductItem} from "../types";
 
 export class Cart {
     items: CartItem[] = [];
     private productList: IProductListView | null = null;
-    private cartView: ICartView | null = null;
 
     constructor() {
-        this.loadCartFromStorage();  // Загружаем данные из localStorage при инициализации
+        this.loadCartFromStorage();
     }
 
     setProductList(productList: IProductListView): void {
         this.productList = productList;
     }
 
-    setCartView(cartView: ICartView): void {
-        this.cartView = cartView;
-    }
-
     removeBasketItem(itemId: string): void {
         this.items = this.items.filter(item => item.id !== itemId);
-        this.saveCartToStorage();  // Сохраняем изменения
+        this.saveCartToStorage();
         if (this.productList) {
             this.productList.removeProductFromCart(itemId);
-        }
-        if (this.cartView) {
-            this.cartView.renderBasketItems();
         }
     }
 
@@ -34,10 +26,7 @@ export class Cart {
             title: product.title,
             price: product.price,
         }));
-        this.saveCartToStorage();  // Сохраняем изменения
-        if (this.cartView) {
-            this.cartView.renderBasketItems();
-        }
+        this.saveCartToStorage();
     }
 
     getTotalPrice(): number {
@@ -46,18 +35,13 @@ export class Cart {
 
     clearCart(): void {
         this.items = [];
-        this.saveCartToStorage();  // Очищаем localStorage
-        if (this.cartView) {
-            this.cartView.renderBasketItems();
-        }
+        this.saveCartToStorage();
     }
 
-    // Сохраняем текущее состояние корзины в localStorage
     private saveCartToStorage(): void {
         localStorage.setItem('cartItems', JSON.stringify(this.items));
     }
 
-    // Загружаем состояние корзины из localStorage
     private loadCartFromStorage(): void {
         const savedItems = localStorage.getItem('cartItems');
         if (savedItems) {

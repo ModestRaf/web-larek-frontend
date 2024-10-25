@@ -3,7 +3,7 @@ import {ModalBase} from "./modalBase";
 
 export class CartView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
-    private readonly onCheckout: (totalPrice: number) => void; // Коллбек для обработки заказа
+    private readonly onCheckout: (totalPrice: number) => void;
     private cartTemplate: HTMLTemplateElement;
     private template: HTMLTemplateElement;
     private model: ICart;
@@ -11,23 +11,23 @@ export class CartView extends ModalBase {
     constructor(
         modalId: string,
         contentTemplateId: string,
-        model: ICart, // Принимаем абстракцию через интерфейс
-        onCheckout: (totalPrice: number) => void, // Передаем функцию для обработки
+        model: ICart,
+        onCheckout: (totalPrice: number) => void
     ) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.onCheckout = onCheckout;
         this.cartTemplate = document.querySelector('#basket') as HTMLTemplateElement;
         this.template = document.querySelector('#card-basket') as HTMLTemplateElement;
-        this.model = model; // Используем интерфейс ICart
+        this.model = model;
     }
 
     open(): void {
         super.open();
         const cartClone = document.importNode(this.cartTemplate.content, true);
-        this.content.innerHTML = '';  // Очищаем содержимое перед добавлением
-        this.content.appendChild(cartClone);  // Добавляем клонированный шаблон
-        this.renderBasketItems();  // Рендерим список товаров в корзине
+        this.content.innerHTML = '';
+        this.content.appendChild(cartClone);
+        this.renderBasketItems();
         const checkoutButton = this.modal.querySelector('.basket__button') as HTMLElement | null;
         if (checkoutButton) {
             checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
@@ -41,7 +41,7 @@ export class CartView extends ModalBase {
         const basketPrice = this.modal.querySelector('.basket__price') as HTMLElement;
         const checkoutButton = this.modal.querySelector('.basket__button') as HTMLButtonElement;
         if (!basketList || !basketPrice || !checkoutButton) {
-            console.error('Элементы корзины не найдены');
+            console.error('Basket elements not found');
             return;
         }
         basketList.innerHTML = '';
@@ -77,8 +77,12 @@ export class CartView extends ModalBase {
         itemIndex.textContent = index.toString();
         itemTitle.textContent = item.title;
         itemPrice.textContent = item.price === null ? 'Бесценно' : `${item.price} синапсов`;
-        // Используем метод интерфейса для удаления товара
-        deleteButton.addEventListener('click', () => this.model.removeBasketItem(item.id));
+
+        // Передаем удаление обратно модели
+        deleteButton.addEventListener('click', () => {
+            this.model.removeBasketItem(item.id);
+            this.renderBasketItems(); // Перерисовка корзины
+        });
 
         return clone;
     }
