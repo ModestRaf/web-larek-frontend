@@ -33,13 +33,11 @@ export class ContactsModal extends ModalBase {
         const contactsClone = document.importNode(this.contactsTemplate.content, true);
         this.content.innerHTML = ''; // Используем this.content из ModalBase
         this.content.appendChild(contactsClone);
-        // Определяем статичные DOM-элементы после добавления шаблона в DOM
         this.emailField = this.modal.querySelector('input[name="email"]') as HTMLInputElement;
         this.phoneField = this.modal.querySelector('input[name="phone"]') as HTMLInputElement;
         this.payButton = this.modal.querySelector('.button') as HTMLButtonElement;
         this.formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
 
-        // Устанавливаем обработчики событий
         setupContactFields(this);
         setupFormSubmitHandler(this);
     }

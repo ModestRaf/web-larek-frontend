@@ -78,7 +78,6 @@ export class CartView extends ModalBase {
         itemTitle.textContent = item.title;
         itemPrice.textContent = item.price === null ? 'Бесценно' : `${item.price} синапсов`;
 
-        // Передаем удаление обратно модели
         deleteButton.addEventListener('click', () => {
             this.model.removeBasketItem(item.id);
             this.renderBasketItems(); // Перерисовка корзины

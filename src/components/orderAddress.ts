@@ -4,18 +4,18 @@ import {IOrderModel} from "../types";
 export class OrderView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private orderTemplate: HTMLTemplateElement;
-    private model: IOrderModel; // Используем интерфейс
+    private model: IOrderModel;
     private selectedPaymentMethod: string;
     public formSubmitHandler: (event: Event) => void;
     private readonly openContactsModal: () => void;
-    private readonly onSuccess: () => void; // Add onSuccess
+    private readonly onSuccess: () => void;
 
     constructor(
         modalId: string,
         contentTemplateId: string,
-        model: IOrderModel, // Используем интерфейс
+        model: IOrderModel,
         openContactsModal: () => void,
-        onSuccess: () => void, // Add onSuccess
+        onSuccess: () => void,
         formSubmitHandler: (event: Event) => void
     ) {
         super(`#${modalId}`, '.modal__close');

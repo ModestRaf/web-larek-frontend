@@ -53,7 +53,6 @@ export class Order {
         }
     }
 
-    // Методы для установки и получения данных
     setPaymentMethod(method: string): void {
         this.paymentMethod = method;
     }

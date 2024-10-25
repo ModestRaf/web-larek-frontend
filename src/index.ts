@@ -215,7 +215,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
     form?.addEventListener('submit', formSubmitHandler);
 
-    // Перемещаем setupContactFields и setupFormSubmitHandler в index.ts
     setupContactFields(contactsModal);
     setupFormSubmitHandler(contactsModal);
 });

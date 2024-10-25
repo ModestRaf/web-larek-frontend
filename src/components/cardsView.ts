@@ -25,7 +25,6 @@ export class CardsView extends ModalBase {
                 this.updateCardContent(popupCard, product);
             });
         }
-
         this.content.innerHTML = '';
         this.content.appendChild(popupClone);
         this.open();
@@ -44,7 +43,6 @@ export class CardsView extends ModalBase {
         const price = element.querySelector('.card__price') as HTMLElement | null;
         const category = element.querySelector('.card__category') as HTMLElement;
         const button = element.querySelector('.card__button') as HTMLButtonElement;
-
         if (image) {
             image.src = CDN_URL + product.image;
             image.alt = product.title;
