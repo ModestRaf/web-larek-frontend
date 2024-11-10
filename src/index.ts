@@ -7,15 +7,17 @@ import {CardsView} from "./components/cardsView";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
-import {ProductItem, IOrder, IOrderResult, OrderForm} from "./types";
+import {ProductItem, IOrder, OrderForm} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsModal} from "./components/contacts";
 import {OrderView} from "./components/orderAddress";
 import {ensureElement} from "./utils/utils";
 import {EventEmitter, IEvents} from "./components/base/events";
+import {LarekApi} from "./components/LarekApi";
 
 const eventEmitter: IEvents = new EventEmitter();
 const api = new Api(API_URL);
+const larekApi = new LarekApi(api);
 const cart = new Cart();
 const productList = new ProductList();
 const orderModel = new Order('modal-container', 'order');
@@ -67,19 +69,6 @@ async function loadProducts(api: Api): Promise<ProductItem[]> {
     }
 }
 
-// Отправка заказа на сервер
-async function submitOrder(api: Api, order: IOrder): Promise<IOrderResult> {
-    try {
-        console.log('Отправка заказа на сервер:', JSON.stringify(order, null, 2));
-        const response = await api.post('/order', order) as IOrderResult;
-        console.log('Ответ сервера:', JSON.stringify(response, null, 2));
-        return response;
-    } catch (error) {
-        console.error('Ошибка при отправке заказа:', error);
-        throw error;
-    }
-}
-
 // Вспомогательные функции
 function updateBasketCounter(): void {
     const selectedProductsCount = productList.products.filter(product => product.selected).length;
@@ -128,7 +117,7 @@ async function formSubmitHandler(event: Event) {
             items: cart.items.map(item => item.id.toString()),
             total: totalPrice
         };
-        const response = await submitOrder(api, order);
+        const response = await larekApi.submitOrder(order);
         console.log('Ответ от сервера:', response);
         if (response.id) {
             console.log('Заказ успешно отправлен');
