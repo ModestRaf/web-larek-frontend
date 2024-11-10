@@ -1,23 +1,15 @@
-import {CartItem, IProductListView, ProductItem} from "../types";
+import {CartItem, ProductItem} from "../types";
 
 export class Cart {
     items: CartItem[] = [];
-    private productList: IProductListView | null = null;
 
     constructor() {
         this.loadCartFromStorage();
     }
 
-    setProductList(productList: IProductListView): void {
-        this.productList = productList;
-    }
-
     removeBasketItem(itemId: string): void {
         this.items = this.items.filter(item => item.id !== itemId);
         this.saveCartToStorage();
-        if (this.productList) {
-            this.productList.removeProductFromCart(itemId);
-        }
     }
 
     updateCartItems(products: ProductItem[]): void {

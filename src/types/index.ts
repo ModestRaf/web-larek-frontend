@@ -64,10 +64,6 @@ export interface IOrderModel {
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean;
 }
 
-export interface ICartModel {
-    setProductList(productList: ProductListView): void;
-}
-
 export interface IContactSetup {
     setupContactFields(modal: ContactsModal): void;
 }

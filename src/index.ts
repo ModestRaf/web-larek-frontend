@@ -27,7 +27,7 @@ const contactsModal = new ContactsModal(
     'content-template',
     orderModel,
     () => console.log('Форма успешно отправлена'),
-    formSubmitHandler
+    handleFormSubmit
 );
 const orderView = new OrderView(
     'modal-container',
@@ -35,7 +35,7 @@ const orderView = new OrderView(
     orderModel,
     () => contactsModal.open(),
     () => console.log('Форма успешно отправлена'),
-    formSubmitHandler
+    handleFormSubmit
 );
 const basketModal = new CartView(
     'modal-container',
@@ -52,7 +52,6 @@ const cardsView = new CardsView(
 
 const productListView = new ProductListView(
     'gallery',
-    cart,
     (product) => cardsView.createProductCard(product), // Убираем `model` и обращаемся к `createProductCard`
     (product, callback) => cardsView.openPopup(product, callback), // Убираем `model` и обращаемся к `openPopup`
     () => basketModal.open()
@@ -90,8 +89,8 @@ function loadProductsLogic(): void {
 
 // Обработчики событий
 eventEmitter.on('orderSuccessClosed', resetCart);
-eventEmitter.on('orderSuccess', (event: CustomEvent) => {
-    const totalPrice = event.detail.totalPrice;
+eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
+    const totalPrice = data.totalPrice;
     if (totalPrice !== undefined) {
         successModal.open(totalPrice);
     } else {
@@ -99,7 +98,7 @@ eventEmitter.on('orderSuccess', (event: CustomEvent) => {
     }
 });
 
-async function formSubmitHandler(event: Event) {
+async function handleFormSubmit(event: Event) {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const totalPrice = cart.getTotalPrice();
@@ -125,7 +124,7 @@ async function formSubmitHandler(event: Event) {
             productList.clearSelectedProducts();
             updateBasketCounter();
             productListView.renderProducts(productList.products);
-            eventEmitter.emit('orderSuccess', new CustomEvent('orderSuccess', {detail: {totalPrice}}));
+            eventEmitter.emit('orderSuccess', {totalPrice});
         } else if (response.error) {
             console.error('Ошибка при отправке заказа:', response.error);
         } else {
@@ -146,8 +145,6 @@ productListView.toggleProductInCart = (product) => {
     updateBasketCounter();
     cart.updateCartItems(productList.products);
 };
-
-cart.setProductList(productListView);
 
 export function setupContactFields(contactsModal: ContactsModal): void {
     const checkFields = () => {
@@ -202,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const basketButton = ensureElement<HTMLButtonElement>('.header__basket');
     basketButton.addEventListener('click', () => basketModal.open());
     const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
-    form?.addEventListener('submit', formSubmitHandler);
+    form?.addEventListener('submit', handleFormSubmit);
 
     setupContactFields(contactsModal);
     setupFormSubmitHandler(contactsModal);
