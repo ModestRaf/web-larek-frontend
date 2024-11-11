@@ -18,8 +18,8 @@ import {LarekApi} from "./components/LarekApi";
 const eventEmitter: IEvents = new EventEmitter();
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
-const cart = new Cart();
 const productList = new ProductList();
+const cart = new Cart(productList);
 const orderModel = new Order('modal-container', 'order');
 const successModal = new SuccessModal('modal-container', 'success');
 const contactsModal = new ContactsModal(
@@ -52,6 +52,7 @@ const cardsView = new CardsView(
 
 const productListView = new ProductListView(
     'gallery',
+    cart,
     (product) => cardsView.createProductCard(product), // Убираем `model` и обращаемся к `createProductCard`
     (product, callback) => cardsView.openPopup(product, callback), // Убираем `model` и обращаемся к `openPopup`
     () => basketModal.open()
@@ -135,13 +136,14 @@ async function handleFormSubmit(event: Event) {
     }
 }
 
-productListView.removeProductFromCart = (productId) => {
-    productList.removeProductFromCart(productId);
+productListView.toggleProductInCart = (product) => {
+    cart.toggleProductInCart(product, productList.products);
     updateBasketCounter();
     cart.updateCartItems(productList.products);
 };
-productListView.toggleProductInCart = (product) => {
-    productList.toggleProductInCart(product);
+
+productListView.removeProductFromCart = (productId) => {
+    cart.removeProductFromCart(productId, productList.products);
     updateBasketCounter();
     cart.updateCartItems(productList.products);
 };

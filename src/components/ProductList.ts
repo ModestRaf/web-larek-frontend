@@ -1,6 +1,6 @@
-import {ProductItem} from "../types";
+import {IProductList, ProductItem} from "../types";
 
-export class ProductList {
+export class ProductList implements IProductList {
     products: ProductItem[] = [];
 
     saveSelectedToStorage(): void {
@@ -24,22 +24,6 @@ export class ProductList {
             });
         }
         return products;
-    }
-
-    toggleProductInCart(product: ProductItem): void {
-        const existingProduct = this.products.find(p => p.id === product.id);
-        if (existingProduct) {
-            existingProduct.selected = !existingProduct.selected;
-        }
-        this.saveSelectedToStorage();
-    }
-
-    removeProductFromCart(productId: string): void {
-        const product = this.products.find(p => p.id === productId);
-        if (product) {
-            product.selected = false;
-            this.saveSelectedToStorage();
-        }
     }
 
     clearSelectedProducts(): void {

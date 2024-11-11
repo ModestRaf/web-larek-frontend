@@ -46,6 +46,10 @@ export interface IProductListView {
     removeProductFromCart(itemId: string): void;
 }
 
+export interface IProductList {
+    saveSelectedToStorage(): void;
+}
+
 export interface ICart {
     items: CartItem[]; // Список товаров в корзине
     getTotalPrice(): number; // Метод для получения общей стоимости товаров
@@ -66,4 +70,8 @@ export interface IOrderModel {
 
 export interface IContactSetup {
     setupContactFields(modal: ContactsModal): void;
+}
+
+export interface ICartModel {
+    setProductList(productList: ProductListView): void;
 }
