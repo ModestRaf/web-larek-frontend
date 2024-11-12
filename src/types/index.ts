@@ -1,6 +1,4 @@
-// Тип для сущности Товар (ProductModel)
 import {ProductListView} from "../components/ProductListView";
-import {ContactsModal} from "../components/contacts";
 
 export interface ProductItem {
     id: string;               // Уникальный идентификатор товара
@@ -66,10 +64,6 @@ export interface IOrderModel {
     setAddress(address: string): void;
 
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean;
-}
-
-export interface IContactSetup {
-    setupContactFields(modal: ContactsModal): void;
 }
 
 export interface ICartModel {
