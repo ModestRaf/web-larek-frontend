@@ -52,11 +52,25 @@ const cardsView = new CardsView(
 
 const productListView = new ProductListView(
     'gallery',
-    cart,
-    (product) => cardsView.createProductCard(product), // Убираем `model` и обращаемся к `createProductCard`
-    (product, callback) => cardsView.openPopup(product, callback), // Убираем `model` и обращаемся к `openPopup`
+    (product) => cardsView.createProductCard(product), // Убираем model и обращаемся к createProductCard
+    (product, callback) => cardsView.openPopup(product, callback), // Убираем model и обращаемся к openPopup
     () => basketModal.open()
 );
+
+// Подписываемся на события
+window.addEventListener('toggleProductInCart', (event: CustomEvent) => {
+    const product = event.detail.product;
+    cart.toggleProductInCart(product, productList.products);
+    updateBasketCounter();
+    cart.updateCartItems(productList.products);
+});
+
+window.addEventListener('removeProductFromCart', (event: CustomEvent) => {
+    const productId = event.detail.productId;
+    cart.removeProductFromCart(productId, productList.products);
+    updateBasketCounter();
+    cart.updateCartItems(productList.products);
+});
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -132,18 +146,6 @@ async function handleFormSubmit(event: Event) {
         console.error('Ошибка при отправке заказа:', error);
     }
 }
-
-productListView.toggleProductInCart = (product) => {
-    cart.toggleProductInCart(product, productList.products);
-    updateBasketCounter();
-    cart.updateCartItems(productList.products);
-};
-
-productListView.removeProductFromCart = (productId) => {
-    cart.removeProductFromCart(productId, productList.products);
-    updateBasketCounter();
-    cart.updateCartItems(productList.products);
-};
 
 export function setupContactFields(contactsModal: ContactsModal): void {
     const checkFields = () => {

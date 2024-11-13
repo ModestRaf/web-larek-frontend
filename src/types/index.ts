@@ -1,5 +1,3 @@
-import {ProductListView} from "../components/ProductListView";
-
 export interface ProductItem {
     id: string;               // Уникальный идентификатор товара
     price: number | null;            // Цена товара
@@ -10,7 +8,6 @@ export interface ProductItem {
     selected: boolean;
 }
 
-// Тип для сущности Элемент корзины (CartItem)
 export interface CartItem {
     id: string;               // Уникальный идентификатор товара
     title: string;            // Название товара
@@ -25,7 +22,6 @@ export interface OrderForm {
 }
 
 export interface IOrder extends OrderForm {
-    // Массив ID купленных товаров
     items?: string [];
     payment?: string;
     total?: number;
@@ -40,18 +36,26 @@ export interface IOrderResult {
     error?: string;  // Сообщение об ошибке (если заказ не был успешно обработан)
 }
 
-export interface IProductListView {
-    removeProductFromCart(itemId: string): void;
-}
-
 export interface IProductList {
     saveSelectedToStorage(): void;
 }
 
 export interface ICart {
-    items: CartItem[]; // Список товаров в корзине
-    getTotalPrice(): number; // Метод для получения общей стоимости товаров
-    removeBasketItem(itemId: string): void; // Метод для удаления товара из корзины
+    items: CartItem[];
+
+    toggleProductInCart(product: ProductItem, products: ProductItem[]): void;
+
+    removeProductFromCart(productId: string, products: ProductItem[]): void;
+
+    removeBasketItem(itemId: string): void;
+
+    updateCartItems(products: ProductItem[]): void;
+
+    getTotalPrice(): number;
+
+    clearCart(): void;
+
+    getSelectedProductsCount(): number;
 }
 
 export interface IContactValidator {
@@ -60,12 +64,6 @@ export interface IContactValidator {
 
 export interface IOrderModel {
     setPaymentMethod(method: string): void;
-
     setAddress(address: string): void;
-
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean;
-}
-
-export interface ICartModel {
-    setProductList(productList: ProductListView): void;
 }

@@ -1,8 +1,7 @@
-import {CartItem, IProductList, IProductListView, ProductItem} from "../types";
+import {CartItem, ICart, IProductList, ProductItem} from "../types";
 
-export class Cart {
+export class Cart implements ICart {
     items: CartItem[] = [];
-    private productListView: IProductListView | null = null;
     private productList: IProductList;
 
     constructor(productList: IProductList) {
@@ -20,6 +19,7 @@ export class Cart {
         }
         this.productList.saveSelectedToStorage();
         this.updateCartItems(products);
+        this.notifyProductToggled(product, this.items.length);
     }
 
     removeProductFromCart(productId: string, products: ProductItem[]): void {
@@ -32,18 +32,13 @@ export class Cart {
         }
         this.productList.saveSelectedToStorage();
         this.updateCartItems(products);
-    }
-
-    setProductList(productList: IProductListView): void {
-        this.productListView = productList;
+        this.notifyProductRemoved(productId, this.items.length);
     }
 
     removeBasketItem(itemId: string): void {
         this.items = this.items.filter(item => item.id !== itemId);
         this.saveCartToStorage();
-        if (this.productListView) {
-            this.productListView.removeProductFromCart(itemId);
-        }
+        this.notifyBasketItemRemoved(itemId, this.items.length);
     }
 
     updateCartItems(products: ProductItem[]): void {
@@ -64,6 +59,10 @@ export class Cart {
         this.saveCartToStorage();
     }
 
+    getSelectedProductsCount(): number {
+        return this.items.length;
+    }
+
     private saveCartToStorage(): void {
         localStorage.setItem('cartItems', JSON.stringify(this.items));
     }
@@ -73,5 +72,20 @@ export class Cart {
         if (savedItems) {
             this.items = JSON.parse(savedItems);
         }
+    }
+
+    private notifyProductToggled(product: ProductItem, selectedProductsCount: number): void {
+        const event = new CustomEvent('productToggled', {detail: {product, selectedProductsCount}});
+        window.dispatchEvent(event);
+    }
+
+    private notifyProductRemoved(productId: string, selectedProductsCount: number): void {
+        const event = new CustomEvent('productRemoved', {detail: {productId, selectedProductsCount}});
+        window.dispatchEvent(event);
+    }
+
+    private notifyBasketItemRemoved(itemId: string, selectedProductsCount: number): void {
+        const event = new CustomEvent('basketItemRemoved', {detail: {itemId, selectedProductsCount}});
+        window.dispatchEvent(event);
     }
 }
