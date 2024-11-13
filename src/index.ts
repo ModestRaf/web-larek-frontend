@@ -101,14 +101,11 @@ eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
 
 async function handleFormSubmit(event: Event) {
     event.preventDefault();
-    const form = event.target as HTMLFormElement;
     const totalPrice = cart.getTotalPrice();
-    const emailField = ensureElement<HTMLInputElement>('input[name="email"]', form);
-    const phoneField = ensureElement<HTMLInputElement>('input[name="phone"]', form);
     try {
         const orderForm: OrderForm = {
-            email: emailField.value,
-            phone: phoneField.value,
+            email: contactsModal.getEmailValue(),
+            phone: contactsModal.getPhoneValue(),
             payment: orderModel.getPaymentMethod(),
             address: orderModel.getAddress(),
         };

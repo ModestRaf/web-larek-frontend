@@ -8,6 +8,7 @@ export class ContactsModal extends ModalBase {
     contactValidator: IContactValidator; // Используем интерфейс
     readonly onSuccess: () => void; // Функция, вызываемая при успешной отправке формы
     readonly formSubmitHandler: (event: Event) => void;
+    private form: HTMLFormElement | null = null;
     emailField: HTMLInputElement | null = null;
     phoneField: HTMLInputElement | null = null;
     payButton: HTMLButtonElement | null = null;
@@ -29,16 +30,29 @@ export class ContactsModal extends ModalBase {
     }
 
     open(): void {
-        super.open(); // Используем метод open из ModalBase
+        super.open();
         const contactsClone = document.importNode(this.contactsTemplate.content, true);
-        this.content.innerHTML = ''; // Используем this.content из ModalBase
+        this.content.innerHTML = '';
         this.content.appendChild(contactsClone);
-        this.emailField = this.modal.querySelector('input[name="email"]') as HTMLInputElement;
-        this.phoneField = this.modal.querySelector('input[name="phone"]') as HTMLInputElement;
-        this.payButton = this.modal.querySelector('.button') as HTMLButtonElement;
-        this.formErrors = this.modal.querySelector('.form__errors') as HTMLElement;
+        this.form = this.content.querySelector('form') as HTMLFormElement;
+        if (this.form) {
+            this.emailField = this.form.querySelector('input[name="email"]') as HTMLInputElement;
+            this.phoneField = this.form.querySelector('input[name="phone"]') as HTMLInputElement;
+            this.payButton = this.form.querySelector('.button') as HTMLButtonElement;
+            this.formErrors = this.form.querySelector('.form__errors') as HTMLElement;
+        } else {
+            console.error('Элемент формы не найден');
+        }
 
         setupContactFields(this);
         setupFormSubmitHandler(this);
+    }
+
+    getEmailValue(): string {
+        return this.emailField?.value || '';
+    }
+
+    getPhoneValue(): string {
+        return this.phoneField?.value || '';
     }
 }
