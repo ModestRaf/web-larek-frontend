@@ -34,6 +34,7 @@ export class ProductListView {
         });
     }
 
+
     renderProducts(products: ProductItem[]): void {
         this.container.innerHTML = '';
         products.forEach(product => {
@@ -47,6 +48,8 @@ export class ProductListView {
     }
 
     updateBasketCounter(selectedProductsCount: number): void {
-        this.basketCounter.textContent = selectedProductsCount.toString();
+        if (this.basketCounter && typeof selectedProductsCount === 'number') { // Проверяем, что элемент существует и значение корректно
+            this.basketCounter.textContent = selectedProductsCount.toString();
+        }
     }
 }

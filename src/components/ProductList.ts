@@ -3,6 +3,21 @@ import {IProductList, ProductItem} from "../types";
 export class ProductList implements IProductList {
     products: ProductItem[] = [];
 
+    constructor() {
+        window.addEventListener('productRemoved', (event: CustomEvent) => {
+            const productId = event.detail.productId;
+            this.updateSelectedState(productId);
+        });
+    }
+
+    private updateSelectedState(productId: string): void {
+        const product = this.products.find(p => p.id === productId);
+        if (product) {
+            product.selected = false;
+            this.saveSelectedToStorage();
+        }
+    }
+
     saveSelectedToStorage(): void {
         const selectedState = this.products.map(product => ({
             id: product.id,

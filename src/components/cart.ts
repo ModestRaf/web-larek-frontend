@@ -38,7 +38,12 @@ export class Cart implements ICart {
     removeBasketItem(itemId: string): void {
         this.items = this.items.filter(item => item.id !== itemId);
         this.saveCartToStorage();
-        this.notifyBasketItemRemoved(itemId, this.items.length);
+        const selectedProductsCount = this.items.length; // Получаем актуальное количество товаров в корзине
+        this.notifyBasketItemRemoved(itemId, selectedProductsCount);
+
+        // Генерируем событие для обновления состояния `selected` в списке продуктов
+        const event = new CustomEvent('productRemoved', {detail: {productId: itemId}});
+        window.dispatchEvent(event);
     }
 
     updateCartItems(products: ProductItem[]): void {
