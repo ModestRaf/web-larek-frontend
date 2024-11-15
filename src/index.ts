@@ -191,16 +191,30 @@ export function setupFormSubmitHandler(contactsModal: ContactsModal): void {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOMContentLoaded event fired');
+
     const products = await loadProducts(api);
     productList.products = productList.loadSelectedFromStorage(products);
 
     loadProductsLogic();
 
     // Элементы управления
-    const basketButton = ensureElement<HTMLButtonElement>('.header__basket');
-    basketButton.addEventListener('click', () => basketModal.open());
-    const form = ensureElement<HTMLFormElement>('form[name="contacts"]', contactsModal.modal);
-    form?.addEventListener('submit', handleFormSubmit);
+    const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
+    if (basketButton) {
+        basketButton.addEventListener('click', () => {
+            console.log('Basket button clicked');
+            basketModal.open();
+        });
+    } else {
+        console.error('Basket button not found');
+    }
+
+    const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
+    if (form) {
+        form.addEventListener('submit', handleFormSubmit);
+    } else {
+        console.error('Contact form not found');
+    }
 
     setupContactFields(contactsModal);
     setupFormSubmitHandler(contactsModal);
