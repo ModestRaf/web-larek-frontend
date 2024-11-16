@@ -1,6 +1,6 @@
 export class ModalBase {
     modal: HTMLElement;
-    protected content: HTMLElement;
+    content: HTMLElement;
     protected closeButton: HTMLElement;
     constructor(modalSelector: string, closeSelector: string) {
         this.modal = document.querySelector(modalSelector) as HTMLElement;

@@ -195,6 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     loadProductsLogic();
 
+    // Basket button to open the cart modal
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
@@ -206,14 +207,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Handle the preview:open event to open the product modal
-    window.addEventListener('preview:open', (event: CustomEvent) => {
+    window.addEventListener('popup:open', (event: CustomEvent) => {
         const product = event.detail.product;
-        cardsView.openPopup(product, () => {
-            const toggleEvent = new CustomEvent('toggleProductInCart', {detail: {product}});
-            window.dispatchEvent(toggleEvent);
-        });
-    });
+        const popupClone = document.importNode(cardsView.popupTemplate.content, true);
+        const popupCard = popupClone.querySelector('.card') as HTMLElement;
 
+        cardsView.updateCardContent(popupCard, product);
+
+        const button = popupCard.querySelector('.card__button') as HTMLButtonElement | null;
+        if (button) {
+            button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
+            button.addEventListener('click', () => {
+                const toggleEvent = new CustomEvent('toggleProductInCart', {detail: {product}});
+                window.dispatchEvent(toggleEvent);
+                cardsView.updateCardContent(popupCard, product);
+            });
+        }
+
+        // Use the inherited `content` property from `ModalBase` directly
+        cardsView.content.innerHTML = '';
+        cardsView.content.appendChild(popupClone);
+
+        cardsView.open();
+    });
     // Form submission for contacts
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
