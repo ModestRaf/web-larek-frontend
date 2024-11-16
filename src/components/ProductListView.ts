@@ -4,23 +4,16 @@ export class ProductListView {
     private container: HTMLElement;
     private basketCounter: HTMLElement;
     private readonly createProductCard: (product: ProductItem) => HTMLElement;
-    private readonly openPopup: (product: ProductItem, callback: () => void) => void;
-    private readonly openBasketModal: () => void;
 
     constructor(
         containerId: string,
-        createProductCard: (product: ProductItem) => HTMLElement,
-        openPopup: (product: ProductItem, callback: () => void) => void,
-        openBasketModal: () => void
+        createProductCard: (product: ProductItem) => HTMLElement
     ) {
         this.container = document.querySelector(`#${containerId}`) as HTMLElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.createProductCard = createProductCard;
-        this.openPopup = openPopup;
-        this.openBasketModal = openBasketModal;
 
-
-        // Подписываемся на события
+        // Subscribing to events for updating basket counter
         window.addEventListener('productToggled', (event: CustomEvent) => {
             this.updateBasketCounter(event.detail.selectedProductsCount);
         });
@@ -34,21 +27,20 @@ export class ProductListView {
         });
     }
 
-
     renderProducts(products: ProductItem[]): void {
         this.container.innerHTML = '';
         products.forEach(product => {
             const card = this.createProductCard(product);
             this.container.appendChild(card);
-            card.addEventListener('click', () => this.openPopup(product, () => {
-                const event = new CustomEvent('toggleProductInCart', {detail: {product}});
+            card.addEventListener('click', () => {
+                const event = new CustomEvent('preview:open', {detail: {product}});
                 window.dispatchEvent(event);
-            }));
+            });
         });
     }
 
     updateBasketCounter(selectedProductsCount: number): void {
-        if (this.basketCounter && typeof selectedProductsCount === 'number') { // Проверяем, что элемент существует и значение корректно
+        if (this.basketCounter && typeof selectedProductsCount === 'number') {
             this.basketCounter.textContent = selectedProductsCount.toString();
         }
     }

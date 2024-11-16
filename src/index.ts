@@ -11,7 +11,6 @@ import {ProductItem, IOrder, OrderForm} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsModal} from "./components/contacts";
 import {OrderView} from "./components/orderAddress";
-import {ensureElement} from "./utils/utils";
 import {EventEmitter, IEvents} from "./components/base/events";
 import {LarekApi} from "./components/LarekApi";
 
@@ -52,9 +51,7 @@ const cardsView = new CardsView(
 
 const productListView = new ProductListView(
     'gallery',
-    (product) => cardsView.createProductCard(product), // Убираем model и обращаемся к createProductCard
-    (product, callback) => cardsView.openPopup(product, callback), // Убираем model и обращаемся к openPopup
-    () => basketModal.open()
+    (product) => cardsView.createProductCard(product) // Removed model reference, directly calling createProductCard
 );
 
 // Подписываемся на события
@@ -198,7 +195,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     loadProductsLogic();
 
-    // Элементы управления
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
@@ -209,6 +205,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Basket button not found');
     }
 
+    // Handle the preview:open event to open the product modal
+    window.addEventListener('preview:open', (event: CustomEvent) => {
+        const product = event.detail.product;
+        cardsView.openPopup(product, () => {
+            const toggleEvent = new CustomEvent('toggleProductInCart', {detail: {product}});
+            window.dispatchEvent(toggleEvent);
+        });
+    });
+
+    // Form submission for contacts
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
