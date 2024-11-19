@@ -3,7 +3,7 @@ import {ModalBase} from "./modalBase";
 import {CDN_URL} from "../utils/constants";
 
 export class CardsView extends ModalBase {
-    private readonly cardTemplate: HTMLTemplateElement;
+    private cardTemplate: HTMLTemplateElement;
     readonly popupTemplate: HTMLTemplateElement;
     private readonly selectors: {
         image: string;
