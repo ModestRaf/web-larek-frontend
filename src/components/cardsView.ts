@@ -22,9 +22,8 @@ export class CardsView extends ModalBase {
 
     constructor(popupSelector: string, closeSelector: string, cardTemplateId: string, popupTemplateId: string) {
         super(popupSelector, closeSelector);
-        this.cardTemplate = document.querySelector(`#${cardTemplateId}`) as HTMLTemplateElement;
-        this.popupTemplate = document.querySelector(`#${popupTemplateId}`) as HTMLTemplateElement;
-        // Сохраняем селекторы для всех статичных элементов карточки
+        this.cardTemplate = document.getElementById(cardTemplateId) as HTMLTemplateElement;
+        this.popupTemplate = document.getElementById(popupTemplateId) as HTMLTemplateElement;
         this.selectors = {
             image: '.card__image',
             title: '.card__title',
@@ -44,29 +43,28 @@ export class CardsView extends ModalBase {
         return productCard;
     }
 
-    updateCardContent(card: HTMLElement, product: ProductItem): void {
-        const image = card.querySelector(this.selectors.image) as HTMLImageElement;
-        const title = card.querySelector(this.selectors.title) as HTMLElement;
-        const price = card.querySelector(this.selectors.price) as HTMLElement | null;
-        const category = card.querySelector(this.selectors.category) as HTMLElement;
-        const button = card.querySelector(this.selectors.button) as HTMLButtonElement;
-        if (image) {
-            image.src = CDN_URL + product.image;
-            image.alt = product.title;
-        }
-        if (title) {
+    updateCardContent(element: HTMLElement, product: ProductItem): void {
+        const updateElement = (selector: string, updater: (el: HTMLElement) => void) => {
+            const el = element.querySelector(selector);
+            if (el) updater(el as HTMLElement);
+        };
+        updateElement(this.selectors.image, (img: HTMLImageElement) => {
+            img.src = CDN_URL + product.image;
+            img.alt = product.title;
+        });
+        updateElement(this.selectors.title, (title) => {
             title.textContent = product.title;
-        }
-        if (price) {
+        });
+        updateElement(this.selectors.price, (price) => {
             price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
-        }
-        if (category) {
+        });
+        updateElement(this.selectors.category, (category) => {
             category.textContent = product.category;
             this.setCategoryClass(category, product.category);
-        }
-        if (button) {
+        });
+        updateElement(this.selectors.button, (button: HTMLButtonElement) => {
             button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
-        }
+        });
     }
 
     private setCategoryClass(category: HTMLElement | null, categoryName: string): void {
