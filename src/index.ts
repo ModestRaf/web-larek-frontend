@@ -54,7 +54,6 @@ const productListView = new ProductListView(
     (product) => cardsView.createProductCard(product)
 );
 
-// Подписываемся на события
 window.addEventListener('toggleProductInCart', (event: CustomEvent) => {
     const product = event.detail.product;
     cart.toggleProductInCart(product, productList.products);

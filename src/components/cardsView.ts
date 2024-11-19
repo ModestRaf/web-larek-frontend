@@ -63,7 +63,12 @@ export class CardsView extends ModalBase {
             this.setCategoryClass(category, product.category);
         });
         updateElement(this.selectors.button, (button: HTMLButtonElement) => {
-            button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
+            if (product.price === null) {
+                button.disabled = true;
+            } else {
+                button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
+                button.disabled = false;
+            }
         });
     }
 

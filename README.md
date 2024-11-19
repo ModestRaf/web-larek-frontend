@@ -20,6 +20,7 @@
 - src/components/orderSuccess.ts - отображает информацию о списании средств
 - src/components/contacts.ts - управляет отображением и валидацией полей email и телефона, а также обработкой кнопки
   оплаты
+- src/components/LarekApi.ts - проверка результата
 - src/components/ProductList.ts - управляет состоянием корзины и переключением/удалением продуктов
 - src/components/cartView.ts - управляет отображением элементов корзины
 - src/components/ProductListView.ts - управляет отображением продуктов и обновлением счетчика корзины
@@ -92,24 +93,32 @@ price: number;            Цена товара
 ##### Данные:
 - products: ProductItem[] — список продуктов
 ##### Методы:
+
 - saveSelectedToStorage(): void — сохраняет состояние корзины в localStorage
 - loadSelectedFromStorage(products: ProductItem[]): ProductItem[] — загружает состояние корзины из localStorage
-- toggleProductInCart(product: ProductItem): void — переключает состояние продукта в корзине
-- removeProductFromCart(productId: string): void — удаляет продукт из корзины
-- clearSelectedProducts(): void — очищает выбранные продукты.
+- updateSelectedState(productId: string): void — обновляет состояние выбранного продукта
+- clearSelectedProducts(): void — очищает выбранные продукты
 
 #### Cart
 ##### Данные:
+
 - items: CartItem[] — список товаров в корзине
-- productList: IProductListView | null — ссылка на ProductListView
+- productList: IProductList — ссылка на ProductList
 ##### Методы:
-- setProductList(productList: IProductListView): void — устанавливает ссылку на ProductListView
+
+- toggleProductInCart(product: ProductItem, products: ProductItem[]): void — переключает состояние продукта в корзине
+- removeProductFromCart(productId: string, products: ProductItem[]): void — удаляет продукт из корзины
 - removeBasketItem(itemId: string): void — удаляет товар из корзины
 - updateCartItems(products: ProductItem[]): void — обновляет содержимое корзины
 - getTotalPrice(): number — возвращает общую стоимость товаров в корзине
 - clearCart(): void — очищает корзину
+- getSelectedProductsCount(): number — возвращает количество выбранных товаров
 - saveCartToStorage(): void — сохраняет корзину в localStorage
 - loadCartFromStorage(): void — загружает корзину из localStorage
+- notifyProductToggled(product: ProductItem, selectedProductsCount: number): void — уведомляет о переключении продукта
+- notifyProductRemoved(productId: string, selectedProductsCount: number): void — уведомляет об удалении продукта
+- notifyBasketItemRemoved(itemId: string, selectedProductsCount: number): void — уведомляет об удалении товара из
+  корзины
 
 ### Слой Представление (View)
 
@@ -120,28 +129,27 @@ price: number;            Цена товара
 #### CartView
 ##### Данные:
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна
-- cartTemplate: HTMLTemplateElement — шаблон корзины
-- template: HTMLTemplateElement — шаблон элемента корзины
-- model: ICart — модель корзины
-- onCheckout: (totalPrice: number) => void — функция, вызываемая при оформлении заказа
 ##### Методы:
+
 - open(): void — открывает модальное окно корзины
+- update(): void — обновляет содержимое корзины
 - renderBasketItems(): void — отображает элементы корзины
-- renderEmptyCart(basketList: HTMLElement, checkoutButton: HTMLButtonElement): void — отображает сообщение о пустой
-  корзине
-- renderItems(basketList: HTMLElement, checkoutButton: HTMLButtonElement): void — отображает элементы корзины
-- createBasketItem(item: CartItem, index: number): HTMLElement — создает элемент корзины
+- renderEmptyCart(): void — отображает сообщение о пустой корзине
+- renderItems(): void — отображает элементы корзины
 
 #### CardsView
 ##### Данные:
+
 - cardTemplate: HTMLTemplateElement — шаблон карточки товара
 - popupTemplate: HTMLTemplateElement — шаблон модального окна
+- selectors: { image: string; title: string; price: string; category: string; button: string; } — селекторы для
+  элементов карточки
+- categoryClasses: Record<string, string> — классы для категорий
 ##### Методы:
-- openPopup(product: ProductItem, toggleProductInCart: (product: ProductItem) => void): void — открывает модальное окно
-  с подробной информацией о товаре
+
 - createProductCard(product: ProductItem): HTMLElement — создает карточку товара
 - updateCardContent(element: HTMLElement, product: ProductItem): void — обновляет содержимое карточки товара
-- setCategoryClass(category: HTMLElement, categoryName: string): void — устанавливает класс категории
+- setCategoryClass(category: HTMLElement | null, categoryName: string): void — устанавливает класс категории
 
 #### OrderView
 ##### Данные:
@@ -184,18 +192,14 @@ price: number;            Цена товара
 
 #### ProductListView
 ##### Данные:
+
 - container: HTMLElement — контейнер для отображения продуктов
 - basketCounter: HTMLElement — элемент для отображения счетчика корзины
-- cartModel: ICartModel — модель корзины
 - createProductCard: (product: ProductItem) => HTMLElement — функция для создания карточки товара
-- openPopup: (product: ProductItem, callback: () => void) => void — функция для открытия модального окна с подробной
-  информацией о товаре
-- openBasketModal: () => void — функция для открытия модального окна корзины
 ##### Методы:
+
 - renderProducts(products: ProductItem[]): void — отображает продукты на странице
 - updateBasketCounter(selectedProductsCount: number): void — обновляет счетчик товаров в корзине
-- toggleProductInCart: (product: ProductItem) => void — переключает состояние продукта в корзине
-- removeProductFromCart: (productId: string) => void — удаляет продукт из корзины
 
 #### ModalBase
 ##### Данные:
@@ -220,11 +224,16 @@ price: number;            Цена товара
 
 ###### Где используются Custom Events
 
-Успешное завершение заказа:
-
-- событие orderSuccessClosed используется для уведомления о том, что пользователь закрыл модальное окно успешного
-  завершения заказа.
-- событие orderSuccess используется для уведомления о том, что заказ был успешно отправлен на сервер.
+- popup:open: Используется для открытия модального окна с подробной информацией о товаре
+- productToggled: Используется для уведомления о переключении состояния продукта в корзине
+- productRemoved: Используется для уведомления об удалении продукта из корзины
+- basketItemRemoved: Используется для уведомления об удалении товара из корзины
+- orderSuccessClosed: Используется для уведомления о том, что пользователь закрыл модальное окно успешного завершения
+  заказа
+- orderSuccess: Используется для уведомления о том, что заказ был успешно отправлен на сервер
+- preview:open: Используется для открытия модального окна с предварительным просмотром товара
+- toggleProductInCart: Используется для уведомления о переключении состояния продукта в корзине
+- removeProductFromCart: Используется для уведомления об удалении продукта из корзины
 
 Обработка событий. События добавляются и обрабатываются в index.ts, чтобы обеспечить взаимодействие между различными
 компонентами приложения.
@@ -247,15 +256,15 @@ price: number;            Цена товара
 В index.ts определены функции, которые связывают пользовательские действия с методами моделей и представлений. Эти
 функции отвечают за инициализацию и настройку обработчиков событий для ключевых элементов интерфейса:
 
-- loadProducts(api: Api): Promise<ProductItem[]> — функция для настройки взаимодействия с API и получения данных о
+- loadProducts(api: Api): Promise<ProductItem[]>: Функция для настройки взаимодействия с API и получения данных о
   продуктах
-- submitOrder(api: Api, order: IOrder): Promise<IOrderResult> — функция для отправки заказа на сервер
-- updateBasketCounter(): void — функция для обновления счетчика товаров в корзине
-- resetCart(): void — функция для очистки корзины и обновления интерфейса.
-- loadProductsLogic(): void — функция для получения и отображения списка продуктов на странице
-- formSubmitHandler(event: Event): void — обработчик отправки формы заказа
-- setupContactFields(contactsModal: ContactsModal): void — функция для настройки полей ввода email и телефона.
-- setupFormSubmitHandler(contactsModal: ContactsModal): void — функция для настройки обработчика отправки формы
+- submitOrder(api: Api, order: IOrder): Promise<IOrderResult>: Функция для отправки заказа на сервер
+- updateBasketCounter(): void: Функция для обновления счетчика товаров в корзине
+- resetCart(): void: Функция для очистки корзины и обновления интерфейса
+- loadProductsLogic(): void: Функция для получения и отображения списка продуктов на странице
+- handleFormSubmit(event: Event): void: Обработчик отправки формы заказа
+- setupContactFields(contactsModal: ContactsModal): void: Функция для настройки полей ввода email и телефона
+- setupFormSubmitHandler(contactsModal: ContactsModal): void: Функция для настройки обработчика отправки формы
   контактной информации
 
 Эти функции обеспечивают связь между моделью и представлением, позволяя приложению реагировать на действия пользователя
