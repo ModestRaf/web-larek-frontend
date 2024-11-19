@@ -42,19 +42,12 @@ export interface IProductList {
 
 export interface ICart {
     items: CartItem[];
-
     toggleProductInCart(product: ProductItem, products: ProductItem[]): void;
-
     removeProductFromCart(productId: string, products: ProductItem[]): void;
-
     removeBasketItem(itemId: string): void;
-
     updateCartItems(products: ProductItem[]): void;
-
     getTotalPrice(): number;
-
     clearCart(): void;
-
     getSelectedProductsCount(): number;
 }
 

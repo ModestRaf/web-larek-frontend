@@ -2,7 +2,7 @@ import {ProductItem} from "../types";
 
 export class ProductListView {
     private container: HTMLElement;
-    private basketCounter: HTMLElement;
+    private readonly basketCounter: HTMLElement;
     private readonly createProductCard: (product: ProductItem) => HTMLElement;
 
     constructor(
@@ -12,16 +12,12 @@ export class ProductListView {
         this.container = document.querySelector(`#${containerId}`) as HTMLElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.createProductCard = createProductCard;
-
-        // Subscribing to events for updating basket counter
         window.addEventListener('productToggled', (event: CustomEvent) => {
             this.updateBasketCounter(event.detail.selectedProductsCount);
         });
-
         window.addEventListener('productRemoved', (event: CustomEvent) => {
             this.updateBasketCounter(event.detail.selectedProductsCount);
         });
-
         window.addEventListener('basketItemRemoved', (event: CustomEvent) => {
             this.updateBasketCounter(event.detail.selectedProductsCount);
         });

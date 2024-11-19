@@ -4,7 +4,7 @@ import {ModalBase} from "./modalBase";
 export class CartView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private readonly onCheckout: (totalPrice: number) => void;
-    private model: ICart;
+    private readonly model: ICart;
     private basketList: HTMLElement | null = null;
     private basketPrice: HTMLElement | null = null;
     private checkoutButton: HTMLButtonElement | null = null;
@@ -26,16 +26,13 @@ export class CartView extends ModalBase {
         const cartClone = document.importNode(this.contentTemplate.content, true);
         this.content.innerHTML = '';
         this.content.appendChild(cartClone);
-
         this.basketList = this.modal.querySelector('.basket__list');
         this.basketPrice = this.modal.querySelector('.basket__price');
         this.checkoutButton = this.modal.querySelector('.basket__button');
-
         if (!this.basketList || !this.basketPrice || !this.checkoutButton) {
             console.error('Basket elements not found');
             return;
         }
-
         this.renderBasketItems();
         this.checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
     }
@@ -49,7 +46,6 @@ export class CartView extends ModalBase {
             console.error('Basket elements not found');
             return;
         }
-
         this.basketList.innerHTML = '';
         if (this.model.items.length === 0) {
             this.renderEmptyCart();
@@ -64,7 +60,6 @@ export class CartView extends ModalBase {
             console.error('Basket elements not found');
             return;
         }
-
         const emptyMessage = document.createElement('p');
         emptyMessage.textContent = 'Корзина пуста';
         this.basketList.appendChild(emptyMessage);
@@ -76,7 +71,6 @@ export class CartView extends ModalBase {
             console.error('Basket elements not found');
             return;
         }
-
         this.model.items.forEach((item, index) => {
             const basketItem = new BasketItemView(item, index + 1, this.model, this.update.bind(this));
             this.basketList.appendChild(basketItem.render());
@@ -106,16 +100,13 @@ export class BasketItemView {
         const itemTitle = clone.querySelector('.card__title') as HTMLElement;
         const itemPrice = clone.querySelector('.card__price') as HTMLElement;
         const deleteButton = clone.querySelector('.basket__item-delete') as HTMLElement;
-
         itemIndex.textContent = this.index.toString();
         itemTitle.textContent = this.item.title;
         itemPrice.textContent = this.item.price === null ? 'Бесценно' : `${this.item.price} синапсов`;
-
         deleteButton.addEventListener('click', () => {
             this.model.removeBasketItem(this.item.id);
             this.updateCart();
         });
-
         return clone;
     }
 }

@@ -46,12 +46,12 @@ const cardsView = new CardsView(
     '.modal',
     '.modal__close',
     'card-catalog',
-    'card-preview'
+    'card-preview',
 );
 
 const productListView = new ProductListView(
     'gallery',
-    (product) => cardsView.createProductCard(product) // Removed model reference, directly calling createProductCard
+    (product) => cardsView.createProductCard(product)
 );
 
 // Подписываемся на события
@@ -188,32 +188,22 @@ export function setupFormSubmitHandler(contactsModal: ContactsModal): void {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOMContentLoaded event fired');
-
     const products = await loadProducts(api);
     productList.products = productList.loadSelectedFromStorage(products);
-
     loadProductsLogic();
-
-    // Basket button to open the cart modal
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
-            console.log('Basket button clicked');
             basketModal.open();
         });
     } else {
         console.error('Basket button not found');
     }
-
-    // Handle the preview:open event to open the product modal
     window.addEventListener('popup:open', (event: CustomEvent) => {
         const product = event.detail.product;
         const popupClone = document.importNode(cardsView.popupTemplate.content, true);
         const popupCard = popupClone.querySelector('.card') as HTMLElement;
-
         cardsView.updateCardContent(popupCard, product);
-
         const button = popupCard.querySelector('.card__button') as HTMLButtonElement | null;
         if (button) {
             button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
@@ -223,21 +213,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cardsView.updateCardContent(popupCard, product);
             });
         }
-
-        // Use the inherited `content` property from `ModalBase` directly
         cardsView.content.innerHTML = '';
         cardsView.content.appendChild(popupClone);
-
         cardsView.open();
     });
-    // Form submission for contacts
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     } else {
         console.error('Contact form not found');
     }
-
     setupContactFields(contactsModal);
     setupFormSubmitHandler(contactsModal);
 });
