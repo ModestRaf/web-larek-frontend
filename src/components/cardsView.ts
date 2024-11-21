@@ -1,6 +1,7 @@
 import {ProductItem} from "../types";
 import {ModalBase} from "./modalBase";
 import {CDN_URL} from "../utils/constants";
+import {EventEmitter} from "./base/events";
 
 export class CardsView extends ModalBase {
     private cardTemplate: HTMLTemplateElement;
@@ -19,8 +20,9 @@ export class CardsView extends ModalBase {
         'дополнительное': 'card__category_additional',
         'кнопка': 'card__category_button',
     };
+    private eventEmitter: EventEmitter;
 
-    constructor(popupSelector: string, closeSelector: string, cardTemplateId: string, popupTemplateId: string) {
+    constructor(popupSelector: string, closeSelector: string, cardTemplateId: string, popupTemplateId: string, eventEmitter: EventEmitter) {
         super(popupSelector, closeSelector);
         this.cardTemplate = document.getElementById(cardTemplateId) as HTMLTemplateElement;
         this.popupTemplate = document.getElementById(popupTemplateId) as HTMLTemplateElement;
@@ -31,6 +33,7 @@ export class CardsView extends ModalBase {
             category: '.card__category',
             button: '.card__button',
         };
+        this.eventEmitter = eventEmitter;
     }
 
     createProductCard(product: ProductItem): HTMLElement {
@@ -38,7 +41,8 @@ export class CardsView extends ModalBase {
         const productCard = cardClone.querySelector('.gallery__item') as HTMLElement;
         this.updateCardContent(productCard, product);
         productCard.addEventListener('click', () => {
-            window.dispatchEvent(new CustomEvent('popup:open', {detail: {product}}));
+            console.log('Card clicked:', product); // Убедитесь, что событие срабатывает
+            this.eventEmitter.emit('popup:open', {product});
         });
         return productCard;
     }

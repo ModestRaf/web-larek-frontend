@@ -14,7 +14,7 @@ import {OrderView} from "./components/orderAddress";
 import {EventEmitter, IEvents} from "./components/base/events";
 import {LarekApi} from "./components/LarekApi";
 
-const eventEmitter: IEvents = new EventEmitter();
+const eventEmitter: IEvents = new EventEmitter() as IEvents;
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
 const productList = new ProductList();
@@ -47,6 +47,7 @@ const cardsView = new CardsView(
     '.modal__close',
     'card-catalog',
     'card-preview',
+    eventEmitter // Передаем общий экземпляр
 );
 
 const productListView = new ProductListView(
@@ -190,6 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const products = await loadProducts(api);
     productList.products = productList.loadSelectedFromStorage(products);
     loadProductsLogic();
+
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
@@ -198,8 +200,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         console.error('Basket button not found');
     }
-    window.addEventListener('popup:open', (event: CustomEvent) => {
-        const product = event.detail.product;
+
+    // Подписываемся на событие popup:open
+    eventEmitter.on('popup:open', (event: { product: ProductItem }) => {
+        console.log('Received popup:open event:', event); // Проверяем получение события
+        const product = event.product;
         const popupClone = document.importNode(cardsView.popupTemplate.content, true);
         const popupCard = popupClone.querySelector('.card') as HTMLElement;
         cardsView.updateCardContent(popupCard, product);
@@ -216,12 +221,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         cardsView.content.appendChild(popupClone);
         cardsView.open();
     });
+
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     } else {
         console.error('Contact form not found');
     }
+
     setupContactFields(contactsModal);
     setupFormSubmitHandler(contactsModal);
 });
