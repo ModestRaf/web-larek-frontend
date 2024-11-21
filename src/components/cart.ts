@@ -1,11 +1,14 @@
 import {CartItem, ICart, IProductList, ProductItem} from "../types";
+import {EventEmitter} from "./base/events";
 
 export class Cart implements ICart {
     items: CartItem[] = [];
     private productList: IProductList;
+    private eventEmitter: EventEmitter;
 
-    constructor(productList: IProductList) {
+    constructor(productList: IProductList, eventEmitter: EventEmitter) {
         this.productList = productList;
+        this.eventEmitter = eventEmitter;
         this.loadCartFromStorage();
     }
 
@@ -78,17 +81,23 @@ export class Cart implements ICart {
     }
 
     private notifyProductToggled(product: ProductItem, selectedProductsCount: number): void {
-        const event = new CustomEvent('productToggled', {detail: {product, selectedProductsCount}});
-        window.dispatchEvent(event);
+        this.eventEmitter.emit<{ product: ProductItem, selectedProductsCount: number }>('productToggled', {
+            product,
+            selectedProductsCount
+        });
     }
 
     private notifyProductRemoved(productId: string, selectedProductsCount: number): void {
-        const event = new CustomEvent('productRemoved', {detail: {productId, selectedProductsCount}});
-        window.dispatchEvent(event);
+        this.eventEmitter.emit<{ productId: string, selectedProductsCount: number }>('productRemoved', {
+            productId,
+            selectedProductsCount
+        });
     }
 
     private notifyBasketItemRemoved(itemId: string, selectedProductsCount: number): void {
-        const event = new CustomEvent('basketItemRemoved', {detail: {itemId, selectedProductsCount}});
-        window.dispatchEvent(event);
+        this.eventEmitter.emit<{ itemId: string, selectedProductsCount: number }>('basketItemRemoved', {
+            itemId,
+            selectedProductsCount
+        });
     }
 }

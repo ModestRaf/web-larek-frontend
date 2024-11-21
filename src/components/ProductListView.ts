@@ -1,4 +1,5 @@
 import {ProductItem} from "../types";
+import {EventEmitter} from "./base/events";
 
 export class ProductListView {
     private container: HTMLElement;
@@ -7,19 +8,24 @@ export class ProductListView {
 
     constructor(
         containerId: string,
-        createProductCard: (product: ProductItem) => HTMLElement
+        createProductCard: (product: ProductItem) => HTMLElement,
+        private eventEmitter: EventEmitter // Передаем EventEmitter
     ) {
         this.container = document.querySelector(`#${containerId}`) as HTMLElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.createProductCard = createProductCard;
-        window.addEventListener('productToggled', (event: CustomEvent) => {
-            this.updateBasketCounter(event.detail.selectedProductsCount);
+
+        // Подписка на события через EventEmitter
+        this.eventEmitter.on<{ selectedProductsCount: number }>('productToggled', ({selectedProductsCount}) => {
+            this.updateBasketCounter(selectedProductsCount);
         });
-        window.addEventListener('productRemoved', (event: CustomEvent) => {
-            this.updateBasketCounter(event.detail.selectedProductsCount);
+
+        this.eventEmitter.on<{ selectedProductsCount: number }>('productRemoved', ({selectedProductsCount}) => {
+            this.updateBasketCounter(selectedProductsCount);
         });
-        window.addEventListener('basketItemRemoved', (event: CustomEvent) => {
-            this.updateBasketCounter(event.detail.selectedProductsCount);
+
+        this.eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
+            this.updateBasketCounter(selectedProductsCount);
         });
     }
 

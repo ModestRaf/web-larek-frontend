@@ -18,7 +18,7 @@ const eventEmitter: IEvents = new EventEmitter() as IEvents;
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
 const productList = new ProductList();
-const cart = new Cart(productList);
+const cart = new Cart(productList, eventEmitter);
 const orderModel = new Order('modal-container', 'order');
 const successModal = new SuccessModal('modal-container', 'success');
 const contactsModal = new ContactsModal(
@@ -52,7 +52,8 @@ const cardsView = new CardsView(
 
 const productListView = new ProductListView(
     'gallery',
-    (product) => cardsView.createProductCard(product)
+    (product) => cardsView.createProductCard(product),
+    eventEmitter
 );
 
 window.addEventListener('toggleProductInCart', (event: CustomEvent) => {
