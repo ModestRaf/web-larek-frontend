@@ -36,18 +36,19 @@ const orderView = new OrderView(
     () => console.log('Форма успешно отправлена'),
     handleFormSubmit
 );
-const basketModal = new CartView(
+const cartView = new CartView(
     'modal-container',
     'basket',
     cart,
-    (totalPrice) => orderView.open(totalPrice)
+    (totalPrice) => orderView.open(totalPrice),
+    eventEmitter
 );
 const cardsView = new CardsView(
     '.modal',
     '.modal__close',
     'card-catalog',
     'card-preview',
-    eventEmitter // Передаем общий экземпляр
+    eventEmitter
 );
 
 const productListView = new ProductListView(
@@ -70,7 +71,7 @@ async function loadProducts(api: Api): Promise<ProductItem[]> {
 // Вспомогательные функции
 function updateBasketCounter(): void {
     const selectedProductsCount = productList.products.filter(product => product.selected).length;
-    productListView.updateBasketCounter(selectedProductsCount);
+    cartView.updateBasketCounter(selectedProductsCount);
 }
 
 function resetCart() {
@@ -83,7 +84,7 @@ function resetCart() {
 function loadProductsLogic(): void {
     productListView.renderProducts(productList.products);
     updateBasketCounter();
-    basketModal.renderBasketItems();
+    cartView.renderBasketItems();
 }
 
 // Обработчики событий
@@ -192,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
-            basketModal.open();
+            cartView.open();
         });
     } else {
         console.error('Basket button not found');

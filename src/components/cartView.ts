@@ -1,5 +1,6 @@
 import {CartItem, ICart} from "../types";
 import {ModalBase} from "./modalBase";
+import {EventEmitter} from "./base/events";
 
 export class CartView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
@@ -8,18 +9,33 @@ export class CartView extends ModalBase {
     private basketList: HTMLElement | null = null;
     private basketPrice: HTMLElement | null = null;
     private checkoutButton: HTMLButtonElement | null = null;
+    private basketCounter: HTMLElement;
 
     constructor(
         modalId: string,
         contentTemplateId: string,
         model: ICart,
-        onCheckout: (totalPrice: number) => void
+        onCheckout: (totalPrice: number) => void,
+        private eventEmitter: EventEmitter // Передаем EventEmitter
     ) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.onCheckout = onCheckout;
         this.model = model;
+        this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
+
+        // Подписка на события
+        this.eventEmitter.on<{ selectedProductsCount: number }>('productToggled', ({selectedProductsCount}) => {
+            this.updateBasketCounter(selectedProductsCount);
+        });
+        this.eventEmitter.on<{ selectedProductsCount: number }>('productRemoved', ({selectedProductsCount}) => {
+            this.updateBasketCounter(selectedProductsCount);
+        });
+        this.eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
+            this.updateBasketCounter(selectedProductsCount);
+        });
     }
+
 
     open(): void {
         super.open();
@@ -53,6 +69,12 @@ export class CartView extends ModalBase {
             this.renderItems();
         }
         this.basketPrice.textContent = `${this.model.getTotalPrice()} синапсов`;
+    }
+
+    updateBasketCounter(selectedProductsCount: number): void {
+        if (this.basketCounter && typeof selectedProductsCount === 'number') {
+            this.basketCounter.textContent = selectedProductsCount.toString();
+        }
     }
 
     private renderEmptyCart(): void {
