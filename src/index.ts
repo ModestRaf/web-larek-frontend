@@ -17,7 +17,7 @@ import {LarekApi} from "./components/LarekApi";
 const eventEmitter: IEvents = new EventEmitter() as IEvents;
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
-const productList = new ProductList();
+const productList = new ProductList(eventEmitter);
 const cart = new Cart(productList, eventEmitter);
 const orderModel = new Order('modal-container', 'order');
 const successModal = new SuccessModal('modal-container', 'success');
@@ -56,20 +56,6 @@ const productListView = new ProductListView(
     eventEmitter
 );
 
-window.addEventListener('toggleProductInCart', (event: CustomEvent) => {
-    const product = event.detail.product;
-    cart.toggleProductInCart(product, productList.products);
-    updateBasketCounter();
-    cart.updateCartItems(productList.products);
-});
-
-window.addEventListener('removeProductFromCart', (event: CustomEvent) => {
-    const productId = event.detail.productId;
-    cart.removeProductFromCart(productId, productList.products);
-    updateBasketCounter();
-    cart.updateCartItems(productList.products);
-});
-
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
     try {
@@ -97,7 +83,7 @@ function resetCart() {
 function loadProductsLogic(): void {
     productListView.renderProducts(productList.products);
     updateBasketCounter();
-    basketModal.renderBasketItems();  // Обновляем интерфейс корзины при загрузке
+    basketModal.renderBasketItems();
 }
 
 // Обработчики событий
@@ -109,6 +95,17 @@ eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
     } else {
         console.error('totalPrice is undefined');
     }
+});
+eventEmitter.on<{ product: ProductItem }>('toggleProductInCart', ({product}) => {
+    cart.toggleProductInCart(product, productList.products);
+    updateBasketCounter();
+    cart.updateCartItems(productList.products);
+});
+
+eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) => {
+    cart.removeProductFromCart(productId, productList.products);
+    updateBasketCounter();
+    cart.updateCartItems(productList.products);
 });
 
 async function handleFormSubmit(event: Event) {
@@ -192,7 +189,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const products = await loadProducts(api);
     productList.products = productList.loadSelectedFromStorage(products);
     loadProductsLogic();
-
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
@@ -201,11 +197,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         console.error('Basket button not found');
     }
-
-    // Подписываемся на событие popup:open
-    eventEmitter.on('popup:open', (event: { product: ProductItem }) => {
-        console.log('Received popup:open event:', event); // Проверяем получение события
-        const product = event.product;
+    eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
+        console.log('Received popup:open event:', product); // Проверяем получение события
         const popupClone = document.importNode(cardsView.popupTemplate.content, true);
         const popupCard = popupClone.querySelector('.card') as HTMLElement;
         cardsView.updateCardContent(popupCard, product);
@@ -213,8 +206,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (button) {
             button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
             button.addEventListener('click', () => {
-                const toggleEvent = new CustomEvent('toggleProductInCart', {detail: {product}});
-                window.dispatchEvent(toggleEvent);
+                eventEmitter.emit('toggleProductInCart', {product});
                 cardsView.updateCardContent(popupCard, product);
             });
         }
@@ -222,14 +214,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         cardsView.content.appendChild(popupClone);
         cardsView.open();
     });
-
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     } else {
         console.error('Contact form not found');
     }
-
     setupContactFields(contactsModal);
     setupFormSubmitHandler(contactsModal);
 });

@@ -9,21 +9,17 @@ export class ProductListView {
     constructor(
         containerId: string,
         createProductCard: (product: ProductItem) => HTMLElement,
-        private eventEmitter: EventEmitter // Передаем EventEmitter
+        private eventEmitter: EventEmitter
     ) {
         this.container = document.querySelector(`#${containerId}`) as HTMLElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.createProductCard = createProductCard;
-
-        // Подписка на события через EventEmitter
         this.eventEmitter.on<{ selectedProductsCount: number }>('productToggled', ({selectedProductsCount}) => {
             this.updateBasketCounter(selectedProductsCount);
         });
-
         this.eventEmitter.on<{ selectedProductsCount: number }>('productRemoved', ({selectedProductsCount}) => {
             this.updateBasketCounter(selectedProductsCount);
         });
-
         this.eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
             this.updateBasketCounter(selectedProductsCount);
         });
@@ -35,8 +31,7 @@ export class ProductListView {
             const card = this.createProductCard(product);
             this.container.appendChild(card);
             card.addEventListener('click', () => {
-                const event = new CustomEvent('preview:open', {detail: {product}});
-                window.dispatchEvent(event);
+                this.eventEmitter.emit<{ product: ProductItem }>('preview:open', {product});
             });
         });
     }

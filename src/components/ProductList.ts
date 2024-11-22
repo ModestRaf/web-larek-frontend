@@ -1,11 +1,13 @@
 import {IProductList, ProductItem} from "../types";
+import {EventEmitter} from "./base/events";
 
 export class ProductList implements IProductList {
     products: ProductItem[] = [];
+    private eventEmitter: EventEmitter;
 
-    constructor() {
-        window.addEventListener('productRemoved', (event: CustomEvent) => {
-            const productId = event.detail.productId;
+    constructor(eventEmitter: EventEmitter) {
+        this.eventEmitter = eventEmitter;
+        this.eventEmitter.on<{ productId: string }>('productRemoved', ({productId}) => {
             this.updateSelectedState(productId);
         });
     }
