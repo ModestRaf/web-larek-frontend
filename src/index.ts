@@ -2,7 +2,7 @@ import './scss/styles.scss';
 import {Api, ApiListResponse} from "./components/base/api";
 import {API_URL} from "./utils/constants";
 import {Cart} from "./components/cart";
-import {CartView} from "./components/cartView";
+import {BasketItemView, CartView} from "./components/cartView";
 import {CardsView} from "./components/cardsView";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
@@ -79,12 +79,14 @@ function resetCart() {
     productList.clearSelectedProducts();
     updateBasketCounter();
     productListView.renderProducts(productList.products);
+    eventEmitter.emit('cart:change');
 }
 
 function loadProductsLogic(): void {
     productListView.renderProducts(productList.products);
     updateBasketCounter();
     cartView.renderBasketItems();
+    eventEmitter.emit('cart:change');
 }
 
 // Обработчики событий
@@ -193,16 +195,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
-            const cartContent = cartView.render();
-            const modalContainer = document.querySelector('#modal-container');
-            if (!modalContainer) {
-                console.error('Modal container not found');
-                return;
-            }
-            const modalBase = new ModalBase('#modal-container', '.modal__close');
-            modalBase.open(undefined, cartContent);
+            eventEmitter.emit('cart:open');
         });
     }
+
+    eventEmitter.on('cart:open', () => {
+        const cartContent = cartView.render();
+        const modalContainer = document.querySelector('#modal-container');
+        if (!modalContainer) {
+            console.error('Modal container not found');
+            return;
+        }
+        const modalBase = new ModalBase('#modal-container', '.modal__close');
+        modalBase.open(undefined, cartContent);
+    });
+
+    eventEmitter.on('cart:change', () => {
+        const items = cartView.model.items.map((item, index) => {
+            const basketItem = new BasketItemView(item, index + 1, cartView.model, cartView.update.bind(cartView));
+            return basketItem.render();
+        });
+        cartView.setItems(items);
+        cartView.updateBasketCounter(cartView.model.items.length);
+        cartView.renderBasketItems();
+    });
+
     eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
         console.log('Received popup:open event:', product); // Проверяем получение события
         const popupClone = document.importNode(cardsView.popupTemplate.content, true);
@@ -220,6 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         cardsView.content.appendChild(popupClone);
         cardsView.open();
     });
+
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
         form.addEventListener('submit', handleFormSubmit);

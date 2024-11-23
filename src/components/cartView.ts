@@ -4,11 +4,12 @@ import {EventEmitter} from "./base/events";
 export class CartView {
     private contentTemplate: HTMLTemplateElement;
     private readonly onCheckout: (totalPrice: number) => void;
-    private readonly model: ICart;
+    readonly model: ICart;
     private basketList: HTMLElement | null = null;
     private basketPrice: HTMLElement | null = null;
     private checkoutButton: HTMLButtonElement | null = null;
     private readonly basketCounter: HTMLElement;
+    private content: HTMLElement | null = null;
 
     constructor(
         contentTemplateId: string,
@@ -31,18 +32,24 @@ export class CartView {
         this.eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
             this.updateBasketCounter(selectedProductsCount);
         });
+
+        this.eventEmitter.on('cart:change', () => {
+            this.update();
+        });
     }
 
     render(): HTMLElement {
-        const cartClone = document.importNode(this.contentTemplate.content, true);
-        const content = document.createElement('modal__content');
-        content.appendChild(cartClone);
-        this.basketList = content.querySelector('.basket__list');
-        this.basketPrice = content.querySelector('.basket__price');
-        this.checkoutButton = content.querySelector('.basket__button');
+        if (!this.content) {
+            const cartClone = document.importNode(this.contentTemplate.content, true);
+            this.content = document.createElement('modal__content');
+            this.content.appendChild(cartClone);
+            this.basketList = this.content.querySelector('.basket__list');
+            this.basketPrice = this.content.querySelector('.basket__price');
+            this.checkoutButton = this.content.querySelector('.basket__button');
+            this.checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
+        }
         this.renderBasketItems();
-        this.checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
-        return content;
+        return this.content;
     }
 
     update(): void {
@@ -91,13 +98,22 @@ export class CartView {
         });
         this.checkoutButton.disabled = false;
     }
+
+    setItems(items: HTMLElement[]): void {
+        if (!this.basketList) {
+            console.error('Basket list not found');
+            return;
+        }
+        this.basketList.innerHTML = '';
+        items.forEach(item => this.basketList.appendChild(item));
+    }
 }
 
 export class BasketItemView {
     private item: CartItem;
     private index: number;
     private model: ICart;
-    private updateCart: () => void;
+    private readonly updateCart: () => void;
     private template: HTMLTemplateElement;
 
     constructor(item: CartItem, index: number, model: ICart, updateCart: () => void) {
