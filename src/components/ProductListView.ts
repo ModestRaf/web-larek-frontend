@@ -3,23 +3,21 @@ import {EventEmitter} from "./base/events";
 
 export class ProductListView {
     private container: HTMLElement;
-    private readonly createProductCard: (product: ProductItem) => HTMLElement;
 
     constructor(
         containerId: string,
-        createProductCard: (product: ProductItem) => HTMLElement,
         private eventEmitter: EventEmitter
     ) {
         this.container = document.querySelector(`#${containerId}`) as HTMLElement;
-        this.createProductCard = createProductCard;
+        this.eventEmitter.on('cards:loaded', (cards: HTMLElement[]) => this.renderProducts(cards));
     }
 
-    renderProducts(products: ProductItem[]): void {
+    renderProducts(cards: HTMLElement[]): void {
         this.container.innerHTML = '';
-        products.forEach(product => {
-            const card = this.createProductCard(product);
+        cards.forEach(card => {
             this.container.appendChild(card);
             card.addEventListener('click', () => {
+                const product = JSON.parse(card.dataset.product || '{}') as ProductItem;
                 this.eventEmitter.emit<{ product: ProductItem }>('preview:open', {product});
             });
         });

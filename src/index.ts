@@ -51,11 +51,7 @@ const cardsView = new CardsView(
     eventEmitter
 );
 
-const productListView = new ProductListView(
-    'gallery',
-    (product) => cardsView.createProductCard(product),
-    eventEmitter
-);
+const productListView = new ProductListView('gallery', eventEmitter);
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -78,12 +74,14 @@ function resetCart() {
     cart.clearCart();
     productList.clearSelectedProducts();
     updateBasketCounter();
-    productListView.renderProducts(productList.products);
+    const productCards = productList.products.map(product => cardsView.createProductCard(product));
+    productListView.renderProducts(productCards);
     eventEmitter.emit('cart:change');
 }
 
 function loadProductsLogic(): void {
-    productListView.renderProducts(productList.products);
+    const productCards = productList.products.map(product => cardsView.createProductCard(product));
+    productListView.renderProducts(productCards);
     updateBasketCounter();
     cartView.renderBasketItems();
     eventEmitter.emit('cart:change');
@@ -133,7 +131,8 @@ async function handleFormSubmit(event: Event) {
             cart.clearCart();
             productList.clearSelectedProducts();
             updateBasketCounter();
-            productListView.renderProducts(productList.products);
+            const productCards = productList.products.map(product => cardsView.createProductCard(product));
+            productListView.renderProducts(productCards);
             eventEmitter.emit('orderSuccess', {totalPrice});
         } else if (response.error) {
             console.error('Ошибка при отправке заказа:', response.error);
