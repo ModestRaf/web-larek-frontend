@@ -1,24 +1,21 @@
 import {CartItem, ICart} from "../types";
-import {ModalBase} from "./modalBase";
 import {EventEmitter} from "./base/events";
 
-export class CartView extends ModalBase {
+export class CartView {
     private contentTemplate: HTMLTemplateElement;
     private readonly onCheckout: (totalPrice: number) => void;
     private readonly model: ICart;
     private basketList: HTMLElement | null = null;
     private basketPrice: HTMLElement | null = null;
     private checkoutButton: HTMLButtonElement | null = null;
-    private basketCounter: HTMLElement;
+    private readonly basketCounter: HTMLElement;
 
     constructor(
-        modalId: string,
         contentTemplateId: string,
         model: ICart,
         onCheckout: (totalPrice: number) => void,
-        private eventEmitter: EventEmitter // Передаем EventEmitter
+        private eventEmitter: EventEmitter
     ) {
-        super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.onCheckout = onCheckout;
         this.model = model;
@@ -36,21 +33,16 @@ export class CartView extends ModalBase {
         });
     }
 
-
-    open(): void {
-        super.open();
+    render(): HTMLElement {
         const cartClone = document.importNode(this.contentTemplate.content, true);
-        this.content.innerHTML = '';
-        this.content.appendChild(cartClone);
-        this.basketList = this.modal.querySelector('.basket__list');
-        this.basketPrice = this.modal.querySelector('.basket__price');
-        this.checkoutButton = this.modal.querySelector('.basket__button');
-        if (!this.basketList || !this.basketPrice || !this.checkoutButton) {
-            console.error('Basket elements not found');
-            return;
-        }
+        const content = document.createElement('modal__content');
+        content.appendChild(cartClone);
+        this.basketList = content.querySelector('.basket__list');
+        this.basketPrice = content.querySelector('.basket__price');
+        this.checkoutButton = content.querySelector('.basket__button');
         this.renderBasketItems();
         this.checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
+        return content;
     }
 
     update(): void {

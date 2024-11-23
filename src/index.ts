@@ -13,6 +13,7 @@ import {ContactsModal} from "./components/contacts";
 import {OrderView} from "./components/orderAddress";
 import {EventEmitter, IEvents} from "./components/base/events";
 import {LarekApi} from "./components/LarekApi";
+import {ModalBase} from "./components/modalBase";
 
 const eventEmitter: IEvents = new EventEmitter() as IEvents;
 const api = new Api(API_URL);
@@ -37,10 +38,9 @@ const orderView = new OrderView(
     handleFormSubmit
 );
 const cartView = new CartView(
-    'modal-container',
     'basket',
     cart,
-    (totalPrice) => orderView.open(totalPrice),
+    (totalPrice: number) => orderView.open(totalPrice),
     eventEmitter
 );
 const cardsView = new CardsView(
@@ -193,10 +193,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
     if (basketButton) {
         basketButton.addEventListener('click', () => {
-            cartView.open();
+            const cartContent = cartView.render();
+            const modalContainer = document.querySelector('#modal-container');
+            if (!modalContainer) {
+                console.error('Modal container not found');
+                return;
+            }
+            const modalBase = new ModalBase('#modal-container', '.modal__close');
+            modalBase.open(undefined, cartContent);
         });
-    } else {
-        console.error('Basket button not found');
     }
     eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
         console.log('Received popup:open event:', product); // Проверяем получение события
