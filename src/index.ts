@@ -9,7 +9,7 @@ import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
 import {ProductItem, IOrder, OrderForm, IOrderModel} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
-import {ContactsView} from "./components/contacts";
+import {ContactsView} from "./components/contactsView";
 import {OrderView} from "./components/orderAddress";
 import {EventEmitter, IEvents} from "./components/base/events";
 import {LarekApi} from "./components/LarekApi";
@@ -268,6 +268,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         console.error('Contact form not found');
     }
-    setupContactFields(contactsView, orderModel);
-    setupFormSubmitHandler(contactsView, orderModel);
 });
