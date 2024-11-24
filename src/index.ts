@@ -21,7 +21,7 @@ const larekApi = new LarekApi(api);
 const productList = new ProductList(eventEmitter);
 const cart = new Cart(eventEmitter);
 const orderModel = new Order('modal-container', 'order');
-const successModal = new SuccessModal('success');
+const successModal = new SuccessModal('success', eventEmitter);
 const contactsModal = new ContactsModal(
     'modal-container',
     'content-template',
@@ -96,7 +96,11 @@ eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
     const totalPrice = data.totalPrice;
     if (totalPrice !== undefined) {
         const modalBase = new ModalBase('#modal-container', '.modal__close');
-        successModal.open(modalBase, totalPrice);
+        const successContent = successModal.render(totalPrice);
+        modalBase.open(undefined, successContent);
+        eventEmitter.on('orderSuccessClosed', () => {
+            modalBase.close();
+        });
     } else {
         console.error('totalPrice is undefined');
     }
@@ -131,7 +135,7 @@ async function handleFormSubmit(event: Event) {
         const order: IOrder = {
             ...orderForm,
             items: cart.items.map(item => item.id.toString()),
-            total: totalPrice
+            total: totalPrice // Убедитесь, что totalPrice передается
         };
         const response = await larekApi.submitOrder(order);
         console.log('Ответ от сервера:', response);
@@ -245,6 +249,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         cardsView.content.appendChild(popupClone);
         cardsView.open();
     });
+
+    eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
+        const totalPrice = data.totalPrice;
+        if (totalPrice !== undefined) {
+            const modalBase = new ModalBase('#modal-container', '.modal__close');
+            const successContent = successModal.render(totalPrice);
+            modalBase.open(undefined, successContent);
+            eventEmitter.on('orderSuccessClosed', () => {
+                modalBase.close();
+            });
+        } else {
+            console.error('totalPrice is undefined');
+        }
+    });
+
+    eventEmitter.on('orderSuccessClosed', resetCart);
 
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
