@@ -1,5 +1,5 @@
 import {ModalBase} from "./modalBase";
-import {IContactValidator} from "../types";
+import {IContactValidator, IOrderModel} from "../types";
 import {setupContactFields, setupFormSubmitHandler} from "../index";
 
 export class ContactsView extends ModalBase {
@@ -13,13 +13,15 @@ export class ContactsView extends ModalBase {
     phoneField: HTMLInputElement | null = null;
     payButton: HTMLButtonElement | null = null;
     formErrors: HTMLElement | null = null;
+    private model: IOrderModel;
 
     constructor(
         modalId: string,
         contentTemplateId: string,
         contactValidator: IContactValidator,
         onSuccess: () => void,
-        formSubmitHandler: (event: Event) => void
+        formSubmitHandler: (event: Event) => void,
+        model: IOrderModel
     ) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
@@ -27,6 +29,7 @@ export class ContactsView extends ModalBase {
         this.contactValidator = contactValidator;
         this.onSuccess = onSuccess;
         this.formSubmitHandler = formSubmitHandler;
+        this.model = model;
     }
 
     open(): void {
@@ -44,15 +47,7 @@ export class ContactsView extends ModalBase {
             console.error('Элемент формы не найден');
         }
 
-        setupContactFields(this);
-        setupFormSubmitHandler(this);
-    }
-
-    getEmailValue(): string {
-        return this.emailField?.value || '';
-    }
-
-    getPhoneValue(): string {
-        return this.phoneField?.value || '';
+        setupContactFields(this, this.model);
+        setupFormSubmitHandler(this, this.model);
     }
 }

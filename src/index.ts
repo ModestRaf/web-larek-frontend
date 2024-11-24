@@ -7,7 +7,7 @@ import {CardsView} from "./components/cardsView";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
-import {ProductItem, IOrder, OrderForm} from "./types";
+import {ProductItem, IOrder, OrderForm, IOrderModel} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsView} from "./components/contacts";
 import {OrderView} from "./components/orderAddress";
@@ -27,14 +27,15 @@ const contactsView = new ContactsView(
     'content-template',
     orderModel,
     () => console.log('Форма успешно отправлена'),
-    handleFormSubmit
+    handleFormSubmit,
+    orderModel
 );
 const orderView = new OrderView(
     'content-template',
     orderModel,
     () => contactsView.open(),
     () => console.log('Форма успешно отправлена'),
-    handleFormSubmit
+    handleFormSubmit,
 );
 const cartView = new CartView(
     'basket',
@@ -166,8 +167,8 @@ async function handleFormSubmit(event: Event) {
     const totalPrice = cart.getTotalPrice();
     try {
         const orderForm: OrderForm = {
-            email: contactsView.getEmailValue(),
-            phone: contactsView.getPhoneValue(),
+            email: orderModel.getEmailValue(),
+            phone: orderModel.getPhoneValue(),
             payment: orderModel.getPaymentMethod(),
             address: orderModel.getAddress(),
         };
@@ -196,39 +197,51 @@ async function handleFormSubmit(event: Event) {
     }
 }
 
-export function setupContactFields(contactsModal: ContactsView): void {
+export function setupContactFields(contactsView: ContactsView, orderModel: IOrderModel): void {
     const checkFields = () => {
-        const isValid = contactsModal.contactValidator.validateContactFields(
-            contactsModal.emailField,
-            contactsModal.phoneField,
-            contactsModal.payButton,
-            contactsModal.formErrors
+        const isValid = contactsView.contactValidator.validateContactFields(
+            contactsView.emailField,
+            contactsView.phoneField,
+            contactsView.payButton,
+            contactsView.formErrors
         );
         if (isValid) {
-            contactsModal.payButton.removeAttribute('disabled');
+            contactsView.payButton.removeAttribute('disabled');
+            if (orderModel.setEmailValue) {
+                orderModel.setEmailValue(contactsView.emailField.value.trim());
+            }
+            if (orderModel.setPhoneValue) {
+                orderModel.setPhoneValue(contactsView.phoneField.value.trim());
+            }
         } else {
-            contactsModal.payButton.setAttribute('disabled', 'true');
+            contactsView.payButton.setAttribute('disabled', 'true');
         }
     };
-    contactsModal.emailField.addEventListener('input', checkFields);
-    contactsModal.phoneField.addEventListener('input', checkFields);
+    contactsView.emailField.addEventListener('input', checkFields);
+    contactsView.phoneField.addEventListener('input', checkFields);
 }
 
-export function setupFormSubmitHandler(contactsModal: ContactsView): void {
-    const form = contactsModal.modal.querySelector('form[name="contacts"]');
+export function setupFormSubmitHandler(contactsView: ContactsView, orderModel: IOrderModel): void {
+    const form = contactsView.modal.querySelector('form[name="contacts"]');
     if (form) {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
-            if (contactsModal.emailField && contactsModal.phoneField) {
-                const isValid = contactsModal.contactValidator.validateContactFields(
-                    contactsModal.emailField,
-                    contactsModal.phoneField,
-                    contactsModal.payButton,
-                    contactsModal.formErrors
+            if (contactsView.emailField && contactsView.phoneField) {
+                const isValid = contactsView.contactValidator.validateContactFields(
+                    contactsView.emailField,
+                    contactsView.phoneField,
+                    contactsView.payButton,
+                    contactsView.formErrors
                 );
                 if (isValid) {
-                    contactsModal.formSubmitHandler(event);
-                    contactsModal.onSuccess();
+                    if (orderModel.setEmailValue) {
+                        orderModel.setEmailValue(contactsView.emailField.value.trim());
+                    }
+                    if (orderModel.setPhoneValue) {
+                        orderModel.setPhoneValue(contactsView.phoneField.value.trim());
+                    }
+                    contactsView.formSubmitHandler(event);
+                    contactsView.onSuccess();
                 } else {
                     console.error('Форма не прошла валидацию');
                 }
@@ -255,6 +268,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         console.error('Contact form not found');
     }
-    setupContactFields(contactsView);
-    setupFormSubmitHandler(contactsView);
+    setupContactFields(contactsView, orderModel);
+    setupFormSubmitHandler(contactsView, orderModel);
 });

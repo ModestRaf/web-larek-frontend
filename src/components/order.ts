@@ -4,13 +4,17 @@ export class Order {
     orderTemplate: HTMLTemplateElement;
     private paymentMethod: string;
     private address: string;
+    private emailField: string;
+    private phoneField: string;
 
     constructor(modalId: string, contentTemplateId: string) {
         this.modal = document.querySelector(`#${modalId}`) as HTMLElement;
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
-        this.paymentMethod = 'card'; // Устанавливаем значение по умолчанию
+        this.paymentMethod = 'card';
         this.address = '';
+        this.emailField = '';
+        this.phoneField = '';
     }
 
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean {
@@ -29,7 +33,6 @@ export class Order {
     validateContactFields(emailField: HTMLInputElement, phoneField: HTMLInputElement, payButton: HTMLButtonElement, formErrors: HTMLElement): boolean {
         const emailValue = emailField.value.trim();
         const phoneValue = phoneField.value.trim();
-
         if (emailValue === '' && phoneValue === '') {
             formErrors.textContent = 'Необходимо ввести email и номер телефона';
             formErrors.classList.add('form__errors_visible');
@@ -61,11 +64,27 @@ export class Order {
         this.address = address;
     }
 
+    setEmailValue(email: string): void {
+        this.emailField = email;
+    }
+
+    setPhoneValue(phone: string): void {
+        this.phoneField = phone;
+    }
+
     getPaymentMethod(): string {
         return this.paymentMethod;
     }
 
     getAddress(): string {
         return this.address;
+    }
+
+    getEmailValue(): string {
+        return this.emailField;
+    }
+
+    getPhoneValue(): string {
+        return this.phoneField;
     }
 }
