@@ -27,7 +27,7 @@ export class OrderView {
 
     render(): HTMLElement {
         const orderClone = document.importNode(this.orderTemplate.content, true);
-        const orderElement = orderClone.firstElementChild as HTMLElement; // Преобразуем DocumentFragment в HTMLElement
+        const orderElement = orderClone.firstElementChild as HTMLElement;
         this.setupPaymentButtons(orderElement);
         this.setupAddressField(orderElement);
         const onlineButton = orderElement.querySelector('button[name="card"]') as HTMLButtonElement;

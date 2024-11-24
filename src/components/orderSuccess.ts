@@ -13,7 +13,7 @@ export class SuccessModal {
 
     render(totalPrice: number): HTMLElement {
         const successClone = document.importNode(this.successTemplate.content, true);
-        const successElement = successClone.firstElementChild as HTMLElement; // Преобразуем DocumentFragment в HTMLElement
+        const successElement = successClone.firstElementChild as HTMLElement;
         const successDescription = successElement.querySelector('.order-success__description') as HTMLElement;
         if (successDescription) {
             successDescription.textContent = `Списано ${totalPrice} синапсов`;

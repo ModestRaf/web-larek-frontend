@@ -30,7 +30,7 @@ const contactsModal = new ContactsModal(
     handleFormSubmit
 );
 const orderView = new OrderView(
-    'content-template', // Исправлено: удален лишний аргумент
+    'content-template',
     orderModel,
     () => contactsModal.open(),
     () => console.log('Форма успешно отправлена'),
@@ -42,7 +42,7 @@ const cartView = new CartView(
     (totalPrice: number) => {
         const modalBase = new ModalBase('#modal-container', '.modal__close');
         const orderContent = orderView.render();
-        modalBase.open(totalPrice, orderContent); // Исправлено: передаем orderContent
+        modalBase.open(totalPrice, orderContent);
     },
     eventEmitter
 );
@@ -135,7 +135,7 @@ async function handleFormSubmit(event: Event) {
         const order: IOrder = {
             ...orderForm,
             items: cart.items.map(item => item.id.toString()),
-            total: totalPrice // Убедитесь, что totalPrice передается
+            total: totalPrice
         };
         const response = await larekApi.submitOrder(order);
         console.log('Ответ от сервера:', response);
@@ -188,7 +188,7 @@ export function setupFormSubmitHandler(contactsModal: ContactsModal): void {
                     contactsModal.formErrors
                 );
                 if (isValid) {
-                    contactsModal.formSubmitHandler(event); // Вызываем обработчик отправки формы
+                    contactsModal.formSubmitHandler(event);
                     contactsModal.onSuccess();
                 } else {
                     console.error('Форма не прошла валидацию');
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
-        console.log('Received popup:open event:', product); // Проверяем получение события
+        console.log('Received popup:open event:', product);
         const popupClone = document.importNode(cardsView.popupTemplate.content, true);
         const popupCard = popupClone.querySelector('.card') as HTMLElement;
         cardsView.updateCardContent(popupCard, product);
@@ -249,22 +249,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         cardsView.content.appendChild(popupClone);
         cardsView.open();
     });
-
-    eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
-        const totalPrice = data.totalPrice;
-        if (totalPrice !== undefined) {
-            const modalBase = new ModalBase('#modal-container', '.modal__close');
-            const successContent = successModal.render(totalPrice);
-            modalBase.open(undefined, successContent);
-            eventEmitter.on('orderSuccessClosed', () => {
-                modalBase.close();
-            });
-        } else {
-            console.error('totalPrice is undefined');
-        }
-    });
-
-    eventEmitter.on('orderSuccessClosed', resetCart);
 
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
