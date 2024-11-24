@@ -2,7 +2,7 @@ import {ModalBase} from "./modalBase";
 import {IContactValidator} from "../types";
 import {setupContactFields, setupFormSubmitHandler} from "../index";
 
-export class ContactsModal extends ModalBase {
+export class ContactsView extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
     contactValidator: IContactValidator;

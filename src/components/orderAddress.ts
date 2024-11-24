@@ -19,9 +19,7 @@ export class OrderView {
         openContactsModal: () => void,
         onSuccess: () => void,
         formSubmitHandler: (event: Event) => void,
-        defaultPaymentMethod = 'card'
     ) {
-        this.selectedPaymentMethod = defaultPaymentMethod;
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         const orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
         const orderClone = document.importNode(orderTemplate.content, true);

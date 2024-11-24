@@ -9,7 +9,7 @@ import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
 import {ProductItem, IOrder, OrderForm} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
-import {ContactsModal} from "./components/contacts";
+import {ContactsView} from "./components/contacts";
 import {OrderView} from "./components/orderAddress";
 import {EventEmitter, IEvents} from "./components/base/events";
 import {LarekApi} from "./components/LarekApi";
@@ -22,7 +22,7 @@ const productList = new ProductList(eventEmitter);
 const cart = new Cart(eventEmitter);
 const orderModel = new Order('modal-container', 'order');
 const successModal = new SuccessModal('success', eventEmitter);
-const contactsModal = new ContactsModal(
+const contactsView = new ContactsView(
     'modal-container',
     'content-template',
     orderModel,
@@ -32,7 +32,7 @@ const contactsModal = new ContactsModal(
 const orderView = new OrderView(
     'content-template',
     orderModel,
-    () => contactsModal.open(),
+    () => contactsView.open(),
     () => console.log('Форма успешно отправлена'),
     handleFormSubmit
 );
@@ -166,8 +166,8 @@ async function handleFormSubmit(event: Event) {
     const totalPrice = cart.getTotalPrice();
     try {
         const orderForm: OrderForm = {
-            email: contactsModal.getEmailValue(),
-            phone: contactsModal.getPhoneValue(),
+            email: contactsView.getEmailValue(),
+            phone: contactsView.getPhoneValue(),
             payment: orderModel.getPaymentMethod(),
             address: orderModel.getAddress(),
         };
@@ -196,7 +196,7 @@ async function handleFormSubmit(event: Event) {
     }
 }
 
-export function setupContactFields(contactsModal: ContactsModal): void {
+export function setupContactFields(contactsModal: ContactsView): void {
     const checkFields = () => {
         const isValid = contactsModal.contactValidator.validateContactFields(
             contactsModal.emailField,
@@ -214,7 +214,7 @@ export function setupContactFields(contactsModal: ContactsModal): void {
     contactsModal.phoneField.addEventListener('input', checkFields);
 }
 
-export function setupFormSubmitHandler(contactsModal: ContactsModal): void {
+export function setupFormSubmitHandler(contactsModal: ContactsView): void {
     const form = contactsModal.modal.querySelector('form[name="contacts"]');
     if (form) {
         form.addEventListener('submit', (event) => {
@@ -255,6 +255,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         console.error('Contact form not found');
     }
-    setupContactFields(contactsModal);
-    setupFormSubmitHandler(contactsModal);
+    setupContactFields(contactsView);
+    setupFormSubmitHandler(contactsView);
 });
