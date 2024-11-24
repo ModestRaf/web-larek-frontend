@@ -5,8 +5,8 @@ import {setupContactFields, setupFormSubmitHandler} from "../index";
 export class ContactsModal extends ModalBase {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
-    contactValidator: IContactValidator; // Используем интерфейс
-    readonly onSuccess: () => void; // Функция, вызываемая при успешной отправке формы
+    contactValidator: IContactValidator;
+    readonly onSuccess: () => void;
     readonly formSubmitHandler: (event: Event) => void;
     private form: HTMLFormElement | null = null;
     emailField: HTMLInputElement | null = null;
@@ -17,15 +17,15 @@ export class ContactsModal extends ModalBase {
     constructor(
         modalId: string,
         contentTemplateId: string,
-        contactValidator: IContactValidator, // Передаем объект, реализующий интерфейс
-        onSuccess: () => void, // Передаем функцию onSuccess
+        contactValidator: IContactValidator,
+        onSuccess: () => void,
         formSubmitHandler: (event: Event) => void
     ) {
         super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
-        this.contactValidator = contactValidator; // Присваиваем объект, реализующий интерфейс
-        this.onSuccess = onSuccess; // Присваиваем функцию onSuccess
+        this.contactValidator = contactValidator;
+        this.onSuccess = onSuccess;
         this.formSubmitHandler = formSubmitHandler;
     }
 

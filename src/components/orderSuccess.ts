@@ -1,36 +1,31 @@
 import {EventEmitter} from "./base/events";
 
 export class SuccessModal {
-    private contentTemplate: HTMLTemplateElement;
-    private successTemplate: HTMLTemplateElement;
+    private successElement: HTMLElement;
+    private successDescription: HTMLElement | null;
+    private closeButton: HTMLButtonElement | null;
     private eventEmitter: EventEmitter;
 
     constructor(contentTemplateId: string, eventEmitter: EventEmitter) {
-        this.contentTemplate = document.getElementById(contentTemplateId) as HTMLTemplateElement;
-        this.successTemplate = document.getElementById('success') as HTMLTemplateElement;
+        const successTemplate = document.getElementById('success') as HTMLTemplateElement;
+        const successClone = document.importNode(successTemplate.content, true);
+        this.successElement = successClone.firstElementChild as HTMLElement;
+        this.successDescription = this.successElement.querySelector('.order-success__description');
+        this.closeButton = this.successElement.querySelector('.order-success__close');
         this.eventEmitter = eventEmitter;
+
+        if (this.closeButton) {
+            this.closeButton.addEventListener('click', () => {
+                this.onSuccessClose();
+            });
+        }
     }
 
     render(totalPrice: number): HTMLElement {
-        const successClone = document.importNode(this.successTemplate.content, true);
-        const successElement = successClone.firstElementChild as HTMLElement;
-        const successDescription = successElement.querySelector('.order-success__description') as HTMLElement;
-        if (successDescription) {
-            successDescription.textContent = `Списано ${totalPrice} синапсов`;
+        if (this.successDescription) {
+            this.successDescription.textContent = `Списано ${totalPrice} синапсов`;
         }
-        const closeButton = successElement.querySelector('.order-success__close') as HTMLButtonElement;
-        if (closeButton) {
-            closeButton.addEventListener('click', () => {
-                this.onSuccessClose();
-            });
-        }
-        const newPurchasesButton = successElement.querySelector('.order-success__new-purchases') as HTMLButtonElement;
-        if (newPurchasesButton) {
-            newPurchasesButton.addEventListener('click', () => {
-                this.onSuccessClose();
-            });
-        }
-        return successElement;
+        return this.successElement;
     }
 
     private onSuccessClose(): void {

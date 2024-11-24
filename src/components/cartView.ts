@@ -5,11 +5,11 @@ export class CartView {
     private contentTemplate: HTMLTemplateElement;
     private readonly onCheckout: (totalPrice: number) => void;
     readonly model: ICart;
-    private basketList: HTMLElement | null = null;
-    private basketPrice: HTMLElement | null = null;
-    private checkoutButton: HTMLButtonElement | null = null;
+    private readonly basketList: HTMLElement;
+    private readonly basketPrice: HTMLElement;
+    private readonly checkoutButton: HTMLButtonElement;
     private readonly basketCounter: HTMLElement;
-    private content: HTMLElement | null = null;
+    private readonly content: HTMLElement;
 
     constructor(
         contentTemplateId: string,
@@ -20,9 +20,18 @@ export class CartView {
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.onCheckout = onCheckout;
         this.model = model;
+        const cartClone = document.importNode(this.contentTemplate.content, true);
+        this.content = document.createElement('modal__content');
+        this.content.appendChild(cartClone);
+        this.basketList = this.content.querySelector('.basket__list') as HTMLElement;
+        this.basketPrice = this.content.querySelector('.basket__price') as HTMLElement;
+        this.checkoutButton = this.content.querySelector('.basket__button') as HTMLButtonElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
+        this.checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
+        this.subscribeToEvents();
+    }
 
-        // Подписка на события
+    private subscribeToEvents(): void {
         this.eventEmitter.on<{ selectedProductsCount: number }>('productToggled', ({selectedProductsCount}) => {
             this.updateBasketCounter(selectedProductsCount);
         });
@@ -32,22 +41,12 @@ export class CartView {
         this.eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
             this.updateBasketCounter(selectedProductsCount);
         });
-
         this.eventEmitter.on('cart:change', () => {
             this.update();
         });
     }
 
     render(): HTMLElement {
-        if (!this.content) {
-            const cartClone = document.importNode(this.contentTemplate.content, true);
-            this.content = document.createElement('modal__content');
-            this.content.appendChild(cartClone);
-            this.basketList = this.content.querySelector('.basket__list');
-            this.basketPrice = this.content.querySelector('.basket__price');
-            this.checkoutButton = this.content.querySelector('.basket__button');
-            this.checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
-        }
         this.renderBasketItems();
         return this.content;
     }
@@ -56,12 +55,17 @@ export class CartView {
         this.renderBasketItems();
     }
 
-    renderBasketItems(): void {
-        if (!this.basketList || !this.basketPrice || !this.checkoutButton) {
-            console.error('Basket elements not found');
+    setItems(items: HTMLElement[]): void {
+        if (!this.basketList) {
+            console.error('Basket list not found');
             return;
         }
-        this.basketList.innerHTML = '';
+        this.basketList.innerHTML = ''; // Очищаем список
+        items.forEach(item => this.basketList.appendChild(item)); // Добавляем новые элементы
+    }
+
+    renderBasketItems(): void {
+        this.basketList.innerHTML = ''; // Очищаем список
         if (this.model.items.length === 0) {
             this.renderEmptyCart();
         } else {
@@ -71,16 +75,12 @@ export class CartView {
     }
 
     updateBasketCounter(selectedProductsCount: number): void {
-        if (this.basketCounter && typeof selectedProductsCount === 'number') {
+        if (typeof selectedProductsCount === 'number') {
             this.basketCounter.textContent = selectedProductsCount.toString();
         }
     }
 
     private renderEmptyCart(): void {
-        if (!this.basketList || !this.checkoutButton) {
-            console.error('Basket elements not found');
-            return;
-        }
         const emptyMessage = document.createElement('p');
         emptyMessage.textContent = 'Корзина пуста';
         this.basketList.appendChild(emptyMessage);
@@ -88,24 +88,11 @@ export class CartView {
     }
 
     private renderItems(): void {
-        if (!this.basketList || !this.checkoutButton) {
-            console.error('Basket elements not found');
-            return;
-        }
         this.model.items.forEach((item, index) => {
             const basketItem = new BasketItemView(item, index + 1, this.model, this.update.bind(this));
             this.basketList.appendChild(basketItem.render());
         });
         this.checkoutButton.disabled = false;
-    }
-
-    setItems(items: HTMLElement[]): void {
-        if (!this.basketList) {
-            console.error('Basket list not found');
-            return;
-        }
-        this.basketList.innerHTML = '';
-        items.forEach(item => this.basketList.appendChild(item));
     }
 }
 
