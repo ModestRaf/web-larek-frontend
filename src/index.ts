@@ -122,6 +122,45 @@ eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) =>
     cart.updateCartItems(productList.products);
 });
 
+eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
+    console.log('Received popup:open event:', product);
+    const popupClone = document.importNode(cardsView.popupTemplate.content, true);
+    const popupCard = popupClone.querySelector('.card') as HTMLElement;
+    cardsView.updateCardContent(popupCard, product);
+    const button = popupCard.querySelector('.card__button') as HTMLButtonElement | null;
+    if (button) {
+        button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
+        button.addEventListener('click', () => {
+            eventEmitter.emit('toggleProductInCart', {product});
+            cardsView.updateCardContent(popupCard, product);
+        });
+    }
+    cardsView.content.innerHTML = '';
+    cardsView.content.appendChild(popupClone);
+    cardsView.open();
+});
+
+eventEmitter.on('cart:open', () => {
+    const cartContent = cartView.render();
+    const modalContainer = document.querySelector('#modal-container');
+    if (!modalContainer) {
+        console.error('Modal container not found');
+        return;
+    }
+    const modalBase = new ModalBase('#modal-container', '.modal__close');
+    modalBase.open(undefined, cartContent);
+});
+
+eventEmitter.on('cart:change', () => {
+    const items = cartView.model.items.map((item, index) => {
+        const basketItem = new BasketItemView(item, index + 1, cartView.model, cartView.update.bind(cartView));
+        return basketItem.render();
+    });
+    cartView.setItems(items);
+    cartView.updateBasketCounter(cartView.model.items.length);
+    cartView.renderBasketItems();
+});
+
 async function handleFormSubmit(event: Event) {
     event.preventDefault();
     const totalPrice = cart.getTotalPrice();
@@ -210,46 +249,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             eventEmitter.emit('cart:open');
         });
     }
-
-    eventEmitter.on('cart:open', () => {
-        const cartContent = cartView.render();
-        const modalContainer = document.querySelector('#modal-container');
-        if (!modalContainer) {
-            console.error('Modal container not found');
-            return;
-        }
-        const modalBase = new ModalBase('#modal-container', '.modal__close');
-        modalBase.open(undefined, cartContent);
-    });
-
-    eventEmitter.on('cart:change', () => {
-        const items = cartView.model.items.map((item, index) => {
-            const basketItem = new BasketItemView(item, index + 1, cartView.model, cartView.update.bind(cartView));
-            return basketItem.render();
-        });
-        cartView.setItems(items);
-        cartView.updateBasketCounter(cartView.model.items.length);
-        cartView.renderBasketItems();
-    });
-
-    eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
-        console.log('Received popup:open event:', product);
-        const popupClone = document.importNode(cardsView.popupTemplate.content, true);
-        const popupCard = popupClone.querySelector('.card') as HTMLElement;
-        cardsView.updateCardContent(popupCard, product);
-        const button = popupCard.querySelector('.card__button') as HTMLButtonElement | null;
-        if (button) {
-            button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
-            button.addEventListener('click', () => {
-                eventEmitter.emit('toggleProductInCart', {product});
-                cardsView.updateCardContent(popupCard, product);
-            });
-        }
-        cardsView.content.innerHTML = '';
-        cardsView.content.appendChild(popupClone);
-        cardsView.open();
-    });
-
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
