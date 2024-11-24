@@ -19,7 +19,7 @@ const eventEmitter: IEvents = new EventEmitter() as IEvents;
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
 const productList = new ProductList(eventEmitter);
-const cart = new Cart(productList, eventEmitter);
+const cart = new Cart(eventEmitter);
 const orderModel = new Order('modal-container', 'order');
 const successModal = new SuccessModal('modal-container', 'success');
 const contactsModal = new ContactsModal(
@@ -98,13 +98,18 @@ eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
     }
 });
 eventEmitter.on<{ product: ProductItem }>('toggleProductInCart', ({product}) => {
-    cart.toggleProductInCart(product, productList.products);
-    updateBasketCounter();
-    cart.updateCartItems(productList.products);
+    const existingProduct = productList.products.find(p => p.id === product.id);
+    if (existingProduct) {
+        existingProduct.selected = !existingProduct.selected;
+        productList.saveSelectedToStorage();
+        cart.toggleProductInCart(existingProduct);
+        updateBasketCounter();
+        cart.updateCartItems(productList.products);
+    }
 });
 
 eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) => {
-    cart.removeProductFromCart(productId, productList.products);
+    cart.removeProductFromCart(productId);
     updateBasketCounter();
     cart.updateCartItems(productList.products);
 });

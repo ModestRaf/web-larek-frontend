@@ -1,51 +1,56 @@
-import {CartItem, ICart, IProductList, ProductItem} from "../types";
+import {CartItem, ICart, ProductItem} from "../types";
 import {EventEmitter} from "./base/events";
 
 export class Cart implements ICart {
     items: CartItem[] = [];
-    private productList: IProductList;
     private eventEmitter: EventEmitter;
 
-    constructor(productList: IProductList, eventEmitter: EventEmitter) {
-        this.productList = productList;
+    constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter;
         this.loadCartFromStorage();
     }
 
-    toggleProductInCart(product: ProductItem, products: ProductItem[]): void {
-        const existingProduct = products.find(p => p.id === product.id);
-        if (existingProduct) {
-            existingProduct.selected = !existingProduct.selected;
-            console.log(`Product ${product.id} selected state changed to ${existingProduct.selected}`);
+    toggleProductInCart(product: ProductItem): void {
+        const existingItem = this.items.find(item => item.id === product.id);
+        if (existingItem) {
+            this.removeProductFromCart(product.id);
+            console.log(`Product ${product.id} removed from cart`);
         } else {
-            console.log(`Product ${product.id} not found in products list`);
+            this.items.push({
+                id: product.id,
+                title: product.title,
+                price: product.price,
+            });
+            console.log(`Product ${product.id} added to cart`);
         }
-        this.productList.saveSelectedToStorage();
-        this.updateCartItems(products);
+        this.saveCartToStorage();
         this.notifyProductToggled(product, this.items.length);
     }
 
-    removeProductFromCart(productId: string, products: ProductItem[]): void {
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            product.selected = false;
+    removeProductFromCart(productId: string): void {
+        const index = this.items.findIndex(item => item.id === productId);
+        if (index !== -1) {
+            this.items.splice(index, 1);
             console.log(`Product ${productId} removed from cart`);
+            this.saveCartToStorage();
+            this.notifyProductRemoved(productId, this.items.length);
         } else {
-            console.log(`Product ${productId} not found in products list`);
+            console.log(`Product ${productId} not found in cart`);
         }
-        this.productList.saveSelectedToStorage();
-        this.updateCartItems(products);
-        this.notifyProductRemoved(productId, this.items.length);
     }
 
     removeBasketItem(itemId: string): void {
-        this.items = this.items.filter(item => item.id !== itemId);
-        this.saveCartToStorage();
-        const selectedProductsCount = this.items.length;
-        this.notifyBasketItemRemoved(itemId, selectedProductsCount);
-        this.eventEmitter.emit<{ productId: string }>('productRemoved', {productId: itemId});
+        const index = this.items.findIndex(item => item.id === itemId);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+            this.saveCartToStorage();
+            const selectedProductsCount = this.items.length;
+            this.notifyBasketItemRemoved(itemId, selectedProductsCount);
+            this.eventEmitter.emit<{ productId: string }>('productRemoved', {productId: itemId});
+        } else {
+            console.log(`Item ${itemId} not found in cart`);
+        }
     }
-
 
     updateCartItems(products: ProductItem[]): void {
         this.items = products.filter(product => product.selected).map(product => ({

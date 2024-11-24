@@ -1,7 +1,7 @@
-import {IProductList, ProductItem} from "../types";
+import {ProductItem} from "../types";
 import {EventEmitter} from "./base/events";
 
-export class ProductList implements IProductList {
+export class ProductList {
     products: ProductItem[] = [];
     private eventEmitter: EventEmitter;
 

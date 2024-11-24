@@ -36,10 +36,6 @@ export interface IOrderResult {
     error?: string;  // Сообщение об ошибке (если заказ не был успешно обработан)
 }
 
-export interface IProductList {
-    saveSelectedToStorage(): void;
-}
-
 export interface ICart {
     items: CartItem[];
     toggleProductInCart(product: ProductItem, products: ProductItem[]): void;
