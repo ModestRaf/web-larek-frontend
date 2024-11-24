@@ -30,8 +30,7 @@ const contactsModal = new ContactsModal(
     handleFormSubmit
 );
 const orderView = new OrderView(
-    'modal-container',
-    'content-template',
+    'content-template', // Исправлено: удален лишний аргумент
     orderModel,
     () => contactsModal.open(),
     () => console.log('Форма успешно отправлена'),
@@ -40,7 +39,10 @@ const orderView = new OrderView(
 const cartView = new CartView(
     'basket',
     cart,
-    (totalPrice: number) => orderView.open(totalPrice),
+    (totalPrice: number) => {
+        const modalBase = new ModalBase('#modal-container', '.modal__close');
+        orderView.open(modalBase, totalPrice); // Исправлено: передаем modalBase и totalPrice
+    },
     eventEmitter
 );
 const cardsView = new CardsView(
