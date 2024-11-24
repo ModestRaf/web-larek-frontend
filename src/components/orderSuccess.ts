@@ -1,32 +1,29 @@
 import {ModalBase} from "./modalBase";
-
-export class SuccessModal extends ModalBase {
+export class SuccessModal {
     private contentTemplate: HTMLTemplateElement;
     private successTemplate: HTMLTemplateElement;
 
-    constructor(modalId: string, contentTemplateId: string) {
-        super(`#${modalId}`, '.modal__close');
+    constructor(contentTemplateId: string) {
         this.contentTemplate = document.getElementById(contentTemplateId) as HTMLTemplateElement;
         this.successTemplate = document.getElementById('success') as HTMLTemplateElement;
     }
 
-    open(totalPrice: number): void {
+    open(modalBase: ModalBase, totalPrice: number): void {
         console.log('Открытие SuccessModal с суммой:', totalPrice); // Лог для проверки
-        super.open();
         const successClone = document.importNode(this.successTemplate.content, true);
-        this.content.innerHTML = '';
-        this.content.appendChild(successClone);
-        const successDescription = this.modal.querySelector('.order-success__description') as HTMLElement;
+        const successElement = successClone.firstElementChild as HTMLElement; // Преобразуем DocumentFragment в HTMLElement
+        const successDescription = successElement.querySelector('.order-success__description') as HTMLElement;
         successDescription.textContent = `Списано ${totalPrice} синапсов`;
-        const closeButton = this.modal.querySelector('.order-success__close') as HTMLButtonElement;
+        const closeButton = successElement.querySelector('.order-success__close') as HTMLButtonElement;
         closeButton.addEventListener('click', () => {
-            this.close();
+            modalBase.close();
             this.onSuccessClose();
         });
+        modalBase.open(undefined, successElement);
     }
 
     private onSuccessClose(): void {
         const event = new CustomEvent('orderSuccessClosed', {bubbles: true});
-        this.modal.dispatchEvent(event);
+        document.dispatchEvent(event);
     }
 }

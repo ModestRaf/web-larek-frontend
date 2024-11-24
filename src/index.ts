@@ -21,7 +21,7 @@ const larekApi = new LarekApi(api);
 const productList = new ProductList(eventEmitter);
 const cart = new Cart(eventEmitter);
 const orderModel = new Order('modal-container', 'order');
-const successModal = new SuccessModal('modal-container', 'success');
+const successModal = new SuccessModal('success');
 const contactsModal = new ContactsModal(
     'modal-container',
     'content-template',
@@ -41,7 +41,8 @@ const cartView = new CartView(
     cart,
     (totalPrice: number) => {
         const modalBase = new ModalBase('#modal-container', '.modal__close');
-        orderView.open(modalBase, totalPrice); // Исправлено: передаем modalBase и totalPrice
+        const orderContent = orderView.render();
+        modalBase.open(totalPrice, orderContent); // Исправлено: передаем orderContent
     },
     eventEmitter
 );
@@ -94,7 +95,8 @@ eventEmitter.on('orderSuccessClosed', resetCart);
 eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
     const totalPrice = data.totalPrice;
     if (totalPrice !== undefined) {
-        successModal.open(totalPrice);
+        const modalBase = new ModalBase('#modal-container', '.modal__close');
+        successModal.open(modalBase, totalPrice);
     } else {
         console.error('totalPrice is undefined');
     }

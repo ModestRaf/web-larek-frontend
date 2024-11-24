@@ -1,4 +1,3 @@
-import {ModalBase} from "./modalBase";
 import {IOrderModel} from "../types";
 
 export class OrderView {
@@ -26,19 +25,19 @@ export class OrderView {
         this.formSubmitHandler = formSubmitHandler;
     }
 
-    open(modalBase: ModalBase, totalPrice: number): void {
+    render(): HTMLElement {
         const orderClone = document.importNode(this.orderTemplate.content, true);
         const orderElement = orderClone.firstElementChild as HTMLElement; // Преобразуем DocumentFragment в HTMLElement
-        modalBase.open(totalPrice, orderElement);
-        this.setupPaymentButtons(modalBase);
-        this.setupAddressField(modalBase);
-        const onlineButton = modalBase.content.querySelector('button[name="card"]') as HTMLButtonElement;
+        this.setupPaymentButtons(orderElement);
+        this.setupAddressField(orderElement);
+        const onlineButton = orderElement.querySelector('button[name="card"]') as HTMLButtonElement;
         onlineButton.classList.add('button_alt-active');
-        this.setupNextButton(modalBase);
+        this.setupNextButton(orderElement);
+        return orderElement;
     }
 
-    setupPaymentButtons(modalBase: ModalBase): void {
-        const paymentButtons = modalBase.content.querySelectorAll('.order__buttons .button_alt');
+    setupPaymentButtons(orderElement: HTMLElement): void {
+        const paymentButtons = orderElement.querySelectorAll('.order__buttons .button_alt');
         paymentButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
@@ -50,23 +49,22 @@ export class OrderView {
         });
     }
 
-    setupAddressField(modalBase: ModalBase): void {
-        const addressField = modalBase.content.querySelector('input[name="address"]') as HTMLInputElement;
-        const nextButton = modalBase.content.querySelector('.order__button') as HTMLButtonElement;
-        const formErrors = modalBase.content.querySelector('.form__errors') as HTMLElement;
+    setupAddressField(orderElement: HTMLElement): void {
+        const addressField = orderElement.querySelector('input[name="address"]') as HTMLInputElement;
+        const nextButton = orderElement.querySelector('.order__button') as HTMLButtonElement;
+        const formErrors = orderElement.querySelector('.form__errors') as HTMLElement;
         addressField.addEventListener('input', () => {
             this.model.validateAddressField(addressField, nextButton, formErrors);
             this.model.setAddress(addressField.value);
         });
     }
 
-    setupNextButton(modalBase: ModalBase): void {
-        const nextButton = modalBase.content.querySelector('.order__button') as HTMLButtonElement;
-        const addressField = modalBase.content.querySelector('input[name="address"]') as HTMLInputElement;
-        const formErrors = modalBase.content.querySelector('.form__errors') as HTMLElement;
+    setupNextButton(orderElement: HTMLElement): void {
+        const nextButton = orderElement.querySelector('.order__button') as HTMLButtonElement;
+        const addressField = orderElement.querySelector('input[name="address"]') as HTMLInputElement;
+        const formErrors = orderElement.querySelector('.form__errors') as HTMLElement;
         nextButton.addEventListener('click', () => {
             if (this.model.validateAddressField(addressField, nextButton, formErrors)) {
-                modalBase.close();
                 this.openContactsModal();
                 this.onSuccess();
             }
