@@ -122,7 +122,7 @@ eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
     const popupClone = document.importNode(cardsView.popupTemplate.content, true);
     const popupCard = popupClone.querySelector('.card') as HTMLElement;
     cardsView.updateCardContent(popupCard, product);
-    const button = popupCard.querySelector('.card__button') as HTMLButtonElement | null;
+    const button = popupCard.querySelector('.card__button') as HTMLButtonElement;
     button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
     button.addEventListener('click', () => {
         eventEmitter.emit('toggleProductInCart', {product});
@@ -157,8 +157,8 @@ async function handleFormSubmit(event: Event) {
     const totalPrice = cart.getTotalPrice();
     try {
         const orderForm: OrderForm = {
-            email: orderModel.getEmailValue(),
-            phone: orderModel.getPhoneValue(),
+            email: orderModel.getEmail(),
+            phone: orderModel.getPhone(),
             payment: orderModel.getPaymentMethod(),
             address: orderModel.getAddress(),
         };
@@ -191,11 +191,11 @@ export function setupContactFields(contactsView: ContactsView, orderModel: IOrde
         );
         if (isValid) {
             contactsView.payButton.removeAttribute('disabled');
-            if (orderModel.setEmailValue) {
-                orderModel.setEmailValue(contactsView.emailField.value.trim());
+            if (orderModel.setEmail) {
+                orderModel.setEmail(contactsView.emailField.value.trim());
             }
-            if (orderModel.setPhoneValue) {
-                orderModel.setPhoneValue(contactsView.phoneField.value.trim());
+            if (orderModel.setPhone) {
+                orderModel.setPhone(contactsView.phoneField.value.trim());
             }
         } else {
             contactsView.payButton.setAttribute('disabled', 'true');
@@ -217,11 +217,11 @@ export function setupFormSubmitHandler(contactsView: ContactsView, orderModel: I
                 contactsView.formErrors
             );
             if (isValid) {
-                if (orderModel.setEmailValue) {
-                    orderModel.setEmailValue(contactsView.emailField.value.trim());
+                if (orderModel.setEmail) {
+                    orderModel.setEmail(contactsView.emailField.value.trim());
                 }
-                if (orderModel.setPhoneValue) {
-                    orderModel.setPhoneValue(contactsView.phoneField.value.trim());
+                if (orderModel.setPhone) {
+                    orderModel.setPhone(contactsView.phoneField.value.trim());
                 }
                 contactsView.formSubmitHandler(event);
                 contactsView.onSuccess();
@@ -234,10 +234,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const products = await loadProducts(api);
     productList.products = productList.loadSelectedFromStorage(products);
     loadProductsLogic();
-    const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
+    const basketButton = document.querySelector('.header__basket') as HTMLButtonElement;
     basketButton.addEventListener('click', () => {
         eventEmitter.emit('cart:open');
     });
-    const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
+    const form = document.querySelector('form[name="contacts"]') as HTMLFormElement
     form.addEventListener('submit', handleFormSubmit);
 });

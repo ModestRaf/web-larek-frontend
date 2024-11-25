@@ -4,8 +4,8 @@ export class Order {
     orderTemplate: HTMLTemplateElement;
     private paymentMethod: string;
     private address: string;
-    private emailField: string;
-    private phoneField: string;
+    private email: string;
+    private phone: string;
 
     constructor(modalId: string, contentTemplateId: string) {
         this.modal = document.querySelector(`#${modalId}`) as HTMLElement;
@@ -13,8 +13,8 @@ export class Order {
         this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
         this.paymentMethod = 'card';
         this.address = '';
-        this.emailField = '';
-        this.phoneField = '';
+        this.email = '';
+        this.phone = '';
     }
 
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean {
@@ -64,12 +64,12 @@ export class Order {
         this.address = address;
     }
 
-    setEmailValue(email: string): void {
-        this.emailField = email;
+    setEmail(email: string): void {
+        this.email = email;
     }
 
-    setPhoneValue(phone: string): void {
-        this.phoneField = phone;
+    setPhone(phone: string): void {
+        this.phone = phone;
     }
 
     getPaymentMethod(): string {
@@ -80,11 +80,11 @@ export class Order {
         return this.address;
     }
 
-    getEmailValue(): string {
-        return this.emailField;
+    getEmail(): string {
+        return this.email;
     }
 
-    getPhoneValue(): string {
-        return this.phoneField;
+    getPhone(): string {
+        return this.phone;
     }
 }

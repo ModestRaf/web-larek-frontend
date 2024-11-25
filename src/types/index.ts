@@ -53,8 +53,12 @@ export interface IContactValidator {
 
 export interface IOrderModel {
     setPaymentMethod(method: string): void;
+
     setAddress(address: string): void;
-    setEmailValue(email: string): void;
-    setPhoneValue(phone: string): void;
+
+    setEmail(email: string): void;
+
+    setPhone(phone: string): void;
+
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean;
 }
