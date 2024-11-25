@@ -14,10 +14,8 @@ export class ProductList {
 
     private updateSelectedState(productId: string): void {
         const product = this.products.find(p => p.id === productId);
-        if (product) {
-            product.selected = false;
-            this.saveSelectedToStorage();
-        }
+        product.selected = false;
+        this.saveSelectedToStorage();
     }
 
     saveSelectedToStorage(): void {

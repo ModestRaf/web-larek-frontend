@@ -14,14 +14,12 @@ export class Cart implements ICart {
         const existingItem = this.items.find(item => item.id === product.id);
         if (existingItem) {
             this.removeProductFromCart(product.id);
-            console.log(`Product ${product.id} removed from cart`);
         } else {
             this.items.push({
                 id: product.id,
                 title: product.title,
                 price: product.price,
             });
-            console.log(`Product ${product.id} added to cart`);
         }
         this.saveCartToStorage();
         this.notifyProductToggled(product, this.items.length);
@@ -29,27 +27,18 @@ export class Cart implements ICart {
 
     removeProductFromCart(productId: string): void {
         const index = this.items.findIndex(item => item.id === productId);
-        if (index !== -1) {
-            this.items.splice(index, 1);
-            console.log(`Product ${productId} removed from cart`);
-            this.saveCartToStorage();
-            this.notifyProductRemoved(productId, this.items.length);
-        } else {
-            console.log(`Product ${productId} not found in cart`);
-        }
+        this.items.splice(index, 1);
+        this.saveCartToStorage();
+        this.notifyProductRemoved(productId, this.items.length);
     }
 
     removeBasketItem(itemId: string): void {
         const index = this.items.findIndex(item => item.id === itemId);
-        if (index !== -1) {
-            this.items.splice(index, 1);
-            this.saveCartToStorage();
-            const selectedProductsCount = this.items.length;
-            this.notifyBasketItemRemoved(itemId, selectedProductsCount);
-            this.eventEmitter.emit<{ productId: string }>('productRemoved', {productId: itemId});
-        } else {
-            console.log(`Item ${itemId} not found in cart`);
-        }
+        this.items.splice(index, 1);
+        this.saveCartToStorage();
+        const selectedProductsCount = this.items.length;
+        this.notifyBasketItemRemoved(itemId, selectedProductsCount);
+        this.eventEmitter.emit<{ productId: string }>('productRemoved', {productId: itemId});
     }
 
     updateCartItems(products: ProductItem[]): void {

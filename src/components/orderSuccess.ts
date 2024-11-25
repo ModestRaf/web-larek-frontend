@@ -13,18 +13,13 @@ export class SuccessModal {
         this.successDescription = this.successElement.querySelector('.order-success__description');
         this.closeButton = this.successElement.querySelector('.order-success__close');
         this.eventEmitter = eventEmitter;
-
-        if (this.closeButton) {
-            this.closeButton.addEventListener('click', () => {
-                this.onSuccessClose();
-            });
-        }
+        this.closeButton.addEventListener('click', () => {
+            this.onSuccessClose();
+        });
     }
 
     render(totalPrice: number): HTMLElement {
-        if (this.successDescription) {
-            this.successDescription.textContent = `Списано ${totalPrice} синапсов`;
-        }
+        this.successDescription.textContent = `Списано ${totalPrice} синапсов`;
         return this.successElement;
     }
 

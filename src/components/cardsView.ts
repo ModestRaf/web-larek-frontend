@@ -41,7 +41,6 @@ export class CardsView extends ModalBase {
         const productCard = cardClone.querySelector('.gallery__item') as HTMLElement;
         this.updateCardContent(productCard, product);
         productCard.addEventListener('click', () => {
-            console.log('Card clicked:', product); // Убедитесь, что событие срабатывает
             this.eventEmitter.emit('popup:open', {product});
         });
         return productCard;
@@ -76,11 +75,10 @@ export class CardsView extends ModalBase {
         });
     }
 
-    private setCategoryClass(category: HTMLElement | null, categoryName: string): void {
-        if (!category) return;
+    private setCategoryClass(category: HTMLElement, categoryName: string): void {
         category.textContent = categoryName;
         category.classList.remove(...Object.values(this.categoryClasses));
-        const className = this.categoryClasses[categoryName] || '';
+        const className = this.categoryClasses[categoryName];
         if (className) category.classList.add(className);
     }
 }

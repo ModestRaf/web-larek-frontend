@@ -1,53 +1,55 @@
-import {ModalBase} from "./modalBase";
 import {IContactValidator, IOrderModel} from "../types";
 import {setupContactFields, setupFormSubmitHandler} from "../index";
+import {EventEmitter} from "./base/events";
 
-export class ContactsView extends ModalBase {
+export class ContactsView {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
     contactValidator: IContactValidator;
     readonly onSuccess: () => void;
     readonly formSubmitHandler: (event: Event) => void;
-    private form: HTMLFormElement | null = null;
-    emailField: HTMLInputElement | null = null;
-    phoneField: HTMLInputElement | null = null;
-    payButton: HTMLButtonElement | null = null;
-    formErrors: HTMLElement | null = null;
+    form: HTMLFormElement;
+    emailField: HTMLInputElement;
+    phoneField: HTMLInputElement;
+    payButton: HTMLButtonElement;
+    formErrors: HTMLElement;
     private model: IOrderModel;
+    private eventEmitter: EventEmitter;
+    private content: HTMLElement;
 
     constructor(
-        modalId: string,
         contentTemplateId: string,
         contactValidator: IContactValidator,
         onSuccess: () => void,
         formSubmitHandler: (event: Event) => void,
-        model: IOrderModel
+        model: IOrderModel,
+        eventEmitter: EventEmitter
     ) {
-        super(`#${modalId}`, '.modal__close');
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
         this.contactValidator = contactValidator;
         this.onSuccess = onSuccess;
         this.formSubmitHandler = formSubmitHandler;
         this.model = model;
-    }
-
-    open(): void {
-        super.open();
+        this.eventEmitter = eventEmitter;
         const contactsClone = document.importNode(this.contactsTemplate.content, true);
-        this.content.innerHTML = '';
+        this.content = document.createElement('div');
         this.content.appendChild(contactsClone);
         this.form = this.content.querySelector('form') as HTMLFormElement;
-        if (this.form) {
-            this.emailField = this.form.querySelector('input[name="email"]') as HTMLInputElement;
-            this.phoneField = this.form.querySelector('input[name="phone"]') as HTMLInputElement;
-            this.payButton = this.form.querySelector('.button') as HTMLButtonElement;
-            this.formErrors = this.form.querySelector('.form__errors') as HTMLElement;
-        } else {
-            console.error('Элемент формы не найден');
-        }
+        this.emailField = this.form.querySelector('input[name="email"]') as HTMLInputElement;
+        this.phoneField = this.form.querySelector('input[name="phone"]') as HTMLInputElement;
+        this.payButton = this.form.querySelector('.button') as HTMLButtonElement;
+        this.formErrors = this.form.querySelector('.form__errors') as HTMLElement;
+    }
 
+    render(): HTMLElement {
         setupContactFields(this, this.model);
         setupFormSubmitHandler(this, this.model);
+        return this.content;
+    }
+
+    openModal(): void {
+        const content = this.render();
+        this.eventEmitter.emit('openModal', content);
     }
 }

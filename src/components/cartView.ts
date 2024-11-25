@@ -56,16 +56,12 @@ export class CartView {
     }
 
     setItems(items: HTMLElement[]): void {
-        if (!this.basketList) {
-            console.error('Basket list not found');
-            return;
-        }
-        this.basketList.innerHTML = ''; // Очищаем список
-        items.forEach(item => this.basketList.appendChild(item)); // Добавляем новые элементы
+        this.basketList.innerHTML = '';
+        items.forEach(item => this.basketList.appendChild(item));
     }
 
     renderBasketItems(): void {
-        this.basketList.innerHTML = ''; // Очищаем список
+        this.basketList.innerHTML = '';
         if (this.model.items.length === 0) {
             this.renderEmptyCart();
         } else {

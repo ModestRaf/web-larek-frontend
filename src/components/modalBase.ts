@@ -5,12 +5,10 @@ export class ModalBase {
     constructor(modalSelector: string, closeSelector: string) {
         this.modal = document.querySelector(modalSelector) as HTMLElement;
         if (!this.modal) {
-            console.error(`Modal element with selector ${modalSelector} not found`);
             return;
         }
         this.content = this.modal.querySelector('.modal__content') as HTMLElement;
         if (!this.content) {
-            console.error(`Content element with class .modal__content not found in modal`);
             return;
         }
         this.closeButton = this.modal.querySelector(closeSelector);
@@ -22,7 +20,6 @@ export class ModalBase {
 
     open(totalPrice?: number, content?: HTMLElement): void {
         if (!this.modal) {
-            console.error('Modal element is not defined');
             return;
         }
         if (content && this.content) {
@@ -34,7 +31,6 @@ export class ModalBase {
 
     close(): void {
         if (!this.modal) {
-            console.error('Modal element is not defined');
             return;
         }
         this.modal.classList.remove('modal_active');

@@ -23,17 +23,17 @@ const cart = new Cart(eventEmitter);
 const orderModel = new Order('modal-container', 'order');
 const successModal = new SuccessModal('success', eventEmitter);
 const contactsView = new ContactsView(
-    'modal-container',
     'content-template',
     orderModel,
     () => console.log('Форма успешно отправлена'),
     handleFormSubmit,
-    orderModel
+    orderModel,
+    eventEmitter
 );
 const orderView = new OrderView(
     'content-template',
     orderModel,
-    () => contactsView.open(),
+    () => contactsView.openModal(),
     () => console.log('Форма успешно отправлена'),
     handleFormSubmit,
 );
@@ -41,7 +41,6 @@ const cartView = new CartView(
     'basket',
     cart,
     (totalPrice: number) => {
-        const modalBase = new ModalBase('#modal-container', '.modal__close');
         const orderContent = orderView.render();
         modalBase.open(totalPrice, orderContent);
     },
@@ -54,8 +53,8 @@ const cardsView = new CardsView(
     'card-preview',
     eventEmitter
 );
-
 const productListView = new ProductListView('gallery', eventEmitter);
+const modalBase = new ModalBase('#modal-container', '.modal__close');
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -93,28 +92,24 @@ function loadProductsLogic(): void {
 
 // Обработчики событий
 eventEmitter.on('orderSuccessClosed', resetCart);
+eventEmitter.on('openModal', (content: HTMLElement) => {
+    modalBase.open(undefined, content);
+});
 eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
     const totalPrice = data.totalPrice;
-    if (totalPrice !== undefined) {
-        const modalBase = new ModalBase('#modal-container', '.modal__close');
-        const successContent = successModal.render(totalPrice);
-        modalBase.open(undefined, successContent);
-        eventEmitter.on('orderSuccessClosed', () => {
-            modalBase.close();
-        });
-    } else {
-        console.error('totalPrice is undefined');
-    }
+    const successContent = successModal.render(totalPrice);
+    modalBase.open(undefined, successContent);
+    eventEmitter.on('orderSuccessClosed', () => {
+        modalBase.close();
+    });
 });
 eventEmitter.on<{ product: ProductItem }>('toggleProductInCart', ({product}) => {
     const existingProduct = productList.products.find(p => p.id === product.id);
-    if (existingProduct) {
         existingProduct.selected = !existingProduct.selected;
         productList.saveSelectedToStorage();
         cart.toggleProductInCart(existingProduct);
         updateBasketCounter();
         cart.updateCartItems(productList.products);
-    }
 });
 
 eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) => {
@@ -124,18 +119,15 @@ eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) =>
 });
 
 eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
-    console.log('Received popup:open event:', product);
     const popupClone = document.importNode(cardsView.popupTemplate.content, true);
     const popupCard = popupClone.querySelector('.card') as HTMLElement;
     cardsView.updateCardContent(popupCard, product);
     const button = popupCard.querySelector('.card__button') as HTMLButtonElement | null;
-    if (button) {
-        button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
-        button.addEventListener('click', () => {
-            eventEmitter.emit('toggleProductInCart', {product});
-            cardsView.updateCardContent(popupCard, product);
-        });
-    }
+    button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
+    button.addEventListener('click', () => {
+        eventEmitter.emit('toggleProductInCart', {product});
+        cardsView.updateCardContent(popupCard, product);
+    });
     cardsView.content.innerHTML = '';
     cardsView.content.appendChild(popupClone);
     cardsView.open();
@@ -145,10 +137,8 @@ eventEmitter.on('cart:open', () => {
     const cartContent = cartView.render();
     const modalContainer = document.querySelector('#modal-container');
     if (!modalContainer) {
-        console.error('Modal container not found');
         return;
     }
-    const modalBase = new ModalBase('#modal-container', '.modal__close');
     modalBase.open(undefined, cartContent);
 });
 
@@ -178,19 +168,13 @@ async function handleFormSubmit(event: Event) {
             total: totalPrice
         };
         const response = await larekApi.submitOrder(order);
-        console.log('Ответ от сервера:', response);
         if (response.id) {
-            console.log('Заказ успешно отправлен');
             cart.clearCart();
             productList.clearSelectedProducts();
             updateBasketCounter();
             const productCards = productList.products.map(product => cardsView.createProductCard(product));
             productListView.renderProducts(productCards);
             eventEmitter.emit('orderSuccess', {totalPrice});
-        } else if (response.error) {
-            console.error('Ошибка при отправке заказа:', response.error);
-        } else {
-            console.error('Неизвестная ошибка при отправке заказа');
         }
     } catch (error) {
         console.error('Ошибка при отправке заказа:', error);
@@ -222,34 +206,28 @@ export function setupContactFields(contactsView: ContactsView, orderModel: IOrde
 }
 
 export function setupFormSubmitHandler(contactsView: ContactsView, orderModel: IOrderModel): void {
-    const form = contactsView.modal.querySelector('form[name="contacts"]');
-    if (form) {
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            if (contactsView.emailField && contactsView.phoneField) {
-                const isValid = contactsView.contactValidator.validateContactFields(
-                    contactsView.emailField,
-                    contactsView.phoneField,
-                    contactsView.payButton,
-                    contactsView.formErrors
-                );
-                if (isValid) {
-                    if (orderModel.setEmailValue) {
-                        orderModel.setEmailValue(contactsView.emailField.value.trim());
-                    }
-                    if (orderModel.setPhoneValue) {
-                        orderModel.setPhoneValue(contactsView.phoneField.value.trim());
-                    }
-                    contactsView.formSubmitHandler(event);
-                    contactsView.onSuccess();
-                } else {
-                    console.error('Форма не прошла валидацию');
+    const form = contactsView.form;
+    form.addEventListener('submit', (event: Event) => {
+        event.preventDefault();
+        if (contactsView.emailField && contactsView.phoneField) {
+            const isValid = contactsView.contactValidator.validateContactFields(
+                contactsView.emailField,
+                contactsView.phoneField,
+                contactsView.payButton,
+                contactsView.formErrors
+            );
+            if (isValid) {
+                if (orderModel.setEmailValue) {
+                    orderModel.setEmailValue(contactsView.emailField.value.trim());
                 }
+                if (orderModel.setPhoneValue) {
+                    orderModel.setPhoneValue(contactsView.phoneField.value.trim());
+                }
+                contactsView.formSubmitHandler(event);
+                contactsView.onSuccess();
             }
-        });
-    } else {
-        console.error('Форма не найдена');
-    }
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -257,15 +235,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     productList.products = productList.loadSelectedFromStorage(products);
     loadProductsLogic();
     const basketButton = document.querySelector('.header__basket') as HTMLButtonElement | null;
-    if (basketButton) {
-        basketButton.addEventListener('click', () => {
-            eventEmitter.emit('cart:open');
-        });
-    }
+    basketButton.addEventListener('click', () => {
+        eventEmitter.emit('cart:open');
+    });
     const form = document.querySelector('form[name="contacts"]') as HTMLFormElement | null;
-    if (form) {
-        form.addEventListener('submit', handleFormSubmit);
-    } else {
-        console.error('Contact form not found');
-    }
+    form.addEventListener('submit', handleFormSubmit);
 });

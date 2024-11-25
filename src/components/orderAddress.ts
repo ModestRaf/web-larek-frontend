@@ -51,14 +51,10 @@ export class OrderView {
             button.addEventListener('click', (event) => {
                 const selectedButton = event.currentTarget as HTMLButtonElement;
                 const paymentMethod = selectedButton.getAttribute('name');
-                if (paymentMethod) {
-                    this.paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
-                    selectedButton.classList.add('button_alt-active');
-                    this.selectedPaymentMethod = paymentMethod;
-                    this.model.setPaymentMethod(this.selectedPaymentMethod);
-                } else {
-                    console.error('Ошибка: у выбранной кнопки отсутствует атрибут "name".');
-                }
+                this.paymentButtons.forEach(btn => btn.classList.remove('button_alt-active'));
+                selectedButton.classList.add('button_alt-active');
+                this.selectedPaymentMethod = paymentMethod;
+                this.model.setPaymentMethod(this.selectedPaymentMethod);
             });
         });
     }
