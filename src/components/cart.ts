@@ -35,22 +35,19 @@ export class Cart {
             });
         }
         this.saveCartToStorage();
-        this.notifyProductToggled(product, this.items.length);
+        this.notifyProductToggled(product, this.getSelectedProductsCount());
     }
 
     removeProductFromCart(productId: string): void {
-        const index = this.items.findIndex(item => item.id === productId);
-        this.items.splice(index, 1);
+        this.items = this.items.filter(item => item.id !== productId);
         this.saveCartToStorage();
-        this.notifyProductRemoved(productId, this.items.length);
+        this.notifyProductRemoved(productId, this.getSelectedProductsCount());
     }
 
     removeBasketItem(itemId: string): void {
-        const index = this.items.findIndex(item => item.id === itemId);
-        this.items.splice(index, 1);
+        this.items = this.items.filter(item => item.id !== itemId);
         this.saveCartToStorage();
-        const selectedProductsCount = this.items.length;
-        this.notifyBasketItemRemoved(itemId, selectedProductsCount);
+        this.notifyBasketItemRemoved(itemId, this.getSelectedProductsCount());
         this.eventEmitter.emit<{ productId: string }>('productRemoved', {productId: itemId});
     }
 

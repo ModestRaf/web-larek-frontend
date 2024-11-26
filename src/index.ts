@@ -7,7 +7,7 @@ import {CardsView} from "./components/cardsView";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
-import {ProductItem, IOrder, OrderForm, IOrderModel, CartItem} from "./types";
+import {ProductItem, IOrder, OrderForm, CartItem} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsView} from "./components/contactsView";
 import {OrderView} from "./components/orderAddress";
@@ -173,62 +173,11 @@ async function handleFormSubmit(event: Event) {
             cart.clearCart();
             productList.clearSelectedProducts();
             updateBasketCounter();
-            const productCards = productList.products.map(product => cardsView.createProductCard(product));
-            productListView.renderProducts(productCards);
             eventEmitter.emit('orderSuccess', {totalPrice});
         }
     } catch (error) {
         console.error('Ошибка при отправке заказа:', error);
     }
-}
-
-export function setupContactFields(contactsView: ContactsView, orderModel: IOrderModel): void {
-    const checkFields = () => {
-        const isValid = contactsView.contactValidator.validateContactFields(
-            contactsView.emailField,
-            contactsView.phoneField,
-            contactsView.payButton,
-            contactsView.formErrors
-        );
-        if (isValid) {
-            contactsView.payButton.removeAttribute('disabled');
-            if (orderModel.setEmail) {
-                orderModel.setEmail(contactsView.emailField.value.trim());
-            }
-            if (orderModel.setPhone) {
-                orderModel.setPhone(contactsView.phoneField.value.trim());
-            }
-        } else {
-            contactsView.payButton.setAttribute('disabled', 'true');
-        }
-    };
-    contactsView.emailField.addEventListener('input', checkFields);
-    contactsView.phoneField.addEventListener('input', checkFields);
-}
-
-export function setupFormSubmitHandler(contactsView: ContactsView, orderModel: IOrderModel): void {
-    const form = contactsView.form;
-    form.addEventListener('submit', (event: Event) => {
-        event.preventDefault();
-        if (contactsView.emailField && contactsView.phoneField) {
-            const isValid = contactsView.contactValidator.validateContactFields(
-                contactsView.emailField,
-                contactsView.phoneField,
-                contactsView.payButton,
-                contactsView.formErrors
-            );
-            if (isValid) {
-                if (orderModel.setEmail) {
-                    orderModel.setEmail(contactsView.emailField.value.trim());
-                }
-                if (orderModel.setPhone) {
-                    orderModel.setPhone(contactsView.phoneField.value.trim());
-                }
-                contactsView.formSubmitHandler(event);
-                contactsView.onSuccess();
-            }
-        }
-    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

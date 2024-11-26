@@ -1,5 +1,4 @@
 import {IContactValidator, IOrderModel} from "../types";
-import {setupContactFields, setupFormSubmitHandler} from "../index";
 import {EventEmitter} from "./base/events";
 
 export class ContactsView {
@@ -40,11 +39,46 @@ export class ContactsView {
         this.phoneField = this.form.querySelector('input[name="phone"]') as HTMLInputElement;
         this.payButton = this.form.querySelector('.button') as HTMLButtonElement;
         this.formErrors = this.form.querySelector('.form__errors') as HTMLElement;
+        this.setupFormHandlers();
+    }
+
+    private checkFields(): void {
+        const isValid = this.contactValidator.validateContactFields(
+            this.emailField,
+            this.phoneField,
+            this.payButton,
+            this.formErrors
+        );
+
+        if (isValid) {
+            this.payButton.removeAttribute('disabled');
+            this.model.setEmail(this.emailField.value.trim());
+            this.model.setPhone(this.phoneField.value.trim());
+        } else {
+            this.payButton.setAttribute('disabled', 'true');
+        }
+    }
+
+    private setupFormHandlers(): void {
+        this.emailField.addEventListener('input', this.checkFields.bind(this));
+        this.phoneField.addEventListener('input', this.checkFields.bind(this));
+        this.form.addEventListener('submit', (event: Event) => {
+            event.preventDefault();
+            if (this.contactValidator.validateContactFields(
+                this.emailField,
+                this.phoneField,
+                this.payButton,
+                this.formErrors
+            )) {
+                this.model.setEmail(this.emailField.value.trim());
+                this.model.setPhone(this.phoneField.value.trim());
+                this.formSubmitHandler(event);
+                this.onSuccess();
+            }
+        });
     }
 
     render(): HTMLElement {
-        setupContactFields(this, this.model);
-        setupFormSubmitHandler(this, this.model);
         return this.content;
     }
 
