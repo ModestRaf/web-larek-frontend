@@ -20,22 +20,20 @@ const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
 const productList = new ProductList(eventEmitter);
 const cart = new Cart(eventEmitter);
-const orderModel = new Order('modal-container', 'order');
+const orderModel = new Order('modal-container', 'order', eventEmitter);
 const successModal = new SuccessModal('success', eventEmitter);
 const contactsView = new ContactsView(
     'content-template',
-    orderModel,
     () => console.log('Форма успешно отправлена'),
     handleFormSubmit,
-    orderModel,
     eventEmitter
 );
 const orderView = new OrderView(
     'content-template',
-    orderModel,
     () => contactsView.openModal(),
     () => console.log('Форма успешно отправлена'),
     handleFormSubmit,
+    eventEmitter
 );
 const cartView = new CartView(
     'basket',
@@ -104,11 +102,11 @@ eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
 });
 eventEmitter.on<{ product: ProductItem }>('toggleProductInCart', ({product}) => {
     const existingProduct = productList.products.find(p => p.id === product.id);
-        existingProduct.selected = !existingProduct.selected;
-        productList.saveSelectedToStorage();
-        cart.toggleProductInCart(existingProduct);
-        updateBasketCounter();
-        cart.updateCartItems(productList.products);
+    existingProduct.selected = !existingProduct.selected;
+    productList.saveSelectedToStorage();
+    cart.toggleProductInCart(existingProduct);
+    updateBasketCounter();
+    cart.updateCartItems(productList.products);
 });
 
 eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) => {

@@ -1,10 +1,8 @@
-import {IContactValidator, IOrderModel} from "../types";
 import {EventEmitter} from "./base/events";
 
 export class ContactsView {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
-    contactValidator: IContactValidator;
     readonly onSuccess: () => void;
     readonly formSubmitHandler: (event: Event) => void;
     form: HTMLFormElement;
@@ -12,24 +10,19 @@ export class ContactsView {
     phoneField: HTMLInputElement;
     payButton: HTMLButtonElement;
     formErrors: HTMLElement;
-    private model: IOrderModel;
     private eventEmitter: EventEmitter;
     private content: HTMLElement;
 
     constructor(
         contentTemplateId: string,
-        contactValidator: IContactValidator,
         onSuccess: () => void,
         formSubmitHandler: (event: Event) => void,
-        model: IOrderModel,
         eventEmitter: EventEmitter
     ) {
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
-        this.contactValidator = contactValidator;
         this.onSuccess = onSuccess;
         this.formSubmitHandler = formSubmitHandler;
-        this.model = model;
         this.eventEmitter = eventEmitter;
         const contactsClone = document.importNode(this.contactsTemplate.content, true);
         this.content = document.createElement('div');
@@ -43,20 +36,12 @@ export class ContactsView {
     }
 
     private checkFields(): void {
-        const isValid = this.contactValidator.validateContactFields(
-            this.emailField,
-            this.phoneField,
-            this.payButton,
-            this.formErrors
-        );
-
-        if (isValid) {
-            this.payButton.removeAttribute('disabled');
-            this.model.setEmail(this.emailField.value.trim());
-            this.model.setPhone(this.phoneField.value.trim());
-        } else {
-            this.payButton.setAttribute('disabled', 'true');
-        }
+        this.eventEmitter.emit('validateContactFields', {
+            emailField: this.emailField,
+            phoneField: this.phoneField,
+            payButton: this.payButton,
+            formErrors: this.formErrors
+        });
     }
 
     private setupFormHandlers(): void {
@@ -64,17 +49,19 @@ export class ContactsView {
         this.phoneField.addEventListener('input', this.checkFields.bind(this));
         this.form.addEventListener('submit', (event: Event) => {
             event.preventDefault();
-            if (this.contactValidator.validateContactFields(
-                this.emailField,
-                this.phoneField,
-                this.payButton,
-                this.formErrors
-            )) {
-                this.model.setEmail(this.emailField.value.trim());
-                this.model.setPhone(this.phoneField.value.trim());
-                this.formSubmitHandler(event);
-                this.onSuccess();
+            this.eventEmitter.emit('validateContactFields', {
+                emailField: this.emailField,
+                phoneField: this.phoneField,
+                payButton: this.payButton,
+                formErrors: this.formErrors
+            });
+            if (this.payButton.disabled) {
+                return;
             }
+            this.eventEmitter.emit('setEmail', {email: this.emailField.value.trim()});
+            this.eventEmitter.emit('setPhone', {phone: this.phoneField.value.trim()});
+            this.formSubmitHandler(event);
+            this.onSuccess();
         });
     }
 

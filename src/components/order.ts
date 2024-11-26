@@ -1,3 +1,5 @@
+import {EventEmitter} from "./base/events";
+
 export class Order {
     modal: HTMLElement;
     private contentTemplate: HTMLTemplateElement;
@@ -6,8 +8,9 @@ export class Order {
     private address: string;
     private email: string;
     private phone: string;
+    private eventEmitter: EventEmitter;
 
-    constructor(modalId: string, contentTemplateId: string) {
+    constructor(modalId: string, contentTemplateId: string, eventEmitter: EventEmitter) {
         this.modal = document.querySelector(`#${modalId}`) as HTMLElement;
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.orderTemplate = document.querySelector('#order') as HTMLTemplateElement;
@@ -15,6 +18,26 @@ export class Order {
         this.address = '';
         this.email = '';
         this.phone = '';
+        this.eventEmitter = eventEmitter;
+        this.eventEmitter.on('setEmail', (data: { email: string }) => this.setEmail(data.email));
+        this.eventEmitter.on('setPhone', (data: { phone: string }) => this.setPhone(data.phone));
+        this.eventEmitter.on('setAddress', (data: { address: string }) => this.setAddress(data.address));
+        this.eventEmitter.on('setPaymentMethod', (data: { method: string }) => this.setPaymentMethod(data.method));
+        this.eventEmitter.on('validateAddress', (data: {
+            addressField: HTMLInputElement,
+            nextButton: HTMLButtonElement,
+            formErrors: HTMLElement
+        }) => {
+            this.validateAddressField(data.addressField, data.nextButton, data.formErrors);
+        });
+        this.eventEmitter.on('validateContactFields', (data: {
+            emailField: HTMLInputElement,
+            phoneField: HTMLInputElement,
+            payButton: HTMLButtonElement,
+            formErrors: HTMLElement
+        }) => {
+            this.validateContactFields(data.emailField, data.phoneField, data.payButton, data.formErrors);
+        });
     }
 
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean {

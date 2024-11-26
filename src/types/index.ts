@@ -35,19 +35,3 @@ export interface IOrderResult {
     total?: number;  // Общая сумма заказа (если заказ успешно обработан)
     error?: string;  // Сообщение об ошибке (если заказ не был успешно обработан)
 }
-
-export interface IContactValidator {
-    validateContactFields(emailField: HTMLInputElement, phoneField: HTMLInputElement, payButton: HTMLButtonElement, formErrors: HTMLElement): boolean;
-}
-
-export interface IOrderModel {
-    setPaymentMethod(method: string): void;
-
-    setAddress(address: string): void;
-
-    setEmail(email: string): void;
-
-    setPhone(phone: string): void;
-
-    validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean;
-}
