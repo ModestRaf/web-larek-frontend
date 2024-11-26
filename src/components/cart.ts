@@ -8,7 +8,6 @@ export class Cart {
     constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter;
         this.loadCartFromStorage();
-        // Добавляем обработчики для событий
         this.eventEmitter.on('cart:getItems', (callback: (items: CartItem[]) => void) => {
             callback(this.items);
         });

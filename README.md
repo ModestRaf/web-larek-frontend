@@ -152,7 +152,6 @@ price: number;            Цена товара
 ##### Данные:
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна
 - orderTemplate: HTMLTemplateElement — шаблон заказа
-- model: IOrderModel — модель заказа
 - selectedPaymentMethod: string — выбранный способ оплаты
 - formSubmitHandler: (event: Event) => void — обработчик отправки формы
 - openContactsModal: () => void — функция для открытия модального окна контактной информации
@@ -164,12 +163,11 @@ price: number;            Цена товара
 - setupAddressField(): void — настраивает поле ввода адреса доставки
 - setupNextButton(): void — настраивает кнопку "Далее"
 
-#### ContactsModal
+#### ContactsView
 ##### Данные:
 
 - contentTemplate: HTMLTemplateElement — шаблон содержимого модального окна
 - contactsTemplate: HTMLTemplateElement — шаблон контактной информации
-- contactValidator: IContactValidator — валидатор контактных данных
 - onSuccess: () => void — функция, вызываемая при успешной отправке формы
 - formSubmitHandler: (event: Event) => void — обработчик отправки формы
 - emailField: HTMLInputElement — поле ввода email
@@ -233,6 +231,17 @@ price: number;            Цена товара
 - removeProductFromCart: Используется для уведомления об удалении продукта из корзины
 - cart:open: Используется для открытия корзины
 - cart:change: Используется для уведомления об изменении содержимого корзины
+- cart:getItems: Используется для получения списка товаров в корзине
+- cart:getTotalPrice: Используется для получения общей стоимости товаров в корзине
+- cart:getSelectedProductsCount: Используется для получения количества выбранных товаров
+- removeBasketItem: Используется для удаления товара из корзины
+- validateContactFields: Используется для валидации полей контактной информации
+- validateAddress: Используется для валидации поля адреса доставки
+- setEmail: Используется для установки значения поля email
+- setPhone: Используется для установки значения поля телефона
+- setAddress: Используется для установки значения поля адреса доставки
+- setPaymentMethod: Используется для установки выбранного способа оплаты
+- openModal: Используется для открытия модального окна
 
 Обработка событий. События добавляются и обрабатываются в index.ts, чтобы обеспечить взаимодействие между различными
 компонентами приложения.
@@ -262,10 +271,6 @@ price: number;            Цена товара
 - resetCart(): void: Функция для очистки корзины и обновления интерфейса
 - loadProductsLogic(): void: Функция для получения и отображения списка продуктов на странице
 - handleFormSubmit(event: Event): void: Обработчик отправки формы заказа
-- setupContactFields(contactsView: ContactsView, orderModel: IOrderModel): void: Функция для настройки полей ввода email
-  и телефона
-- setupFormSubmitHandler(contactsView: ContactsView, orderModel: IOrderModel): void: Функция для настройки обработчика
-  отправки формы контактной информации
 
 Эти функции обеспечивают связь между моделью и представлением, позволяя приложению реагировать на действия пользователя
 и обновлять интерфейс в реальном времени
