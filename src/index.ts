@@ -7,7 +7,7 @@ import {CardsView} from "./components/cardsView";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
-import {ProductItem, IOrder, OrderForm, IOrderModel} from "./types";
+import {ProductItem, IOrder, OrderForm, IOrderModel, CartItem} from "./types";
 import {SuccessModal} from "./components/orderSuccess";
 import {ContactsView} from "./components/contactsView";
 import {OrderView} from "./components/orderAddress";
@@ -39,7 +39,6 @@ const orderView = new OrderView(
 );
 const cartView = new CartView(
     'basket',
-    cart,
     (totalPrice: number) => {
         const orderContent = orderView.render();
         modalBase.open(totalPrice, orderContent);
@@ -143,13 +142,15 @@ eventEmitter.on('cart:open', () => {
 });
 
 eventEmitter.on('cart:change', () => {
-    const items = cartView.model.items.map((item, index) => {
-        const basketItem = new BasketItemView(item, index + 1, cartView.model, cartView.update.bind(cartView));
-        return basketItem.render();
+    eventEmitter.emit('cart:getItems', (items: CartItem[]) => {
+        const basketItems = items.map((item, index) => {
+            const basketItem = new BasketItemView(item, index + 1, eventEmitter, cartView.update.bind(cartView));
+            return basketItem.render();
+        });
+        cartView.setItems(basketItems);
+        cartView.updateBasketCounter(items.length);
+        cartView.renderBasketItems();
     });
-    cartView.setItems(items);
-    cartView.updateBasketCounter(cartView.model.items.length);
-    cartView.renderBasketItems();
 });
 
 async function handleFormSubmit(event: Event) {

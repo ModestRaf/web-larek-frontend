@@ -1,13 +1,26 @@
-import {CartItem, ICart, ProductItem} from "../types";
+import {CartItem, ProductItem} from "../types";
 import {EventEmitter} from "./base/events";
 
-export class Cart implements ICart {
+export class Cart {
     items: CartItem[] = [];
     private eventEmitter: EventEmitter;
 
     constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter;
         this.loadCartFromStorage();
+        // Добавляем обработчики для событий
+        this.eventEmitter.on('cart:getItems', (callback: (items: CartItem[]) => void) => {
+            callback(this.items);
+        });
+        this.eventEmitter.on('cart:getTotalPrice', (callback: (price: number) => void) => {
+            callback(this.getTotalPrice());
+        });
+        this.eventEmitter.on('cart:getSelectedProductsCount', (callback: (count: number) => void) => {
+            callback(this.getSelectedProductsCount());
+        });
+        this.eventEmitter.on('removeBasketItem', (data: { itemId: string }) => {
+            this.removeBasketItem(data.itemId);
+        });
     }
 
     toggleProductInCart(product: ProductItem): void {

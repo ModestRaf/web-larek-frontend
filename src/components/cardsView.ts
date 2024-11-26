@@ -47,32 +47,53 @@ export class CardsView extends ModalBase {
     }
 
     updateCardContent(element: HTMLElement, product: ProductItem): void {
-        const updateElement = (selector: string, updater: (el: HTMLElement) => void) => {
-            const el = element.querySelector(selector);
-            if (el) updater(el as HTMLElement);
-        };
-        updateElement(this.selectors.image, (img: HTMLImageElement) => {
+        this.updateImage(element, product);
+        this.updateTitle(element, product);
+        this.updatePrice(element, product);
+        this.updateCategory(element, product);
+        this.updateButton(element, product);
+    }
+
+    private updateImage(element: HTMLElement, product: ProductItem): void {
+        const img = element.querySelector(this.selectors.image) as HTMLImageElement;
+        if (img) {
             img.src = CDN_URL + product.image;
             img.alt = product.title;
-        });
-        updateElement(this.selectors.title, (title) => {
+        }
+    }
+
+    private updateTitle(element: HTMLElement, product: ProductItem): void {
+        const title = element.querySelector(this.selectors.title);
+        if (title) {
             title.textContent = product.title;
-        });
-        updateElement(this.selectors.price, (price) => {
+        }
+    }
+
+    private updatePrice(element: HTMLElement, product: ProductItem): void {
+        const price = element.querySelector(this.selectors.price);
+        if (price) {
             price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
-        });
-        updateElement(this.selectors.category, (category) => {
+        }
+    }
+
+    private updateCategory(element: HTMLElement, product: ProductItem): void {
+        const category = element.querySelector(this.selectors.category) as HTMLElement;
+        if (category) {
             category.textContent = product.category;
             this.setCategoryClass(category, product.category);
-        });
-        updateElement(this.selectors.button, (button: HTMLButtonElement) => {
+        }
+    }
+
+    private updateButton(element: HTMLElement, product: ProductItem): void {
+        const button = element.querySelector(this.selectors.button) as HTMLButtonElement;
+        if (button) {
             if (product.price === null) {
                 button.disabled = true;
             } else {
                 button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
                 button.disabled = false;
             }
-        });
+        }
     }
 
     private setCategoryClass(category: HTMLElement, categoryName: string): void {

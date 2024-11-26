@@ -1,10 +1,9 @@
-import {CartItem, ICart} from "../types";
+import {CartItem} from "../types";
 import {EventEmitter} from "./base/events";
 
 export class CartView {
     private contentTemplate: HTMLTemplateElement;
     private readonly onCheckout: (totalPrice: number) => void;
-    readonly model: ICart;
     private readonly basketList: HTMLElement;
     private readonly basketPrice: HTMLElement;
     private readonly checkoutButton: HTMLButtonElement;
@@ -13,13 +12,11 @@ export class CartView {
 
     constructor(
         contentTemplateId: string,
-        model: ICart,
         onCheckout: (totalPrice: number) => void,
         private eventEmitter: EventEmitter
     ) {
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.onCheckout = onCheckout;
-        this.model = model;
         const cartClone = document.importNode(this.contentTemplate.content, true);
         this.content = document.createElement('modal__content');
         this.content.appendChild(cartClone);
@@ -27,7 +24,7 @@ export class CartView {
         this.basketPrice = this.content.querySelector('.basket__price') as HTMLElement;
         this.checkoutButton = this.content.querySelector('.basket__button') as HTMLButtonElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
-        this.checkoutButton.addEventListener('click', () => this.onCheckout(this.model.getTotalPrice()));
+        this.checkoutButton.addEventListener('click', () => this.onCheckout(this.getTotalPrice()));
         this.subscribeToEvents();
     }
 
@@ -62,12 +59,12 @@ export class CartView {
 
     renderBasketItems(): void {
         this.basketList.innerHTML = '';
-        if (this.model.items.length === 0) {
+        if (this.getSelectedProductsCount() === 0) {
             this.renderEmptyCart();
         } else {
             this.renderItems();
         }
-        this.basketPrice.textContent = `${this.model.getTotalPrice()} синапсов`;
+        this.basketPrice.textContent = `${this.getTotalPrice()} синапсов`;
     }
 
     updateBasketCounter(selectedProductsCount: number): void {
@@ -84,25 +81,41 @@ export class CartView {
     }
 
     private renderItems(): void {
-        this.model.items.forEach((item, index) => {
-            const basketItem = new BasketItemView(item, index + 1, this.model, this.update.bind(this));
-            this.basketList.appendChild(basketItem.render());
+        this.eventEmitter.emit('cart:getItems', (items: CartItem[]) => {
+            items.forEach((item, index) => {
+                const basketItem = new BasketItemView(item, index + 1, this.eventEmitter, this.update.bind(this));
+                this.basketList.appendChild(basketItem.render());
+            });
+            this.checkoutButton.disabled = false;
         });
-        this.checkoutButton.disabled = false;
+    }
+
+    private getTotalPrice(): number {
+        let totalPrice = 0;
+        this.eventEmitter.emit('cart:getTotalPrice', (price: number) => {
+            totalPrice = price;
+        });
+        return totalPrice;
+    }
+
+    private getSelectedProductsCount(): number {
+        let count = 0;
+        this.eventEmitter.emit('cart:getSelectedProductsCount', (selectedCount: number) => {
+            count = selectedCount;
+        });
+        return count;
     }
 }
 
 export class BasketItemView {
     private item: CartItem;
     private index: number;
-    private model: ICart;
     private readonly updateCart: () => void;
     private template: HTMLTemplateElement;
 
-    constructor(item: CartItem, index: number, model: ICart, updateCart: () => void) {
+    constructor(item: CartItem, index: number, private eventEmitter: EventEmitter, updateCart: () => void) {
         this.item = item;
         this.index = index;
-        this.model = model;
         this.updateCart = updateCart;
         this.template = document.querySelector('#card-basket') as HTMLTemplateElement;
     }
@@ -117,7 +130,7 @@ export class BasketItemView {
         itemTitle.textContent = this.item.title;
         itemPrice.textContent = this.item.price === null ? 'Бесценно' : `${this.item.price} синапсов`;
         deleteButton.addEventListener('click', () => {
-            this.model.removeBasketItem(this.item.id);
+            this.eventEmitter.emit<{ itemId: string }>('removeBasketItem', {itemId: this.item.id});
             this.updateCart();
         });
         return clone;
