@@ -3,8 +3,6 @@ import {EventEmitter} from "./base/events";
 export class ContactsView {
     private contentTemplate: HTMLTemplateElement;
     private contactsTemplate: HTMLTemplateElement;
-    readonly onSuccess: () => void;
-    readonly formSubmitHandler: (event: Event) => void;
     form: HTMLFormElement;
     emailField: HTMLInputElement;
     phoneField: HTMLInputElement;
@@ -15,14 +13,10 @@ export class ContactsView {
 
     constructor(
         contentTemplateId: string,
-        onSuccess: () => void,
-        formSubmitHandler: (event: Event) => void,
         eventEmitter: EventEmitter
     ) {
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
         this.contactsTemplate = document.querySelector('#contacts') as HTMLTemplateElement;
-        this.onSuccess = onSuccess;
-        this.formSubmitHandler = formSubmitHandler;
         this.eventEmitter = eventEmitter;
         const contactsClone = document.importNode(this.contactsTemplate.content, true);
         this.content = document.createElement('div');
@@ -37,8 +31,8 @@ export class ContactsView {
 
     private checkFields(): void {
         this.eventEmitter.emit('validateContactFields', {
-            emailField: this.emailField,
-            phoneField: this.phoneField,
+            email: this.emailField.value,
+            phone: this.phoneField.value,
             payButton: this.payButton,
             formErrors: this.formErrors
         });
@@ -49,19 +43,13 @@ export class ContactsView {
         this.phoneField.addEventListener('input', this.checkFields.bind(this));
         this.form.addEventListener('submit', (event: Event) => {
             event.preventDefault();
-            this.eventEmitter.emit('validateContactFields', {
-                emailField: this.emailField,
-                phoneField: this.phoneField,
-                payButton: this.payButton,
-                formErrors: this.formErrors
-            });
+            this.checkFields();
             if (this.payButton.disabled) {
                 return;
             }
             this.eventEmitter.emit('setEmail', {email: this.emailField.value.trim()});
             this.eventEmitter.emit('setPhone', {phone: this.phoneField.value.trim()});
-            this.formSubmitHandler(event);
-            this.onSuccess();
+            this.eventEmitter.emit('order:submit', event);
         });
     }
 

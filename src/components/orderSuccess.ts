@@ -3,7 +3,7 @@ import {EventEmitter} from "./base/events";
 export class SuccessModal {
     private successElement: HTMLElement;
     private successDescription: HTMLElement | null;
-    private closeButton: HTMLButtonElement | null;
+    closeButton: HTMLButtonElement | null;
     private eventEmitter: EventEmitter;
 
     constructor(contentTemplateId: string, eventEmitter: EventEmitter) {
@@ -13,9 +13,6 @@ export class SuccessModal {
         this.successDescription = this.successElement.querySelector('.order-success__description');
         this.closeButton = this.successElement.querySelector('.order-success__close');
         this.eventEmitter = eventEmitter;
-        this.closeButton.addEventListener('click', () => {
-            this.onSuccessClose();
-        });
     }
 
     render(totalPrice: number): HTMLElement {
@@ -23,7 +20,7 @@ export class SuccessModal {
         return this.successElement;
     }
 
-    private onSuccessClose(): void {
+    onSuccessClose(): void {
         this.eventEmitter.emit('orderSuccessClosed');
     }
 }

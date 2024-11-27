@@ -14,8 +14,6 @@ export class OrderView {
     constructor(
         contentTemplateId: string,
         openContactsModal: () => void,
-        onSuccess: () => void,
-        formSubmitHandler: (event: Event) => void,
         eventEmitter: EventEmitter
     ) {
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
@@ -58,22 +56,28 @@ export class OrderView {
     private setupAddressField(): void {
         this.addressField.addEventListener('input', () => {
             this.eventEmitter.emit('setAddress', {address: this.addressField.value});
-            this.eventEmitter.emit('validateAddress', {
-                addressField: this.addressField,
-                nextButton: this.nextButton,
-                formErrors: this.formErrors
-            });
+            this.validateAddress(this.addressField.value, this.nextButton, this.formErrors);
         });
     }
 
     private setupNextButton(): void {
         this.nextButton.addEventListener('click', () => {
-            this.eventEmitter.emit('validateAddress', {
-                addressField: this.addressField,
-                nextButton: this.nextButton,
-                formErrors: this.formErrors
-            });
+            this.validateAddress(this.addressField.value, this.nextButton, this.formErrors);
             this.openContactsModal();
         });
+    }
+
+    validateAddress(address: string, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean {
+        const isValid = address.trim() !== '';
+        if (isValid) {
+            formErrors.textContent = '';
+            formErrors.classList.remove('form__errors_visible');
+            nextButton.disabled = false;
+        } else {
+            formErrors.textContent = 'Необходимо указать адрес доставки';
+            formErrors.classList.add('form__errors_visible');
+            nextButton.disabled = true;
+        }
+        return isValid;
     }
 }
