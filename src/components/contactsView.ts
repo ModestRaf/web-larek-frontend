@@ -36,12 +36,6 @@ export class ContactsView {
         });
     }
 
-    updateValidationState(isValid: boolean, error: string): void {
-        this.formErrors.textContent = error;
-        this.formErrors.classList.toggle('form__errors_visible', !!error);
-        this.payButton.disabled = !isValid;
-    }
-
     private setupFormHandlers(): void {
         this.emailField.addEventListener('input', this.checkFields.bind(this));
         this.phoneField.addEventListener('input', this.checkFields.bind(this));
