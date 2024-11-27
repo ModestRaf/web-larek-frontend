@@ -8,12 +8,10 @@ export class OrderView {
     private nextButton: HTMLButtonElement;
     private formErrors: HTMLElement;
     private selectedPaymentMethod: string;
-    private readonly openContactsModal: () => void;
     private eventEmitter: EventEmitter;
 
     constructor(
         contentTemplateId: string,
-        openContactsModal: () => void,
         eventEmitter: EventEmitter
     ) {
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
@@ -24,7 +22,6 @@ export class OrderView {
         this.addressField = this.orderElement.querySelector('input[name="address"]') as HTMLInputElement;
         this.nextButton = this.orderElement.querySelector('.order__button') as HTMLButtonElement;
         this.formErrors = this.orderElement.querySelector('.form__errors') as HTMLElement;
-        this.openContactsModal = openContactsModal;
         this.eventEmitter = eventEmitter;
         this.setupPaymentButtons();
         this.setupAddressField();
@@ -63,7 +60,7 @@ export class OrderView {
     private setupNextButton(): void {
         this.nextButton.addEventListener('click', () => {
             this.validateAddress(this.addressField.value, this.nextButton, this.formErrors);
-            this.openContactsModal();
+            this.eventEmitter.emit('openContactsModal');
         });
     }
 

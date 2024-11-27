@@ -26,19 +26,8 @@ const contactsView = new ContactsView(
     'content-template',
     eventEmitter
 );
-const orderView = new OrderView(
-    'content-template',
-    () => contactsView.openModal(),
-    eventEmitter
-);
-const cartView = new CartView(
-    'basket',
-    (totalPrice: number) => {
-        const orderContent = orderView.render();
-        modalBase.open(totalPrice, orderContent);
-    },
-    eventEmitter
-);
+const orderView = new OrderView('content-template', eventEmitter);
+const cartView = new CartView('basket', eventEmitter);
 const cardsView = new CardsView(
     '.modal',
     '.modal__close',
@@ -84,6 +73,9 @@ function loadProductsLogic(): void {
 }
 
 // Обработчики событий
+eventEmitter.on('openContactsModal', () => {
+    contactsView.openModal();
+});
 successModal.closeButton.addEventListener('click', () => {
     successModal.onSuccessClose();
 });
@@ -98,6 +90,10 @@ eventEmitter.on('orderSuccessClosed', () => {
     if (successElement) {
         successElement.remove();
     }
+});
+eventEmitter.on('checkout', (data: { totalPrice: number }) => {
+    const orderContent = orderView.render();
+    modalBase.open(data.totalPrice, orderContent);
 });
 eventEmitter.on('order:submit', async (event: Event) => {
     event.preventDefault();

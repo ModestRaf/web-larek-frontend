@@ -3,7 +3,6 @@ import {EventEmitter} from "./base/events";
 
 export class CartView {
     private contentTemplate: HTMLTemplateElement;
-    private readonly onCheckout: (totalPrice: number) => void;
     private readonly basketList: HTMLElement;
     private readonly basketPrice: HTMLElement;
     private readonly checkoutButton: HTMLButtonElement;
@@ -12,11 +11,9 @@ export class CartView {
 
     constructor(
         contentTemplateId: string,
-        onCheckout: (totalPrice: number) => void,
         private eventEmitter: EventEmitter
     ) {
         this.contentTemplate = document.querySelector(`#${contentTemplateId}`) as HTMLTemplateElement;
-        this.onCheckout = onCheckout;
         const cartClone = document.importNode(this.contentTemplate.content, true);
         this.content = document.createElement('modal__content');
         this.content.appendChild(cartClone);
@@ -24,7 +21,10 @@ export class CartView {
         this.basketPrice = this.content.querySelector('.basket__price') as HTMLElement;
         this.checkoutButton = this.content.querySelector('.basket__button') as HTMLButtonElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
-        this.checkoutButton.addEventListener('click', () => this.onCheckout(this.getTotalPrice()));
+        this.checkoutButton.addEventListener('click', () => {
+            const totalPrice = this.getTotalPrice();
+            this.eventEmitter.emit('checkout', {totalPrice});
+        });
     }
 
     render(): HTMLElement {
