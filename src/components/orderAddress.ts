@@ -5,7 +5,7 @@ export class OrderView {
     private orderElement: HTMLElement;
     private paymentButtons: NodeListOf<HTMLButtonElement>;
     private addressField: HTMLInputElement;
-    private nextButton: HTMLButtonElement;
+    nextButton: HTMLButtonElement;
     private formErrors: HTMLElement;
     private selectedPaymentMethod: string;
     private eventEmitter: EventEmitter;
@@ -32,6 +32,12 @@ export class OrderView {
         return this.orderElement;
     }
 
+    updateValidationState(isValid: boolean, error: string): void {
+        this.formErrors.textContent = error;
+        this.formErrors.classList.toggle('form__errors_visible', !!error);
+        this.nextButton.disabled = !isValid;
+    }
+
     private setupPaymentButtons(): void {
         this.paymentButtons.forEach(button => {
             if (button.getAttribute('name') === 'card') {
@@ -53,28 +59,14 @@ export class OrderView {
     private setupAddressField(): void {
         this.addressField.addEventListener('input', () => {
             this.eventEmitter.emit('setAddress', {address: this.addressField.value});
-            this.validateAddress(this.addressField.value, this.nextButton, this.formErrors);
+            this.eventEmitter.emit('validateAddress', {address: this.addressField.value});
         });
     }
 
     private setupNextButton(): void {
         this.nextButton.addEventListener('click', () => {
-            this.validateAddress(this.addressField.value, this.nextButton, this.formErrors);
-            this.eventEmitter.emit('openContactsModal');
+            this.eventEmitter.emit('validateAddress', {address: this.addressField.value});
+            this.eventEmitter.emit('proceedToContacts');
         });
-    }
-
-    validateAddress(address: string, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean {
-        const isValid = address.trim() !== '';
-        if (isValid) {
-            formErrors.textContent = '';
-            formErrors.classList.remove('form__errors_visible');
-            nextButton.disabled = false;
-        } else {
-            formErrors.textContent = 'Необходимо указать адрес доставки';
-            formErrors.classList.add('form__errors_visible');
-            nextButton.disabled = true;
-        }
-        return isValid;
     }
 }

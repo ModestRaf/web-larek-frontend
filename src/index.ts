@@ -204,22 +204,19 @@ eventEmitter.on('setEmail', (data: { email: string }) => orderModel.setEmail(dat
 eventEmitter.on('setPhone', (data: { phone: string }) => orderModel.setPhone(data.phone));
 eventEmitter.on('setAddress', (data: { address: string }) => orderModel.setAddress(data.address));
 eventEmitter.on('setPaymentMethod', (data: { method: string }) => orderModel.setPaymentMethod(data.method));
+eventEmitter.on('validateContactFields', (data: { email: string; phone: string }) => {
+    const error = orderModel.validateContactFields(data.email, data.phone);
+    contactsView.updateValidationState(!error, error);
+});
 
-eventEmitter.on('validateContactFields', (data: {
-    email: string,
-    phone: string,
-    payButton: HTMLButtonElement,
-    formErrors: HTMLElement
-}) => {
-    const errorMessage = orderModel.validateContactFields(data.email, data.phone);
-    if (errorMessage) {
-        data.formErrors.textContent = String(errorMessage);
-        data.formErrors.classList.add('form__errors_visible');
-        data.payButton.disabled = true;
-    } else {
-        data.formErrors.textContent = '';
-        data.formErrors.classList.remove('form__errors_visible');
-        data.payButton.disabled = false;
+eventEmitter.on('validateAddress', (data: { address: string }) => {
+    const error = orderModel.validateAddress(data.address);
+    orderView.updateValidationState(!error, error);
+});
+
+eventEmitter.on('proceedToContacts', () => {
+    if (!orderView.nextButton.disabled) {
+        eventEmitter.emit('openContactsModal');
     }
 });
 // Обработчики событий для класса CartView

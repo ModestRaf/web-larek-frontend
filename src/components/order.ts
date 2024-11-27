@@ -24,6 +24,10 @@ export class Order {
         return '';
     }
 
+    validateAddress(address: string): string {
+        return address.trim() === '' ? 'Необходимо указать адрес доставки' : '';
+    }
+
     setPaymentMethod(method: string): void {
         this.paymentMethod = method;
     }

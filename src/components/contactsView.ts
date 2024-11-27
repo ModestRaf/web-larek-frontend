@@ -32,10 +32,14 @@ export class ContactsView {
     private checkFields(): void {
         this.eventEmitter.emit('validateContactFields', {
             email: this.emailField.value,
-            phone: this.phoneField.value,
-            payButton: this.payButton,
-            formErrors: this.formErrors
+            phone: this.phoneField.value
         });
+    }
+
+    updateValidationState(isValid: boolean, error: string): void {
+        this.formErrors.textContent = error;
+        this.formErrors.classList.toggle('form__errors_visible', !!error);
+        this.payButton.disabled = !isValid;
     }
 
     private setupFormHandlers(): void {
@@ -44,9 +48,6 @@ export class ContactsView {
         this.form.addEventListener('submit', (event: Event) => {
             event.preventDefault();
             this.checkFields();
-            if (this.payButton.disabled) {
-                return;
-            }
             this.eventEmitter.emit('setEmail', {email: this.emailField.value.trim()});
             this.eventEmitter.emit('setPhone', {phone: this.phoneField.value.trim()});
             this.eventEmitter.emit('order:submit', event);
