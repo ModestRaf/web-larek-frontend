@@ -1,9 +1,8 @@
 import {ProductItem} from "../types";
-import {ModalBase} from "./modalBase";
 import {CDN_URL} from "../utils/constants";
 import {EventEmitter} from "./base/events";
 
-export class CardsView extends ModalBase {
+export class CardsView {
     private cardTemplate: HTMLTemplateElement;
     readonly popupTemplate: HTMLTemplateElement;
     private readonly selectors: {
@@ -22,8 +21,7 @@ export class CardsView extends ModalBase {
     };
     private eventEmitter: EventEmitter;
 
-    constructor(popupSelector: string, closeSelector: string, cardTemplateId: string, popupTemplateId: string, eventEmitter: EventEmitter) {
-        super(popupSelector, closeSelector);
+    constructor(cardTemplateId: string, popupTemplateId: string, eventEmitter: EventEmitter) {
         this.cardTemplate = document.getElementById(cardTemplateId) as HTMLTemplateElement;
         this.popupTemplate = document.getElementById(popupTemplateId) as HTMLTemplateElement;
         this.selectors = {

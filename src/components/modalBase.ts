@@ -18,7 +18,7 @@ export class ModalBase {
         document.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
 
-    open(totalPrice?: number, content?: HTMLElement): void {
+    open(totalPrice: number, content: HTMLElement): void {
         if (!this.modal) {
             return;
         }

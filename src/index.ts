@@ -29,8 +29,6 @@ const contactsView = new ContactsView(
 const orderView = new OrderView('content-template', eventEmitter);
 const cartView = new CartView('basket', eventEmitter);
 const cardsView = new CardsView(
-    '.modal',
-    '.modal__close',
     'card-catalog',
     'card-preview',
     eventEmitter
@@ -148,7 +146,7 @@ eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) =>
     cart.updateCartItems(productList.products);
 });
 
-eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
+eventEmitter.on('popup:open', ({product}: { product: ProductItem }) => {
     const popupClone = document.importNode(cardsView.popupTemplate.content, true);
     const popupCard = popupClone.querySelector('.card') as HTMLElement;
     cardsView.updateCardContent(popupCard, product);
@@ -158,11 +156,10 @@ eventEmitter.on<{ product: ProductItem }>('popup:open', ({product}) => {
         eventEmitter.emit('toggleProductInCart', {product});
         cardsView.updateCardContent(popupCard, product);
     });
-    cardsView.content.innerHTML = '';
-    cardsView.content.appendChild(popupClone);
-    cardsView.open();
+    eventEmitter.emit('modal:open', popupClone);
 });
 
+eventEmitter.on<HTMLElement>('modal:open', (content) => modalBase.open(undefined, content));
 eventEmitter.on('cart:open', () => {
     const cartContent = cartView.render();
     const modalContainer = document.querySelector('#modal-container');
