@@ -6,7 +6,7 @@ export class OrderView {
     private paymentButtons: NodeListOf<HTMLButtonElement>;
     private addressField: HTMLInputElement;
     nextButton: HTMLButtonElement;
-    private formErrors: HTMLElement;
+    formErrors: HTMLElement;
     private selectedPaymentMethod: string;
     private eventEmitter: EventEmitter;
 

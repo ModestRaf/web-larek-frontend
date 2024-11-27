@@ -145,7 +145,6 @@ eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) =>
     updateBasketCounter();
     cart.updateCartItems(productList.products);
 });
-
 eventEmitter.on('popup:open', ({product}: { product: ProductItem }) => {
     const popupClone = document.importNode(cardsView.popupTemplate.content, true);
     const popupCard = popupClone.querySelector('.card') as HTMLElement;
@@ -158,7 +157,6 @@ eventEmitter.on('popup:open', ({product}: { product: ProductItem }) => {
     });
     eventEmitter.emit('modal:open', popupClone);
 });
-
 eventEmitter.on<HTMLElement>('modal:open', (content) => modalBase.open(undefined, content));
 eventEmitter.on('cart:open', () => {
     const cartContent = cartView.render();
@@ -203,12 +201,16 @@ eventEmitter.on('setAddress', (data: { address: string }) => orderModel.setAddre
 eventEmitter.on('setPaymentMethod', (data: { method: string }) => orderModel.setPaymentMethod(data.method));
 eventEmitter.on('validateContactFields', (data: { email: string; phone: string }) => {
     const error = orderModel.validateContactFields(data.email, data.phone);
-    contactsView.updateValidationState(!error, error);
+    contactsView.formErrors.textContent = error;
+    contactsView.formErrors.classList.toggle('form__errors_visible', !!error);
+    contactsView.payButton.disabled = !!error;
 });
 
 eventEmitter.on('validateAddress', (data: { address: string }) => {
     const error = orderModel.validateAddress(data.address);
-    orderView.updateValidationState(!error, error);
+    orderView.formErrors.textContent = error;
+    orderView.formErrors.classList.toggle('form__errors_visible', !!error);
+    orderView.nextButton.disabled = !!error;
 });
 
 eventEmitter.on('proceedToContacts', () => {
