@@ -19,38 +19,20 @@ export class Order {
         this.email = '';
         this.phone = '';
         this.eventEmitter = eventEmitter;
-        this.eventEmitter.on('setEmail', (data: { email: string }) => this.setEmail(data.email));
-        this.eventEmitter.on('setPhone', (data: { phone: string }) => this.setPhone(data.phone));
-        this.eventEmitter.on('setAddress', (data: { address: string }) => this.setAddress(data.address));
-        this.eventEmitter.on('setPaymentMethod', (data: { method: string }) => this.setPaymentMethod(data.method));
-        this.eventEmitter.on('validateAddress', (data: {
-            addressField: HTMLInputElement,
-            nextButton: HTMLButtonElement,
-            formErrors: HTMLElement
-        }) => {
-            this.validateAddressField(data.addressField, data.nextButton, data.formErrors);
-        });
-        this.eventEmitter.on('validateContactFields', (data: {
-            emailField: HTMLInputElement,
-            phoneField: HTMLInputElement,
-            payButton: HTMLButtonElement,
-            formErrors: HTMLElement
-        }) => {
-            this.validateContactFields(data.emailField, data.phoneField, data.payButton, data.formErrors);
-        });
     }
 
     validateAddressField(addressField: HTMLInputElement, nextButton: HTMLButtonElement, formErrors: HTMLElement): boolean {
-        if (addressField.value.trim() === '') {
+        const isValid = addressField.value.trim() !== '';
+        if (isValid) {
+            formErrors.textContent = '';
+            formErrors.classList.remove('form__errors_visible');
+            nextButton.disabled = false;
+        } else {
             formErrors.textContent = 'Необходимо указать адрес доставки';
             formErrors.classList.add('form__errors_visible');
             nextButton.disabled = true;
-            return false;
-        } else {
-            formErrors.classList.remove('form__errors_visible');
-            nextButton.disabled = false;
-            return true;
         }
+        return isValid;
     }
 
     validateContactFields(emailField: HTMLInputElement, phoneField: HTMLInputElement, payButton: HTMLButtonElement, formErrors: HTMLElement): boolean {

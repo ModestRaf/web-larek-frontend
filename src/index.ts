@@ -87,6 +87,33 @@ function loadProductsLogic(): void {
     eventEmitter.emit('cart:change');
 }
 
+async function handleFormSubmit(event: Event) {
+    event.preventDefault();
+    const totalPrice = cart.getTotalPrice();
+    try {
+        const orderForm: OrderForm = {
+            email: orderModel.getEmail(),
+            phone: orderModel.getPhone(),
+            payment: orderModel.getPaymentMethod(),
+            address: orderModel.getAddress(),
+        };
+        const order: IOrder = {
+            ...orderForm,
+            items: cart.items.map(item => item.id.toString()),
+            total: totalPrice
+        };
+        const response = await larekApi.submitOrder(order);
+        if (response.id) {
+            cart.clearCart();
+            productList.clearSelectedProducts();
+            updateBasketCounter();
+            eventEmitter.emit('orderSuccess', {totalPrice});
+        }
+    } catch (error) {
+        console.error('Ошибка при отправке заказа:', error);
+    }
+}
+
 // Обработчики событий
 eventEmitter.on('orderSuccessClosed', resetCart);
 eventEmitter.on('openModal', (content: HTMLElement) => {
@@ -138,7 +165,6 @@ eventEmitter.on('cart:open', () => {
     }
     modalBase.open(undefined, cartContent);
 });
-
 eventEmitter.on('cart:change', () => {
     eventEmitter.emit('cart:getItems', (items: CartItem[]) => {
         const basketItems = items.map((item, index) => {
@@ -150,33 +176,59 @@ eventEmitter.on('cart:change', () => {
         cartView.renderBasketItems();
     });
 });
-
-async function handleFormSubmit(event: Event) {
-    event.preventDefault();
-    const totalPrice = cart.getTotalPrice();
-    try {
-        const orderForm: OrderForm = {
-            email: orderModel.getEmail(),
-            phone: orderModel.getPhone(),
-            payment: orderModel.getPaymentMethod(),
-            address: orderModel.getAddress(),
-        };
-        const order: IOrder = {
-            ...orderForm,
-            items: cart.items.map(item => item.id.toString()),
-            total: totalPrice
-        };
-        const response = await larekApi.submitOrder(order);
-        if (response.id) {
-            cart.clearCart();
-            productList.clearSelectedProducts();
-            updateBasketCounter();
-            eventEmitter.emit('orderSuccess', {totalPrice});
-        }
-    } catch (error) {
-        console.error('Ошибка при отправке заказа:', error);
-    }
-}
+eventEmitter.on('cards:loaded', (cards: HTMLElement[]) => productListView.renderProducts(cards));
+eventEmitter.on<{ productId: string }>('productRemoved', ({productId}) => {
+    productList.updateSelectedState(productId);
+});
+// Обработчики событий для класса Cart
+eventEmitter.on('cart:getItems', (callback: (items: CartItem[]) => void) => {
+    callback(cart.items);
+});
+eventEmitter.on('cart:getTotalPrice', (callback: (price: number) => void) => {
+    callback(cart.getTotalPrice());
+});
+eventEmitter.on('cart:getSelectedProductsCount', (callback: (count: number) => void) => {
+    callback(cart.getSelectedProductsCount());
+});
+eventEmitter.on('removeBasketItem', (data: { itemId: string }) => {
+    cart.removeProductFromCart(data.itemId);
+});
+// Обработчики событий для класса Order
+eventEmitter.on('setEmail', (data: { email: string }) => orderModel.setEmail(data.email));
+eventEmitter.on('setPhone', (data: { phone: string }) => orderModel.setPhone(data.phone));
+eventEmitter.on('setAddress', (data: { address: string }) => orderModel.setAddress(data.address));
+eventEmitter.on('setPaymentMethod', (data: { method: string }) => orderModel.setPaymentMethod(data.method));
+eventEmitter.on('validateAddress', (data: {
+    addressField: HTMLInputElement,
+    nextButton: HTMLButtonElement,
+    formErrors: HTMLElement
+}) => {
+    data.addressField.addEventListener('input', () => {
+        orderModel.validateAddressField(data.addressField, data.nextButton, data.formErrors);
+    });
+    orderModel.validateAddressField(data.addressField, data.nextButton, data.formErrors);
+});
+eventEmitter.on('validateContactFields', (data: {
+    emailField: HTMLInputElement,
+    phoneField: HTMLInputElement,
+    payButton: HTMLButtonElement,
+    formErrors: HTMLElement
+}) => {
+    orderModel.validateContactFields(data.emailField, data.phoneField, data.payButton, data.formErrors);
+});
+// Обработчики событий для класса CartView
+eventEmitter.on<{ selectedProductsCount: number }>('productToggled', ({selectedProductsCount}) => {
+    cartView.updateBasketCounter(selectedProductsCount);
+});
+eventEmitter.on<{ selectedProductsCount: number }>('productRemoved', ({selectedProductsCount}) => {
+    cartView.updateBasketCounter(selectedProductsCount);
+});
+eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
+    cartView.updateBasketCounter(selectedProductsCount);
+});
+eventEmitter.on('cart:change', () => {
+    cartView.update();
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
     const products = await loadProducts(api);
@@ -186,6 +238,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     basketButton.addEventListener('click', () => {
         eventEmitter.emit('cart:open');
     });
-    const form = document.querySelector('form[name="contacts"]') as HTMLFormElement
-    form.addEventListener('submit', handleFormSubmit);
 });

@@ -8,18 +8,6 @@ export class Cart {
     constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter;
         this.loadCartFromStorage();
-        this.eventEmitter.on('cart:getItems', (callback: (items: CartItem[]) => void) => {
-            callback(this.items);
-        });
-        this.eventEmitter.on('cart:getTotalPrice', (callback: (price: number) => void) => {
-            callback(this.getTotalPrice());
-        });
-        this.eventEmitter.on('cart:getSelectedProductsCount', (callback: (count: number) => void) => {
-            callback(this.getSelectedProductsCount());
-        });
-        this.eventEmitter.on('removeBasketItem', (data: { itemId: string }) => {
-            this.removeBasketItem(data.itemId);
-        });
     }
 
     toggleProductInCart(product: ProductItem): void {
@@ -32,22 +20,21 @@ export class Cart {
                 title: product.title,
                 price: product.price,
             });
+            this.saveCartToStorage();
+            this.eventEmitter.emit<{ product: ProductItem, selectedProductsCount: number }>('productToggled', {
+                product,
+                selectedProductsCount: this.getSelectedProductsCount()
+            });
         }
-        this.saveCartToStorage();
-        this.notifyProductToggled(product, this.getSelectedProductsCount());
     }
 
     removeProductFromCart(productId: string): void {
         this.items = this.items.filter(item => item.id !== productId);
         this.saveCartToStorage();
-        this.notifyProductRemoved(productId, this.getSelectedProductsCount());
-    }
-
-    removeBasketItem(itemId: string): void {
-        this.items = this.items.filter(item => item.id !== itemId);
-        this.saveCartToStorage();
-        this.notifyBasketItemRemoved(itemId, this.getSelectedProductsCount());
-        this.eventEmitter.emit<{ productId: string }>('productRemoved', {productId: itemId});
+        this.eventEmitter.emit<{ productId: string, selectedProductsCount: number }>('productRemoved', {
+            productId,
+            selectedProductsCount: this.getSelectedProductsCount()
+        });
     }
 
     updateCartItems(products: ProductItem[]): void {
@@ -81,26 +68,5 @@ export class Cart {
         if (savedItems) {
             this.items = JSON.parse(savedItems);
         }
-    }
-
-    private notifyProductToggled(product: ProductItem, selectedProductsCount: number): void {
-        this.eventEmitter.emit<{ product: ProductItem, selectedProductsCount: number }>('productToggled', {
-            product,
-            selectedProductsCount
-        });
-    }
-
-    private notifyProductRemoved(productId: string, selectedProductsCount: number): void {
-        this.eventEmitter.emit<{ productId: string, selectedProductsCount: number }>('productRemoved', {
-            productId,
-            selectedProductsCount
-        });
-    }
-
-    private notifyBasketItemRemoved(itemId: string, selectedProductsCount: number): void {
-        this.eventEmitter.emit<{ itemId: string, selectedProductsCount: number }>('basketItemRemoved', {
-            itemId,
-            selectedProductsCount
-        });
     }
 }

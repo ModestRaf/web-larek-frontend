@@ -8,9 +8,7 @@ export class OrderView {
     private nextButton: HTMLButtonElement;
     private formErrors: HTMLElement;
     private selectedPaymentMethod: string;
-    public formSubmitHandler: (event: Event) => void;
     private readonly openContactsModal: () => void;
-    private readonly onSuccess: () => void;
     private eventEmitter: EventEmitter;
 
     constructor(
@@ -29,8 +27,6 @@ export class OrderView {
         this.nextButton = this.orderElement.querySelector('.order__button') as HTMLButtonElement;
         this.formErrors = this.orderElement.querySelector('.form__errors') as HTMLElement;
         this.openContactsModal = openContactsModal;
-        this.onSuccess = onSuccess;
-        this.formSubmitHandler = formSubmitHandler;
         this.eventEmitter = eventEmitter;
         this.setupPaymentButtons();
         this.setupAddressField();
@@ -78,7 +74,6 @@ export class OrderView {
                 formErrors: this.formErrors
             });
             this.openContactsModal();
-            this.onSuccess();
         });
     }
 }

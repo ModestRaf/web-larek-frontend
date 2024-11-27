@@ -7,15 +7,14 @@ export class ProductList {
 
     constructor(eventEmitter: EventEmitter) {
         this.eventEmitter = eventEmitter;
-        this.eventEmitter.on<{ productId: string }>('productRemoved', ({productId}) => {
-            this.updateSelectedState(productId);
-        });
     }
 
-    private updateSelectedState(productId: string): void {
+    updateSelectedState(productId: string): void {
         const product = this.products.find(p => p.id === productId);
-        product.selected = false;
-        this.saveSelectedToStorage();
+        if (product) {
+            product.selected = false;
+            this.saveSelectedToStorage();
+        }
     }
 
     saveSelectedToStorage(): void {

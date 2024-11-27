@@ -9,7 +9,6 @@ export class ProductListView {
         private eventEmitter: EventEmitter
     ) {
         this.container = document.querySelector(`#${containerId}`) as HTMLElement;
-        this.eventEmitter.on('cards:loaded', (cards: HTMLElement[]) => this.renderProducts(cards));
     }
 
     renderProducts(cards: HTMLElement[]): void {

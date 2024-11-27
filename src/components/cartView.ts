@@ -25,22 +25,6 @@ export class CartView {
         this.checkoutButton = this.content.querySelector('.basket__button') as HTMLButtonElement;
         this.basketCounter = document.querySelector('.header__basket-counter') as HTMLElement;
         this.checkoutButton.addEventListener('click', () => this.onCheckout(this.getTotalPrice()));
-        this.subscribeToEvents();
-    }
-
-    private subscribeToEvents(): void {
-        this.eventEmitter.on<{ selectedProductsCount: number }>('productToggled', ({selectedProductsCount}) => {
-            this.updateBasketCounter(selectedProductsCount);
-        });
-        this.eventEmitter.on<{ selectedProductsCount: number }>('productRemoved', ({selectedProductsCount}) => {
-            this.updateBasketCounter(selectedProductsCount);
-        });
-        this.eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
-            this.updateBasketCounter(selectedProductsCount);
-        });
-        this.eventEmitter.on('cart:change', () => {
-            this.update();
-        });
     }
 
     render(): HTMLElement {

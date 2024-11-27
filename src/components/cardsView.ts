@@ -54,7 +54,7 @@ export class CardsView extends ModalBase {
         this.updateButton(element, product);
     }
 
-    private updateImage(element: HTMLElement, product: ProductItem): void {
+    updateImage(element: HTMLElement, product: ProductItem): void {
         const img = element.querySelector(this.selectors.image) as HTMLImageElement;
         if (img) {
             img.src = CDN_URL + product.image;
@@ -62,21 +62,21 @@ export class CardsView extends ModalBase {
         }
     }
 
-    private updateTitle(element: HTMLElement, product: ProductItem): void {
+    updateTitle(element: HTMLElement, product: ProductItem): void {
         const title = element.querySelector(this.selectors.title);
         if (title) {
             title.textContent = product.title;
         }
     }
 
-    private updatePrice(element: HTMLElement, product: ProductItem): void {
+    updatePrice(element: HTMLElement, product: ProductItem): void {
         const price = element.querySelector(this.selectors.price);
         if (price) {
             price.textContent = product.price !== null ? `${product.price} синапсов` : 'Бесценно';
         }
     }
 
-    private updateCategory(element: HTMLElement, product: ProductItem): void {
+    updateCategory(element: HTMLElement, product: ProductItem): void {
         const category = element.querySelector(this.selectors.category) as HTMLElement;
         if (category) {
             category.textContent = product.category;
@@ -84,7 +84,7 @@ export class CardsView extends ModalBase {
         }
     }
 
-    private updateButton(element: HTMLElement, product: ProductItem): void {
+    updateButton(element: HTMLElement, product: ProductItem): void {
         const button = element.querySelector(this.selectors.button) as HTMLButtonElement;
         if (button) {
             if (product.price === null) {
@@ -96,7 +96,7 @@ export class CardsView extends ModalBase {
         }
     }
 
-    private setCategoryClass(category: HTMLElement, categoryName: string): void {
+    setCategoryClass(category: HTMLElement, categoryName: string): void {
         category.textContent = categoryName;
         category.classList.remove(...Object.values(this.categoryClasses));
         const className = this.categoryClasses[categoryName];
