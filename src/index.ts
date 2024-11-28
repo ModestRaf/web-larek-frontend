@@ -166,14 +166,15 @@ eventEmitter.on('cart:change', () => {
 eventEmitter.on('cards:loaded', (cards: HTMLElement[]) => productListView.renderProducts(cards));
 // Обработчики событий для класса CartView
 eventEmitter.on('cart:getItems', (callback: (items: CartItem[]) => void) => {
-    callback(cart.items);
+    callback(cart.items); // для метода renderItems
 });
 eventEmitter.on('cart:getTotalPrice', (callback: (price: number) => void) => {
-    callback(cart.getTotalPrice());
+    callback(cart.getTotalPrice()); // для метода getTotalPrice
 });
 eventEmitter.on('cart:getSelectedProductsCount', (callback: (count: number) => void) => {
-    callback(cart.getSelectedProductsCount());
+    callback(cart.getSelectedProductsCount()); // для метода getSelectedProductsCount
 });
+//Обработчик события для класса BasketItemView
 eventEmitter.on('removeBasketItem', (data: { itemId: string }) => {
     cart.removeProductFromCart(data.itemId);
 });
