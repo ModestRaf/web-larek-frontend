@@ -101,3 +101,29 @@ export class CardsView {
         if (className) category.classList.add(className);
     }
 }
+
+export class ProductModal {
+    private popupTemplateSelector: string;
+    private eventEmitter: EventEmitter;
+    private cardsView: CardsView;
+
+    constructor(popupTemplateSelector: string, eventEmitter: EventEmitter, cardsView: CardsView) {
+        this.popupTemplateSelector = popupTemplateSelector;
+        this.eventEmitter = eventEmitter;
+        this.cardsView = cardsView;
+    }
+
+    createModal(product: ProductItem): DocumentFragment {
+        const popupTemplate = document.querySelector(this.popupTemplateSelector) as HTMLTemplateElement;
+        const popupClone = document.importNode(popupTemplate.content, true);
+        const popupCard = popupClone.querySelector('.card') as HTMLElement;
+        this.cardsView.updateCardContent(popupCard, product);
+        const button = popupCard.querySelector('.card__button') as HTMLButtonElement;
+        button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
+        button.addEventListener('click', () => {
+            this.eventEmitter.emit('toggleProductInCart', {product});
+            this.cardsView.updateCardContent(popupCard, product);
+        });
+        return popupClone;
+    }
+}

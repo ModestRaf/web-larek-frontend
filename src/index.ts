@@ -3,7 +3,7 @@ import {Api, ApiListResponse} from "./components/base/api";
 import {API_URL} from "./utils/constants";
 import {Cart} from "./components/cart";
 import {BasketItemView, CartView} from "./components/cartView";
-import {CardsView} from "./components/cardsView";
+import {CardsView, ProductModal} from "./components/cardsView";
 import {ProductListView} from "./components/ProductListView";
 import {ProductList} from "./components/ProductList";
 import {Order} from "./components/order";
@@ -35,6 +35,7 @@ const cardsView = new CardsView(
 );
 const productListView = new ProductListView('gallery', eventEmitter);
 const modalBase = new ModalBase('#modal-container', '.modal__close');
+const productModal = new ProductModal('#card-preview', eventEmitter, cardsView);
 
 // Загрузка продуктов
 async function loadProducts(api: Api): Promise<ProductItem[]> {
@@ -142,16 +143,8 @@ eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) =>
     cart.updateCartItems(productList.products);
 });
 eventEmitter.on('card-modal:open', ({product}: { product: ProductItem }) => {
-    const popupClone = document.importNode(cardsView.popupTemplate.content, true);
-    const popupCard = popupClone.querySelector('.card') as HTMLElement;
-    cardsView.updateCardContent(popupCard, product);
-    const button = popupCard.querySelector('.card__button') as HTMLButtonElement;
-    button.textContent = product.selected ? 'Убрать' : 'Добавить в корзину';
-    button.addEventListener('click', () => {
-        eventEmitter.emit('toggleProductInCart', {product});
-        cardsView.updateCardContent(popupCard, product);
-    });
-    eventEmitter.emit('modal:open', popupClone);
+    const modalContent = productModal.createModal(product);
+    eventEmitter.emit('modal:open', modalContent);
 });
 eventEmitter.on<HTMLElement>('modal:open', (content) => modalBase.open(undefined, content));
 eventEmitter.on('cart:open', () => {
