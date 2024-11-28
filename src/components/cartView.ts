@@ -28,12 +28,12 @@ export class CartView {
     }
 
     render(): HTMLElement {
-        this.renderBasketItems();
+        this.renderBasket();
         return this.content;
     }
 
     update(): void {
-        this.renderBasketItems();
+        this.renderBasket();
     }
 
     setItems(items: HTMLElement[]): void {
@@ -41,7 +41,7 @@ export class CartView {
         items.forEach(item => this.basketList.appendChild(item));
     }
 
-    renderBasketItems(): void {
+    renderBasket(): void {
         this.basketList.innerHTML = '';
         if (this.getSelectedProductsCount() === 0) {
             this.renderEmptyCart();

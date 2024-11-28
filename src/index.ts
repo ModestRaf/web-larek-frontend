@@ -33,7 +33,7 @@ const cardsView = new CardsView(
     'card-preview',
     eventEmitter
 );
-const productListView = new ProductListView('gallery', eventEmitter);
+const productListView = new ProductListView('gallery');
 const modalBase = new ModalBase('#modal-container', '.modal__close');
 const productModal = new ProductModal('#card-preview', eventEmitter, cardsView);
 
@@ -65,7 +65,7 @@ function loadProductsLogic(): void {
     const productCards = productList.products.map(product => cardsView.createProductCard(product));
     productListView.renderProducts(productCards);
     updateBasketCounter();
-    cartView.renderBasketItems();
+    cartView.renderBasket();
     eventEmitter.emit('cart:change');
 }
 
@@ -81,8 +81,6 @@ eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
     const successContent = successModal.render(data.totalPrice);
     modalBase.open(data.totalPrice, successContent);
 });
-
-
 eventEmitter.on('orderSuccessClosed', () => {
     modalBase.close();
 });
@@ -156,21 +154,17 @@ eventEmitter.on('cart:open', () => {
     modalBase.open(undefined, cartContent);
 });
 eventEmitter.on('cart:change', () => {
-    eventEmitter.emit('cart:getItems', (items: CartItem[]) => {
-        const basketItems = items.map((item, index) => {
-            const basketItem = new BasketItemView(item, index + 1, eventEmitter, cartView.update.bind(cartView));
-            return basketItem.render();
-        });
-        cartView.setItems(basketItems);
-        cartView.updateBasketCounter(items.length);
-        cartView.renderBasketItems();
+    const items = cart.items;
+    const basketItems = items.map((item, index) => {
+        const basketItem = new BasketItemView(item, index + 1, eventEmitter, cartView.update.bind(cartView));
+        return basketItem.render();
     });
+    cartView.setItems(basketItems);
+    cartView.updateBasketCounter(items.length);
+    cartView.renderBasket();
 });
 eventEmitter.on('cards:loaded', (cards: HTMLElement[]) => productListView.renderProducts(cards));
-eventEmitter.on<{ productId: string }>('productRemoved', ({productId}) => {
-    productList.updateSelectedState(productId);
-});
-// Обработчики событий для класса Cart
+// Обработчики событий для класса CartView
 eventEmitter.on('cart:getItems', (callback: (items: CartItem[]) => void) => {
     callback(cart.items);
 });
@@ -207,20 +201,18 @@ eventEmitter.on('proceedToContacts', () => {
         eventEmitter.emit('openContactsModal');
     }
 });
-// Обработчики событий для класса CartView
-eventEmitter.on<{ selectedProductsCount: number }>('productToggled', ({selectedProductsCount}) => {
+eventEmitter.on<{ productId: string, selectedProductsCount: number }>('productRemoved', ({
+                                                                                             productId,
+                                                                                             selectedProductsCount
+                                                                                         }) => {
+    productList.updateSelectedState(productId);
+    eventEmitter.emit<{ selectedProductsCount: number }>('updateCounter', {
+        selectedProductsCount
+    });
+});
+eventEmitter.on<{ selectedProductsCount: number }>('updateCounter', ({selectedProductsCount}) => {
     cartView.updateBasketCounter(selectedProductsCount);
 });
-eventEmitter.on<{ selectedProductsCount: number }>('productRemoved', ({selectedProductsCount}) => {
-    cartView.updateBasketCounter(selectedProductsCount);
-});
-eventEmitter.on<{ selectedProductsCount: number }>('basketItemRemoved', ({selectedProductsCount}) => {
-    cartView.updateBasketCounter(selectedProductsCount);
-});
-eventEmitter.on('cart:change', () => {
-    cartView.update();
-});
-
 document.addEventListener('DOMContentLoaded', async () => {
     const products = await loadProducts(api);
     productList.products = productList.loadSelectedFromStorage(products);

@@ -21,7 +21,7 @@ export class Cart {
                 price: product.price,
             });
             this.saveCartToStorage();
-            this.eventEmitter.emit<{ product: ProductItem, selectedProductsCount: number }>('productToggled', {
+            this.eventEmitter.emit<{ product: ProductItem, selectedProductsCount: number }>('updateCounter', {
                 product,
                 selectedProductsCount: this.getSelectedProductsCount()
             });
