@@ -201,10 +201,7 @@ eventEmitter.on('proceedToContacts', () => {
         eventEmitter.emit('openContactsModal');
     }
 });
-eventEmitter.on<{ productId: string, selectedProductsCount: number }>('productRemoved', ({
-                                                                                             productId,
-                                                                                             selectedProductsCount
-                                                                                         }) => {
+eventEmitter.on<{ productId: string, selectedProductsCount: number }>('productRemoved', ({productId, selectedProductsCount}) => {
     productList.updateSelectedState(productId);
     eventEmitter.emit<{ selectedProductsCount: number }>('updateCounter', {
         selectedProductsCount
