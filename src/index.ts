@@ -57,8 +57,6 @@ function resetCart() {
     cart.clearCart();
     productList.clearSelectedProducts();
     updateBasketCounter();
-    const productCards = productList.products.map(product => cardsView.createProductCard(product));
-    productListView.renderProducts(productCards);
     eventEmitter.emit('cart:change');
 }
 
@@ -79,15 +77,13 @@ successModal.closeButton.addEventListener('click', () => {
 });
 
 eventEmitter.on('orderSuccess', (data: { totalPrice: number }) => {
-    const successElement = successModal.render(data.totalPrice);
-    document.body.appendChild(successElement);
+    const successContent = successModal.render(data.totalPrice);
+    modalBase.open(data.totalPrice, successContent);
 });
 
+
 eventEmitter.on('orderSuccessClosed', () => {
-    const successElement = document.querySelector('.order-success');
-    if (successElement) {
-        successElement.remove();
-    }
+    modalBase.close();
 });
 eventEmitter.on('checkout', (data: { totalPrice: number }) => {
     const orderContent = orderView.render();
@@ -145,7 +141,7 @@ eventEmitter.on<{ productId: string }>('removeProductFromCart', ({productId}) =>
     updateBasketCounter();
     cart.updateCartItems(productList.products);
 });
-eventEmitter.on('popup:open', ({product}: { product: ProductItem }) => {
+eventEmitter.on('card-modal:open', ({product}: { product: ProductItem }) => {
     const popupClone = document.importNode(cardsView.popupTemplate.content, true);
     const popupCard = popupClone.querySelector('.card') as HTMLElement;
     cardsView.updateCardContent(popupCard, product);

@@ -39,7 +39,7 @@ export class CardsView {
         const productCard = cardClone.querySelector('.gallery__item') as HTMLElement;
         this.updateCardContent(productCard, product);
         productCard.addEventListener('click', () => {
-            this.eventEmitter.emit('popup:open', {product});
+            this.eventEmitter.emit('card-modal:open', {product});
         });
         return productCard;
     }
